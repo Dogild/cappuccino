@@ -105,6 +105,16 @@ var CPMenuItemStringRepresentationDictionary = [CPDictionary dictionaryWithObjec
     _CPMenuItemView _menuItemView;
 }
 
++ (Class)_binderClassForBinding:(CPString)aBinding
+{
+    if ([aBinding hasPrefix:CPEnabledBinding])
+        return [CPMultipleValueAndBinding class];
+    else if (aBinding === CPTargetBinding || [aBinding hasPrefix:CPArgumentBinding])
+        return [CPActionBinding class];
+
+    return [super _binderClassForBinding:aBinding];
+}
+
 - (id)init
 {
     return [self initWithTitle:@"" action:nil keyEquivalent:nil];

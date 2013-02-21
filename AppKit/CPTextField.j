@@ -129,6 +129,18 @@ CPTextFieldStatePlaceholder = CPThemeState("placeholder");
     CPControlSize           _controlSize;
 }
 
++ (Class)_binderClassForBinding:(CPString)aBinding
+{
+    if (aBinding === CPValueBinding)
+        return [_CPTextFieldValueBinder class];
+    else if ([aBinding hasPrefix:CPDisplayPatternValueBinding])
+        return [_CPTextFieldPatternValueBinder class];
+    else if ([aBinding hasPrefix:CPEditableBinding])
+        return [CPMultipleValueAndBinding class];
+
+    return [super _binderClassForBinding:aBinding];
+}
+
 + (CPTextField)textFieldWithStringValue:(CPString)aStringValue placeholder:(CPString)aPlaceholder width:(float)aWidth
 {
     return [self textFieldWithStringValue:aStringValue placeholder:aPlaceholder width:aWidth theme:[CPTheme defaultTheme]];
@@ -190,14 +202,6 @@ CPTextFieldStatePlaceholder = CPThemeState("placeholder");
 + (CPString)defaultThemeClass
 {
     return "textfield";
-}
-
-+ (Class)_binderClassForBinding:(CPString)theBinding
-{
-    if (theBinding === CPValueBinding)
-        return [_CPTextFieldValueBinder class];
-
-    return [super _binderClassForBinding:theBinding];
 }
 
 + (id)themeAttributes
@@ -539,6 +543,9 @@ CPTextFieldStatePlaceholder = CPThemeState("placeholder");
 */
 - (void)_becomeFirstKeyResponder
 {
+    // Make sure the text field is visible so the browser will not scroll without the NSScrollView knowing about it.
+    [self scrollRectToVisible:[self bounds]];
+
     [self setThemeState:CPThemeStateEditing];
 
     [self _updatePlaceholderState];
@@ -611,8 +618,6 @@ CPTextFieldStatePlaceholder = CPThemeState("placeholder");
     // The font change above doesn't work for some browsers if the element isn't already appendChild'ed.
     if (!CPFeatureIsCompatible(CPInputSetFontOutsideOfDOM))
         element.style.font = [font cssString];
-
-    [[[self window] platformWindow] _propagateCurrentDOMEvent:YES];
 
     CPTextFieldInputIsActive = YES;
 
@@ -1628,10 +1633,8 @@ var CPTextFieldIsEditableKey            = "CPTextFieldIsEditableKey",
 @end
 
 @implementation _CPTextFieldValueBinder : CPBinder
-{
-}
 
-- (void)_updatePlaceholdersWithOptions:(CPDictionary)options
+- (void)_updatePlaceholdersWithOptions:(CPDictionary)options forBinding:(CPBinder)aBinding
 {
     [super _updatePlaceholdersWithOptions:options];
 
@@ -1654,3 +1657,17 @@ var CPTextFieldIsEditableKey            = "CPTextFieldIsEditableKey",
 
 @end
 
+@implementation _CPTextFieldPatternValueBinder : CPValueWithPatternBinding
+
+- (void)setPlaceholderValue:(id)aValue withMarker:(CPString)aMarker forBinding:(CPString)aBinding
+{
+    [_source setPlaceholderString:aValue];
+    [_source setObjectValue:nil];
+}
+
+- (void)setValue:(id)aValue forBinding:(CPString)aBinding
+{
+    [_source setObjectValue:aValue];
+}
+
+@end

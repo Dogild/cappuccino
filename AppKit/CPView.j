@@ -227,6 +227,14 @@ var CPViewFlags                     = { },
     CachedNotificationCenter = [CPNotificationCenter defaultCenter];
 }
 
++ (Class)_binderClassForBinding:(CPString)aBinding
+{
+    if ([aBinding hasPrefix:CPHiddenBinding])
+        return [CPMultipleValueOrBinding class];
+
+    return [super _binderClassForBinding:aBinding];
+}
+
 - (void)_setupViewFlags
 {
     var theClass = [self class],
@@ -1568,6 +1576,7 @@ var CPViewFlags                     = { },
 - (void)rightMouseDown:(CPEvent)anEvent
 {
     var menu = [self menuForEvent:anEvent];
+
     if (menu)
         [CPMenu popUpContextMenu:menu withEvent:anEvent forView:self];
     else if ([[self nextResponder] isKindOfClass:CPView])
