@@ -76,9 +76,10 @@ CPButtonStateMixed             = CPThemeState("mixed");
 CPButtonStateBezelStyleRounded = CPThemeState("rounded");
 
 // add all future correspondance between bezel styles and theme state here.
-var CPButtonBezelStyleStateMap = [CPDictionary dictionaryWithObjectsAndKeys:
-                                    CPButtonStateBezelStyleRounded, CPRoundedBezelStyle,
-                                    [CPNull null], CPRoundRectBezelStyle];
+var CPButtonBezelStyleStateMap = @{
+        CPRoundedBezelStyle: CPButtonStateBezelStyleRounded,
+        CPRoundRectBezelStyle: [CPNull null],
+    };
 
 /// @cond IGNORE
 CPButtonDefaultHeight = 25.0;
@@ -150,8 +151,13 @@ CPButtonImageOffset   = 3.0;
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjects:[[CPNull null], 0.0, _CGInsetMakeZero(), _CGInsetMakeZero(), [CPNull null]]
-                                       forKeys:[@"image", @"image-offset", @"bezel-inset", @"content-inset", @"bezel-color"]];
+    return @{
+            @"image": [CPNull null],
+            @"image-offset": 0.0,
+            @"bezel-inset": CGInsetMakeZero(),
+            @"content-inset": CGInsetMakeZero(),
+            @"bezel-color": [CPNull null],
+        };
 }
 
 /*!
@@ -590,7 +596,7 @@ CPButtonImageOffset   = 3.0;
 {
     var contentInset = [self currentValueForThemeAttribute:@"content-inset"];
 
-    return _CGRectInsetByInset(bounds, contentInset);
+    return CGRectInsetByInset(bounds, contentInset);
 }
 
 - (CGRect)bezelRectForBounds:(CGRect)bounds
@@ -601,7 +607,7 @@ CPButtonImageOffset   = 3.0;
 
     var bezelInset = [self currentValueForThemeAttribute:@"bezel-inset"];
 
-    return _CGRectInsetByInset(bounds, bezelInset);
+    return CGRectInsetByInset(bounds, bezelInset);
 }
 
 - (CGSize)_minimumFrameSize
@@ -661,14 +667,14 @@ CPButtonImageOffset   = 3.0;
 {
     if (aName === "bezel-view")
     {
-        var view = [[CPView alloc] initWithFrame:_CGRectMakeZero()];
+        var view = [[CPView alloc] initWithFrame:CGRectMakeZero()];
 
         [view setHitTests:NO];
 
         return view;
     }
     else
-        return [[_CPImageAndTextView alloc] initWithFrame:_CGRectMakeZero()];
+        return [[_CPImageAndTextView alloc] initWithFrame:CGRectMakeZero()];
 }
 
 - (void)layoutSubviews

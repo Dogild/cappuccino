@@ -77,14 +77,15 @@ var CPProgressIndicatorSpinningStyleColors = [];
 
 + (CPDictionary)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjectsAndKeys:
-                [CPNull null], @"indeterminate-bar-color",
-                [CPNull null], @"bar-color",
-                20, @"default-height",
-                [CPNull null], @"bezel-color",
-                [CPNull null], @"spinning-mini-gif",
-                [CPNull null], @"spinning-small-gif",
-                [CPNull null], @"spinning-regular-gif"];
+    return @{
+            @"indeterminate-bar-color": [CPNull null],
+            @"bar-color": [CPNull null],
+            @"default-height": 20,
+            @"bezel-color": [CPNull null],
+            @"spinning-mini-gif": [CPNull null],
+            @"spinning-small-gif": [CPNull null],
+            @"spinning-regular-gif": [CPNull null],
+        };
 }
 
 + (Class)_binderClassForBinding:(CPString)aBinding
@@ -370,7 +371,7 @@ var CPProgressIndicatorSpinningStyleColors = [];
 
 - (CPView)createEphemeralSubviewNamed:(CPString)aName
 {
-    return [[CPView alloc] initWithFrame:_CGRectMakeZero()];
+    return [[CPView alloc] initWithFrame:CGRectMakeZero()];
 }
 
 - (CGRect)rectForEphemeralSubviewNamed:(CPString)aViewName
@@ -386,7 +387,7 @@ var CPProgressIndicatorSpinningStyleColors = [];
         if (_indeterminate)
             barWidth = width;
 
-        return _CGRectMake(0, 0, barWidth, [self valueForThemeAttribute:@"default-height"]);
+        return CGRectMake(0, 0, barWidth, [self valueForThemeAttribute:@"default-height"]);
     }
 
     return nil;

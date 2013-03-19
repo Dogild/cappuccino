@@ -302,8 +302,8 @@ var CPImageViewEmptyPlaceholderImage = nil;
         y = 0.0,
         insetWidth = (_hasShadow ? [_shadowView horizontalInset] : 0.0),
         insetHeight = (_hasShadow ? [_shadowView verticalInset] : 0.0),
-        boundsWidth = _CGRectGetWidth(bounds),
-        boundsHeight = _CGRectGetHeight(bounds),
+        boundsWidth = CGRectGetWidth(bounds),
+        boundsHeight = CGRectGetHeight(bounds),
         width = boundsWidth - insetWidth,
         height = boundsHeight - insetHeight;
 
@@ -401,10 +401,10 @@ var CPImageViewEmptyPlaceholderImage = nil;
 #endif
     }
 
-    _imageRect = _CGRectMake(x, y, width, height);
+    _imageRect = CGRectMake(x, y, width, height);
 
     if (_hasShadow)
-        [_shadowView setFrame:_CGRectMake(x - [_shadowView leftInset], y - [_shadowView topInset], width + insetWidth, height + insetHeight)];
+        [_shadowView setFrame:CGRectMake(x - [_shadowView leftInset], y - [_shadowView topInset], width + insetWidth, height + insetHeight)];
 }
 
 - (void)mouseDown:(CPEvent)anEvent
@@ -476,14 +476,28 @@ var CPImageViewEmptyPlaceholderImage = nil;
 {
     var image;
 
-    if (aBinding === CPDataBinding)
+    if (aValue == nil)
+        image = nil;
+    else if (aBinding === CPDataBinding)
         image = [[CPImage alloc] initWithData:aValue];
     else if (aBinding === CPValueURLBinding || aBinding === CPValuePathBinding)
-        image = [[CPImage alloc] initWithContentsOfFile:aValue];
+        image = [CPImage cachedImageWithContentsOfFile:aValue];
     else if (aBinding === CPValueBinding)
         image = aValue;
 
     [_source setImage:image];
+}
+
+- (void)valueForBinding:(CPString)aBinding
+{
+    var image = [_source image];
+
+    if (aBinding === CPDataBinding)
+        return [image data];
+    else if (aBinding === CPValueURLBinding || aBinding === CPValuePathBinding)
+        return [image filename];
+    else if (aBinding === CPValueBinding)
+        return image;
 }
 
 @end
@@ -567,6 +581,24 @@ var CPImageViewImageKey          = @"CPImageViewImageKey",
 
     if (_isEditable)
         [aCoder encodeBool:_isEditable forKey:CPImageViewIsEditableKey];
+}
+
+@end
+
+@implementation CPImage (CahedImage)
+
++ (CPImage)cachedImageWithContentsOfFile:(CPString)aFile
+{
+    var cached_name = [CPString stringWithFormat:@"%@_%d", [self class], [aFile hash]],
+        image = [CPImage imageNamed:cached_name];
+
+    if (!image)
+    {
+        image = [[CPImage alloc] initWithContentsOfFile:aFile];
+        [image setName:cached_name];
+    }
+
+    return image;
 }
 
 @end

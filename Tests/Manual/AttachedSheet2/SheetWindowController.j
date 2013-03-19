@@ -1,25 +1,34 @@
+@import <AppKit/CPAlert.j>
+@import <AppKit/CPApplication.j>
+@import <AppKit/CPPopover.j>
+@import <AppKit/CPViewController.j>
+@import <AppKit/CPWindowController.j>
 
 @implementation SheetWindowController : CPWindowController
 {
-    @outlet CPButton _closeButton;
-    @outlet CPButton _sheetWindowHackCheckbox;
-    @outlet CPButton _altCloseButton;
-    @outlet CPButton _otherCloseButton;
-    @outlet CPButton _orderOutAfterCheckbox;
-    @outlet CPRadioGroup _windowTypeMatrix;
-    @outlet CPButton _titledMaskButton;
-    @outlet CPButton _closableMaskButton;
-    @outlet CPButton _miniaturizableMaskButton;
-    @outlet CPButton _resizableMaskButton;
-    @outlet CPButton _shadeWindowView;
-    @outlet CPButton _shadeContentView;
-    @outlet CPButton _shadeParentWindow;
+    @outlet CPButton        _closeButton;
+    @outlet CPButton        _sheetWindowHackCheckbox;
+    @outlet CPButton        _altCloseButton;
+    @outlet CPButton        _otherCloseButton;
+    @outlet CPButton        _orderOutAfterCheckbox;
+    @outlet CPRadioGroup    _windowTypeMatrix;
+    @outlet CPButton        _titledMaskButton;
+    @outlet CPButton        _closableMaskButton;
+    @outlet CPButton        _miniaturizableMaskButton;
+    @outlet CPButton        _resizableMaskButton;
+    @outlet CPButton        _shadeWindowView;
+    @outlet CPButton        _shadeContentView;
+    @outlet CPButton        _shadeParentWindow;
+    @outlet CPTextField     _textField;
+    @outlet CPTokenField    _tokenField;
 
-    CPModalSession _modalSession;
-    CPWindow       _parentWindow;
-    CPWindow       _sheet;
-    int            _returnCode;
-    CPColor        _savedColor;
+    CPModalSession          _modalSession;
+    CPWindow                _parentWindow;
+    CPWindow                _sheet;
+    int                     _returnCode;
+    CPColor                 _savedColor;
+
+    BOOL                    _hud;
 }
 
 - (void)initWithWindowCibName:(CPString)cibName
@@ -60,6 +69,21 @@
     [_altCloseButton setAction:@selector(unsetAction:)];
     [_otherCloseButton setTarget:self];
     [_otherCloseButton setAction:@selector(unsetAction:)];
+
+    if (_hud)
+    {
+        var theWindow = [self window],
+            contentView = [theWindow contentView],
+            hudWindow = [[CPWindow alloc] initWithContentRect:[contentView bounds] styleMask:[theWindow styleMask] | CPHUDBackgroundWindowMask];
+        [theWindow orderOut:nil];
+        [hudWindow setFrame:[theWindow frame]];
+        [hudWindow setContentView:contentView];
+        [hudWindow orderFront:nil];
+        [self setWindow:hudWindow];
+        [contentView _setThemeIncludingDescendants:[CPTheme defaultHudTheme]];
+    }
+
+    [[_textField window] makeFirstResponder:_textField];
 }
 
 - (void)unsetAction:(id)sender
@@ -100,11 +124,16 @@
     [_otherCloseButton setTarget:self];
     [_otherCloseButton setAction:unsetAction];
     [[aWindow contentView] addSubview:_otherCloseButton positioned:CPWindowAbove relativeTo:nil];
+
+    if ([aWindow styleMask] & CPHUDBackgroundWindowMask)
+        [[_closeButton, _altCloseButton, _otherCloseButton] makeObjectsPerformSelector:@selector(setTheme:) withObject:[CPTheme defaultHudTheme]];
 }
 
-- (SheetWindowController)initWithStyleMask:(int)styleMask debug:(int)debug
+- (SheetWindowController)initWithStyleMask:(int)styleMask debug:(int)debug hud:(BOOL)shouldBeHud
 {
     CPLog.debug("[%@ %@] mask=%d radioGroup=%@", [self class], _cmd, styleMask, _windowTypeMatrix);
+
+    _hud = shouldBeHud;
 
     if (styleMask < 0)
         return [self initWithWindowCibName:@"Window"];
@@ -129,10 +158,12 @@
         [[_windowTypeMatrix selectedRadio] tag]);
 
     var type = 1;
+
     if (_windowTypeMatrix)
         type = [[_windowTypeMatrix selectedRadio] tag];
 
     var styleMask = 0;
+
     if ([_titledMaskButton state])
         styleMask |= CPTitledWindowMask;
 
@@ -147,32 +178,40 @@
         case 2:
             styleMask |= CPHUDBackgroundWindowMask;
             break;
+
         case 3:
             styleMask = CPBorderlessWindowMask;
             break;
+
         case 4:
             styleMask |= CPTexturedBackgroundWindowMask;
             break;
+
         case 5:
             styleMask = CPDocModalWindowMask;
             break;
+
         default:
+            break;
     }
 
     if ([_resizableMaskButton state])
         styleMask |= CPResizableWindowMask;
 
-    if (type == 1)
+    if (type == 1 || type == -1)
         styleMask = -1;
 
     var debug = 0;
+
     if ([_shadeWindowView state])
         debug |= 1;
 
     if ([_shadeContentView state])
          debug |= 2;
 
-    return [[SheetWindowController alloc] initWithStyleMask:styleMask debug:debug];
+    var hud = type === -1;
+
+    return [[SheetWindowController alloc] initWithStyleMask:styleMask debug:debug hud:hud];
 }
 
 - (SheetWindowController)allocWithPanel:(CPPanel)panel
@@ -185,6 +224,7 @@
     CPLog.debug("[%@ %@]", [self class], _cmd);
 
     var unsetSelector = @selector(unsetAction:);
+
     if (_closeButton)
         [_closeButton setEnabled:[_closeButton action] != unsetSelector];
 
@@ -373,12 +413,6 @@
         modalDelegate:self
         didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
         contextInfo:parentWindow];
-
-    // what is the difference between these two approaches?
-    [CPApp runModalForWindow:sheet];
-
-    //var session = [CPApp beginModalSessionForWindow:sheet];
-    //[CPApp runModalSession:session];
 }
 
 - (void)closeModalSheet:(id)sender
@@ -425,6 +459,28 @@
                       modalDelegate:self
                      didEndSelector:@selector(didEndSheet:returnCode:contextInfo:)
                         contextInfo:parentWindow];
+}
+
+//
+// Test popover
+//
+- (@action)newPopover:(id)sender
+{
+    [[self allocController] runPopoverForWindow:[self window] withSender:sender];
+}
+
+- (void)runPopoverForWindow:(CPWindow)parentWindow withSender:(id)sender
+{
+    var aPopover = [CPPopover new],
+        viewController = [CPViewController new];
+
+    [aPopover setContentViewController:viewController];
+    [[self window] close];
+    [viewController setView:[[self window] contentView]];
+    [aPopover setContentSize:[[[self window] contentView] boundsSize]];
+    [aPopover setAnimates:YES];
+    [aPopover setBehavior:CPPopoverBehaviorTransient];
+    [aPopover showRelativeToRect:[sender bounds] ofView:sender preferredEdge:CPMaxXEdge];
 }
 
 //

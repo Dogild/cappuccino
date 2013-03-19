@@ -60,7 +60,10 @@ var CPComboBoxTextSubview = @"text",
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjectsAndKeys:_CGSizeMake(21.0, 29.0), @"popup-button-size", _CGInsetMake(3.0, 3.0, 3.0, 3.0), @"border-inset"];
+    return @{
+                @"popup-button-size": CGSizeMake(21.0, 29.0),
+                @"border-inset": CGInsetMake(3.0, 3.0, 3.0, 3.0),
+            };
 }
 
 + (Class)_binderClassForBinding:(CPString)aBinding
@@ -851,7 +854,7 @@ var CPComboBoxTextSubview = @"text",
 {
     if (aName === "popup-button-view")
     {
-        var view = [[_CPComboBoxPopUpButton alloc] initWithFrame:_CGRectMakeZero() comboBox:self];
+        var view = [[_CPComboBoxPopUpButton alloc] initWithFrame:CGRectMakeZero() comboBox:self];
 
         return view;
     }

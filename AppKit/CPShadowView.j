@@ -49,11 +49,10 @@ CPThemeStateShadowViewHeavy = CPThemeState("shadowview-style-heavy");
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithJSObject:
-        {
+    return @{
             @"bezel-color": [CPNull null],
             @"content-inset": CGInsetMakeZero()
-        }];
+        };
 }
 
 + (CGRect)frameForContentFrame:(CGRect)aFrame withWeight:(CPShadowWeight)aWeight
@@ -61,7 +60,7 @@ CPThemeStateShadowViewHeavy = CPThemeState("shadowview-style-heavy");
     var shadowView = [CPShadowView new],
         inset = [shadowView valueForThemeAttribute:@"content-inset" inState:(aWeight == CPLightShadow) ? CPThemeStateShadowViewLight : CPThemeStateShadowViewHeavy];
 
-    return CGRectMake(_CGRectGetMinX(aFrame) - inset.left, _CGRectGetMinY(aFrame) - inset.top, _CGRectGetWidth(aFrame) + inset.left + inset.right, _CGRectGetHeight(aFrame) + inset.top + inset.bottom);
+    return CGRectMake(CGRectGetMinX(aFrame) - inset.left, CGRectGetMinY(aFrame) - inset.top, CGRectGetWidth(aFrame) + inset.left + inset.right, CGRectGetHeight(aFrame) + inset.top + inset.bottom);
 }
 
 + (id)shadowViewEnclosingView:(CPView)aView

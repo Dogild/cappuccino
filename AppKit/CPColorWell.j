@@ -60,8 +60,13 @@ var _CPColorWellDidBecomeExclusiveNotification = @"_CPColorWellDidBecomeExclusiv
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjects:[_CGInsetMakeZero(), [CPNull null], _CGInsetMake(3.0, 3.0, 3.0, 3.0), _CGInsetMakeZero(), [CPNull null]]
-                                       forKeys:[@"bezel-inset", @"bezel-color", @"content-inset", @"content-border-inset", @"content-border-color"]];
+    return @{
+            @"bezel-inset": CGInsetMakeZero(),
+            @"bezel-color": [CPNull null],
+            @"content-inset": CGInsetMake(3.0, 3.0, 3.0, 3.0),
+            @"content-border-inset": CGInsetMakeZero(),
+            @"content-border-color": [CPNull null],
+        };
 }
 
 - (void)_reverseSetBinding
@@ -244,21 +249,21 @@ var _CPColorWellDidBecomeExclusiveNotification = @"_CPColorWellDidBecomeExclusiv
 {
     var contentInset = [self currentValueForThemeAttribute:@"content-inset"];
 
-    return _CGRectInsetByInset(bounds, contentInset);
+    return CGRectInsetByInset(bounds, contentInset);
 }
 
 - (CGRect)bezelRectForBounds:(CGRect)bounds
 {
     var bezelInset = [self currentValueForThemeAttribute:@"bezel-inset"];
 
-    return _CGRectInsetByInset(bounds, bezelInset);
+    return CGRectInsetByInset(bounds, bezelInset);
 }
 
 - (CGRect)contentBorderRectForBounds:(CGRect)bounds
 {
     var contentBorderInset = [self currentValueForThemeAttribute:@"content-border-inset"];
 
-    return _CGRectInsetByInset(bounds, contentBorderInset);
+    return CGRectInsetByInset(bounds, contentBorderInset);
 }
 
 - (CGRect)rectForEphemeralSubviewNamed:(CPString)aName
@@ -278,7 +283,7 @@ var _CPColorWellDidBecomeExclusiveNotification = @"_CPColorWellDidBecomeExclusiv
 
 - (CPView)createEphemeralSubviewNamed:(CPString)aName
 {
-    var view = [[CPView alloc] initWithFrame:_CGRectMakeZero()];
+    var view = [[CPView alloc] initWithFrame:CGRectMakeZero()];
 
     [view setHitTests:NO];
 

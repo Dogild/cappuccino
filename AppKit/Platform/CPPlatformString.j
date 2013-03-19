@@ -33,7 +33,7 @@
 
 + (CGSize)sizeOfString:(CPString)aString withFont:(CPFont)aFont forWidth:(float)aWidth
 {
-    return _CGSizeMakeZero();
+    return CGSizeMakeZero();
 }
 
 @end
@@ -45,12 +45,16 @@
 
 + (CGSize)sizeOfString:(CPString)aString withFont:(CPFont)aFont forWidth:(float)aWidth
 {
-    return _CGSizeMakeZero();
+    return CGSizeMakeZero();
 }
 
 + (CPDictionary)metricsOfFont:(CPFont)aFont
 {
-    return [CPDictionary dictionaryWithObjectsAndKeys:0, @"ascender", 0, @"descender", 0, @"lineHeight"];
+    return @{
+            @"ascender": 0,
+            @"descender": 0,
+            @"lineHeight": 0,
+        };
 }
 
 @end

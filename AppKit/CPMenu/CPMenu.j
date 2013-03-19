@@ -68,6 +68,8 @@ var _CPMenuBarVisible               = NO,
 
     int             _highlightedIndex;
     _CPMenuWindow   _menuWindow;
+
+    CPEvent         _lastCloseEvent;
 }
 
 // Managing the Menu Bar
@@ -77,7 +79,7 @@ var _CPMenuBarVisible               = NO,
     if (self !== [CPMenu class])
         return;
 
-    [[self class] setMenuBarAttributes:[CPDictionary dictionary]];
+    [[self class] setMenuBarAttributes:@{}];
 }
 
 + (BOOL)menuBarVisible
@@ -148,6 +150,13 @@ var _CPMenuBarVisible               = NO,
     return _CPMenuBarImage;
 }
 
++ (void)_setOrRemoveMenuBarAttribute:(id)aValue forKey:(id)aKey
+{
+    if (aValue === nil)
+        [_CPMenuBarAttributes removeObjectForKey:aKey];
+    else
+        [_CPMenuBarAttributes setObject:aValue forKey:aKey];
+}
 
 + (void)setMenuBarAttributes:(CPDictionary)attributes
 {
@@ -172,8 +181,8 @@ var _CPMenuBarVisible               = NO,
 
     else if (!textColor && !titleColor)
     {
-        [_CPMenuBarAttributes setObject:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-text-color" forClass:_CPMenuView] forKey:@"CPMenuBarTextColor"];
-        [_CPMenuBarAttributes setObject:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-title-color" forClass:_CPMenuView] forKey:@"CPMenuBarTitleColor"];
+        [self _setOrRemoveMenuBarAttribute:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-text-color" forClass:_CPMenuView] forKey:@"CPMenuBarTextColor"];
+        [self _setOrRemoveMenuBarAttribute:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-title-color" forClass:_CPMenuView] forKey:@"CPMenuBarTitleColor"];
     }
 
     if (!textShadowColor && titleShadowColor)
@@ -184,18 +193,18 @@ var _CPMenuBarVisible               = NO,
 
     else if (!textShadowColor && !titleShadowColor)
     {
-        [_CPMenuBarAttributes setObject:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-text-shadow-color" forClass:_CPMenuView] forKey:@"CPMenuBarTextShadowColor"];
-        [_CPMenuBarAttributes setObject:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-title-shadow-color" forClass:_CPMenuView] forKey:@"CPMenuBarTitleShadowColor"];
+        [self _setOrRemoveMenuBarAttribute:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-text-shadow-color" forClass:_CPMenuView] forKey:@"CPMenuBarTextShadowColor"];
+        [self _setOrRemoveMenuBarAttribute:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-title-shadow-color" forClass:_CPMenuView] forKey:@"CPMenuBarTitleShadowColor"];
     }
 
     if (!highlightColor)
-        [_CPMenuBarAttributes setObject:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-highlight-color" forClass:_CPMenuView] forKey:@"CPMenuBarHighlightColor"];
+        [self _setOrRemoveMenuBarAttribute:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-highlight-color" forClass:_CPMenuView] forKey:@"CPMenuBarHighlightColor"];
 
     if (!highlightTextColor)
-        [_CPMenuBarAttributes setObject:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-highlight-text-color" forClass:_CPMenuView] forKey:@"CPMenuBarHighlightTextColor"];
+        [self _setOrRemoveMenuBarAttribute:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-highlight-text-color" forClass:_CPMenuView] forKey:@"CPMenuBarHighlightTextColor"];
 
     if (!highlightTextShadowColor)
-        [_CPMenuBarAttributes setObject:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-highlight-text-shadow-color" forClass:_CPMenuView] forKey:@"CPMenuBarHighlightTextShadowColor"];
+        [self _setOrRemoveMenuBarAttribute:[[CPTheme defaultTheme] valueForAttributeWithName:@"menu-bar-highlight-text-shadow-color" forClass:_CPMenuView] forKey:@"CPMenuBarHighlightTextShadowColor"];
 
     if (_CPMenuBarSharedWindow)
     {
@@ -373,7 +382,7 @@ var _CPMenuBarVisible               = NO,
     [[CPNotificationCenter defaultCenter]
         postNotificationName:CPMenuDidChangeItemNotification
                       object:self
-                    userInfo:[CPDictionary dictionaryWithObject:[_items indexOfObjectIdenticalTo:aMenuItem] forKey:@"CPMenuItemIndex"]];
+                    userInfo:@{ @"CPMenuItemIndex": [_items indexOfObjectIdenticalTo:aMenuItem] }];
 }
 
 // Finding Menu Items
@@ -628,22 +637,27 @@ var _CPMenuBarVisible               = NO,
 
         if (!validator)
         {
-            // Check to see if there is a target binding with a valid selector
-            var info = [CPBinder infoForBinding:CPTargetBinding forObject:item],
-                valid = NO;
-
-            if (info)
+            // If targetForAction: returns nil, it could be that there is no action.
+            // If there is an action and nil is returned, no valid target could be found.
+            if ([item action] || [item target])
+                [item setEnabled:NO];
+            else
             {
-                var object = [info objectForKey:CPObservedObjectKey],
-                    keyPath = [info objectForKey:CPObservedKeyPathKey],
-                    options = [info objectForKey:CPOptionsKey],
-                    target = [object valueForKeyPath:keyPath],
-                    selector = [options valueForKey:CPSelectorNameBindingOption];
+                // Check to see if there is a target binding with an invalid selector
+                var info = [CPBinder infoForBinding:CPTargetBinding forObject:item];
 
-                valid = target && selector && [target respondsToSelector:CPSelectorFromString(selector)];
+                if (info)
+                {
+                    var object = [info objectForKey:CPObservedObjectKey],
+                        keyPath = [info objectForKey:CPObservedKeyPathKey],
+                        options = [info objectForKey:CPOptionsKey],
+                        target = [object valueForKeyPath:keyPath],
+                        selector = [options valueForKey:CPSelectorNameBindingOption];
+
+                    if (target && selector && ![target respondsToSelector:CPSelectorFromString(selector)])
+                        [item setEnabled:NO];
+                }
             }
-
-            [item setEnabled:valid];
         }
         else if (![validator respondsToSelector:[item action]])
             [item setEnabled:NO];
@@ -932,6 +946,10 @@ var _CPMenuBarVisible               = NO,
 
 - (void)_menuDidClose
 {
+    // Remember which event caused this menu to close, if any. CPPopUpButton uses this to detect
+    // when a click on the button itself caused the menu to close.
+    _lastCloseEvent = [CPApp currentEvent];
+
     var delegate = [self delegate];
 
     if ([delegate respondsToSelector:@selector(menuDidClose:)])
@@ -951,7 +969,7 @@ var _CPMenuBarVisible               = NO,
 {
     [CPApp sendEvent:[CPEvent
         otherEventWithType:CPAppKitDefined
-                  location:_CGPointMakeZero()
+                  location:CGPointMakeZero()
              modifierFlags:0
                  timestamp:0
               windowNumber:0
@@ -1136,7 +1154,7 @@ var _CPMenuBarVisible               = NO,
     [[CPNotificationCenter defaultCenter]
         postNotificationName:CPMenuDidAddItemNotification
                       object:self
-                    userInfo:[CPDictionary dictionaryWithObject:anIndex forKey:@"CPMenuItemIndex"]];
+                    userInfo:@{ @"CPMenuItemIndex": anIndex }];
 }
 
 - (void)removeObjectFromItemsAtIndex:(CPUInteger)anIndex
@@ -1150,7 +1168,7 @@ var _CPMenuBarVisible               = NO,
     [[CPNotificationCenter defaultCenter]
         postNotificationName:CPMenuDidRemoveItemNotification
                       object:self
-                    userInfo:[CPDictionary dictionaryWithObject:anIndex forKey:@"CPMenuItemIndex"]];
+                    userInfo:@{ @"CPMenuItemIndex": anIndex }];
 }
 
 @end

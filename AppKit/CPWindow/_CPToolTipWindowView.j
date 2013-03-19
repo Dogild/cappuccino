@@ -40,16 +40,13 @@
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjects:[[CPColor colorWithHexString:@"E3E3E3"],
-                                                [CPColor colorWithHexString:@"FFFFCA"],
-                                                2.0,
-                                                1.0,
-                                                [CPColor blackColor]]
-                                       forKeys:[@"stroke-color",
-                                                @"background-color",
-                                                @"border-radius",
-                                                @"stroke-width",
-                                                @"color"]];
+    return @{
+            @"stroke-color": [CPColor colorWithHexString:@"E3E3E3"],
+            @"background-color": [CPColor colorWithHexString:@"FFFFCA"],
+            @"border-radius": 2.0,
+            @"stroke-width": 1.0,
+            @"color": [CPColor blackColor],
+        };
 }
 
 /*! compute the contentView frame from a given window frame
@@ -57,7 +54,7 @@
 */
 + (CGRect)contentRectForFrameRect:(CGRect)aFrameRect
 {
-    var contentRect = CGRectMakeCopy(aFrameRect);
+    var contentRect = [super contentRectForFrameRect:aFrameRect];
 
     contentRect.origin.x += 3;
     contentRect.origin.y += 3;
@@ -99,17 +96,17 @@
     CGContextSetStrokeColor(context, strokeColor);
     CGContextSetFillColor(context, bgColor);
     CGContextSetLineWidth(context, strokeWidth);
-    CGContextBeginPath(context);
 
     aRect.origin.x += strokeWidth;
     aRect.origin.y += strokeWidth;
     aRect.size.width -= strokeWidth * 2;
     aRect.size.height -= strokeWidth * 2;
 
-    CGContextAddPath(context, CGPathWithRoundedRectangleInRect(aRect, radius, radius, YES, YES, YES, YES));
-    CGContextClosePath(context);
-
+    var path = CGPathWithRoundedRectangleInRect(aRect, radius, radius, YES, YES, YES, YES);
+    CGContextAddPath(context, path);
     CGContextStrokePath(context);
+
+    CGContextAddPath(context, path);
     CGContextFillPath(context);
 }
 

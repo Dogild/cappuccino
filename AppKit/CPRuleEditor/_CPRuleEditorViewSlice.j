@@ -53,8 +53,8 @@
     if (select == _selected)
         return;
 
-    var selector = select ? @"setThemeState:" : @"unsetThemeState:";
-    [[self subviews] makeObjectsPerformSelector:CPSelectorFromString(selector)  withObject:CPThemeStateSelectedDataView];
+    var selector = select ? @selector(setThemeState:) : @selector(unsetThemeState:);
+    [[self subviews] makeObjectsPerformSelector:selector  withObject:CPThemeStateSelectedDataView];
     _selected = select;
 }
 
@@ -65,7 +65,7 @@
         maxX = CGRectGetWidth(bounds),
         maxY = CGRectGetHeight(bounds);
 
-// Draw background
+    // Draw background
     if ([self _isSelected])
         _backgroundColor = [_ruleEditor _selectedRowColor];
     else
@@ -78,20 +78,20 @@
     CGContextSetFillColor(context, _backgroundColor);
     CGContextFillRect(context, rect);
 
-// Draw Top Border
+    // Draw Top Border
     CGContextBeginPath(context);
     CGContextMoveToPoint(context, 0, 0);
     CGContextAddLineToPoint(context, maxX, 0);
-    CGContextClosePath(context);
     CGContextSetStrokeColor(context, [_ruleEditor _sliceTopBorderColor]);
     CGContextStrokePath(context);
 
-// Draw Bottom Border
+    // Draw Bottom Border
     CGContextBeginPath(context);
     CGContextMoveToPoint(context, 0, maxY);
     CGContextAddLineToPoint(context, maxX, maxY);
-    CGContextClosePath(context);
+
     var bottomColor = (_rowIndex == [_ruleEditor _lastRow]) ? [_ruleEditor _sliceLastBottomBorderColor] : [_ruleEditor _sliceBottomBorderColor];
+
     CGContextSetStrokeColor(context, bottomColor);
     CGContextStrokePath(context);
 }

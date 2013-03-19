@@ -45,10 +45,10 @@
     if (_documentView == aView)
         return;
 
-    var defaultCenter = [CPNotificationCenter defaultCenter];
-
     if (_documentView)
     {
+        var defaultCenter = [CPNotificationCenter defaultCenter];
+
         [defaultCenter
             removeObserver:self
                       name:CPViewFrameDidChangeNotification
@@ -67,22 +67,28 @@
     if (_documentView)
     {
         [self addSubview:_documentView];
-
-        [_documentView setPostsFrameChangedNotifications:YES];
-        [_documentView setPostsBoundsChangedNotifications:YES];
-
-        [defaultCenter
-            addObserver:self
-               selector:@selector(viewFrameChanged:)
-                   name:CPViewFrameDidChangeNotification
-                 object:_documentView];
-
-        [defaultCenter
-            addObserver:self
-               selector:@selector(viewBoundsChanged:)
-                   name:CPViewBoundsDidChangeNotification
-                 object:_documentView];
+        [self _observeDocumentView];
     }
+}
+
+- (void)_observeDocumentView
+{
+    var defaultCenter = [CPNotificationCenter defaultCenter];
+
+    [_documentView setPostsFrameChangedNotifications:YES];
+    [_documentView setPostsBoundsChangedNotifications:YES];
+
+    [defaultCenter
+        addObserver:self
+           selector:@selector(viewFrameChanged:)
+               name:CPViewFrameDidChangeNotification
+             object:_documentView];
+
+    [defaultCenter
+        addObserver:self
+           selector:@selector(viewBoundsChanged:)
+               name:CPViewBoundsDidChangeNotification
+             object:_documentView];
 }
 
 /*!
@@ -102,19 +108,19 @@
 - (CGPoint)constrainScrollPoint:(CGPoint)aPoint
 {
     if (!_documentView)
-        return _CGPointMakeZero();
+        return CGPointMakeZero();
 
     var documentFrame = [_documentView frame];
 
-    aPoint.x = MAX(0.0, MIN(aPoint.x, MAX(_CGRectGetWidth(documentFrame) - _CGRectGetWidth(_bounds), 0.0)));
-    aPoint.y = MAX(0.0, MIN(aPoint.y, MAX(_CGRectGetHeight(documentFrame) - _CGRectGetHeight(_bounds), 0.0)));
+    aPoint.x = MAX(0.0, MIN(aPoint.x, MAX(CGRectGetWidth(documentFrame) - CGRectGetWidth(_bounds), 0.0)));
+    aPoint.y = MAX(0.0, MIN(aPoint.y, MAX(CGRectGetHeight(documentFrame) - CGRectGetHeight(_bounds), 0.0)));
 
     return aPoint;
 }
 
 - (void)setBoundsOrigin:(CGPoint)aPoint
 {
-    if (_CGPointEqualToPoint(_bounds.origin, aPoint))
+    if (CGPointEqualToPoint(_bounds.origin, aPoint))
         return;
 
     [super setBoundsOrigin:aPoint];
@@ -234,7 +240,12 @@ var CPClipViewDocumentViewKey = @"CPScrollViewDocumentView";
 - (id)initWithCoder:(CPCoder)aCoder
 {
     if (self = [super initWithCoder:aCoder])
-        [self setDocumentView:[aCoder decodeObjectForKey:CPClipViewDocumentViewKey]];
+    {
+        // Don't call setDocumentView: here. It calls addSubview:, but it's A) not necessary since the
+        // view hierarchy is fully encoded and B) dangerous if the subview is not fully decoded.
+        _documentView = [aCoder decodeObjectForKey:CPClipViewDocumentViewKey];
+        [self _observeDocumentView];
+    }
 
     return self;
 }

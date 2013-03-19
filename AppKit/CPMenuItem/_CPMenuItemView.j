@@ -55,8 +55,7 @@
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjects:[]
-                                       forKeys:[]];
+    return @{};
 }
 
 // Not used in the Appkit
@@ -247,8 +246,6 @@
     CGContextMoveToPoint(context, 1.0, 4.0);
     CGContextAddLineToPoint(context, 9.0, 4.0);
     CGContextAddLineToPoint(context, 5.0, 8.0);
-    CGContextAddLineToPoint(context, 1.0, 4.0);
-
     CGContextClosePath(context);
 
     CGContextSetFillColor(context, _color);

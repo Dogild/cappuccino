@@ -26,7 +26,6 @@
 @implementation _CPDocModalWindowView : _CPWindowView
 {
     CPView _bodyView;
-    CPView _shadowView;
 }
 
 + (CPString)defaultThemeClass
@@ -36,8 +35,21 @@
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjects:[[CPColor whiteColor], 8]
-                                       forKeys:[ @"body-color", @"height-shadow"]];
+    return @{
+            @"body-color": [CPColor whiteColor],
+            @"shadow-height": 8,
+        };
+}
+
++ (CGRect)contentRectForFrameRect:(CGRect)aFrameRect
+{
+    /*
+        This window view class draws a frame.
+        So we have to inset the content rect to be inside the frame.
+    */
+    var contentRect = [super contentRectForFrameRect:aFrameRect];
+
+    return CGRectInset(contentRect, 1.0, 1.0);
 }
 
 - (id)initWithFrame:(CGRect)aFrame styleMask:(unsigned)aStyleMask
@@ -48,34 +60,25 @@
     {
         var bounds = [self bounds];
 
-       _bodyView = [[CPView alloc] initWithFrame:_CGRectMake(0.0, 0.0, _CGRectGetWidth(bounds), _CGRectGetHeight(bounds))];
+        _bodyView = [[CPView alloc] initWithFrame:CGRectMake(0.0, 0.0, CGRectGetWidth(bounds), CGRectGetHeight(bounds))];
 
         [_bodyView setAutoresizingMask:CPViewWidthSizable | CPViewHeightSizable];
         [_bodyView setHitTests:NO];
 
         [self addSubview:_bodyView];
-
-        _shadowView = [[CPView alloc] initWithFrame:CGRectMake(0, 0, _CGRectGetWidth(bounds), [self valueForThemeAttribute:@"height-shadow"])];
-        [_shadowView setAutoresizingMask:CPViewWidthSizable];
-        [self addSubview:_shadowView];
-     }
+    }
 
     return self;
 }
 
 - (CGRect)contentRectForFrameRect:(CGRect)aFrameRect
 {
-    return aFrameRect;
+    return [[self class] contentRectForFrameRect:aFrameRect];
 }
 
 - (CGRect)frameRectForContentRect:(CGRect)aContentRect
 {
-    return aContentRect;
-}
-
-- (void)_enableSheet:(BOOL)enable
-{
-    // do nothing, already a sheet
+    return [[self class] frameRectForContentRect:aContentRect];
 }
 
 - (void)layoutSubviews
@@ -85,9 +88,11 @@
     var bounds = [self bounds];
 
     [_bodyView setBackgroundColor:[self valueForThemeAttribute:@"body-color"]];
+}
 
-    [_shadowView setFrame:CGRectMake(0,0, _CGRectGetWidth(bounds), [self valueForThemeAttribute:@"height-shadow"])];
-    [_shadowView setBackgroundColor:[self valueForThemeAttribute:@"attached-sheet-shadow-color"]];
+- (int)bodyOffset
+{
+    return [_bodyView frame].origin.y;
 }
 
 @end

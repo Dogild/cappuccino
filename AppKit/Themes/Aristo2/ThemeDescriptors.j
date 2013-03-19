@@ -532,7 +532,7 @@ var themedButtonValues = nil,
         [@"bezel-color",        bezelColor["@"],                    CPThemeStateBezeled],
         [@"bezel-color",        bezelFocusedColor,                  CPThemeStateBezeled | CPThemeStateEditing],
         [@"bezel-color",        bezelColor["disabled"],             CPThemeStateBezeled | CPThemeStateDisabled],
-        [@"font",               [CPFont systemFontOfSize:12.0],     CPThemeStateBezeled],
+        [@"font",               [CPFont systemFontOfSize:CPFontCurrentSystemSize],     CPThemeStateBezeled],
 
         [@"content-inset",      CGInsetMake(8.0, 7.0, 5.0, 10.0),   CPThemeStateBezeled],
         [@"content-inset",      CGInsetMake(8.0, 7.0, 5.0, 10.0),   CPThemeStateBezeled | CPThemeStateEditing],
@@ -546,19 +546,20 @@ var themedButtonValues = nil,
         [@"content-inset",      CGInsetMake(0.0, 0.0, 0.0, 5.0),    CPThemeStateTableDataView],
 
         [@"text-color",         [CPColor colorWithCalibratedWhite:51.0 / 255.0 alpha:1.0], CPThemeStateTableDataView],
-        [@"text-color",         [CPColor whiteColor],                CPThemeStateTableDataView | CPThemeStateSelectedTableDataView],
-        [@"font",               [CPFont boldSystemFontOfSize:12.0],  CPThemeStateTableDataView | CPThemeStateSelectedTableDataView],
+        [@"text-color",         [CPColor whiteColor],                CPThemeStateTableDataView | CPThemeStateSelectedDataView],
+        [@"font",               [CPFont systemFontOfSize:CPFontCurrentSystemSize],      CPThemeStateTableDataView | CPThemeStateSelectedDataView],
         [@"text-color",         [CPColor blackColor],                CPThemeStateTableDataView | CPThemeStateEditing],
-        [@"content-inset",      CGInsetMake(7.0, 7.0, 5.0, 10.0),     CPThemeStateTableDataView | CPThemeStateEditing],
-        [@"font",               [CPFont systemFontOfSize:12.0],      CPThemeStateTableDataView | CPThemeStateEditing],
+        [@"text-color",         [CPColor blackColor],                CPThemeStateTableDataView | CPThemeStateSelectedDataView | CPThemeStateEditable],
+        [@"content-inset",      CGInsetMake(7.0, 7.0, 5.0, 10.0),     CPThemeStateTableDataView | CPThemeStateEditable],
+        [@"font",               [CPFont systemFontOfSize:CPFontCurrentSystemSize],      CPThemeStateTableDataView | CPThemeStateEditing],
         [@"bezel-inset",        CGInsetMake(-2.0, -2.0, -2.0, -2.0), CPThemeStateTableDataView | CPThemeStateEditing],
 
         [@"text-color",         [CPColor colorWithCalibratedWhite:125.0 / 255.0 alpha:1.0], CPThemeStateTableDataView | CPThemeStateGroupRow],
-        [@"text-color",         [CPColor colorWithCalibratedWhite:1.0 alpha:1.0], CPThemeStateTableDataView | CPThemeStateGroupRow | CPThemeStateSelectedTableDataView],
+        [@"text-color",         [CPColor colorWithCalibratedWhite:1.0 alpha:1.0], CPThemeStateTableDataView | CPThemeStateGroupRow | CPThemeStateSelectedDataView],
         [@"text-shadow-color",  [CPColor whiteColor],                CPThemeStateTableDataView | CPThemeStateGroupRow],
-        [@"text-shadow-offset",  CGSizeMake(0,1),                    CPThemeStateTableDataView | CPThemeStateGroupRow],
-        [@"text-shadow-color",  [CPColor colorWithCalibratedWhite:0.0 alpha:0.6],                CPThemeStateTableDataView | CPThemeStateGroupRow | CPThemeStateSelectedTableDataView],
-        [@"font",               [CPFont boldSystemFontOfSize:12.0],  CPThemeStateTableDataView | CPThemeStateGroupRow]
+        [@"text-shadow-offset",  CGSizeMake(0, 1),                   CPThemeStateTableDataView | CPThemeStateGroupRow],
+        [@"text-shadow-color",  [CPColor colorWithCalibratedWhite:0.0 alpha:0.6],                CPThemeStateTableDataView | CPThemeStateGroupRow | CPThemeStateSelectedDataView],
+        [@"font",               [CPFont boldSystemFontOfSize:CPFontCurrentSystemSize],  CPThemeStateTableDataView | CPThemeStateGroupRow]
     ];
 
     [self registerThemeValues:themedTextFieldValues forView:textfield];
@@ -1295,19 +1296,16 @@ var themedButtonValues = nil,
         alternatingRowColors = [[CPColor whiteColor], [CPColor colorWithRed:245.0 / 255.0 green:249.0 / 255.0 blue:252.0 / 255.0 alpha:1.0]],
         gridColor = [CPColor colorWithHexString:@"dce0e2"],
         selectionColor = [CPColor colorWithHexString:@"5780d8"],
-        sourceListSelectionColor = [CPDictionary dictionaryWithObjectsAndKeys:
-            CGGradientCreateWithColorComponents(
+        sourceListSelectionColor = @{
+            CPSourceListGradient: CGGradientCreateWithColorComponents(
                 CGColorSpaceCreateDeviceRGB(),
                 [109.0 / 255.0, 150.0 / 255.0, 238.0 / 255.0, 1.0, 72.0 / 255.0, 113.0 / 255.0, 201.0 / 255.0, 1.0],
                 [0, 1],
                 2
             ),
-            CPSourceListGradient,
-            [CPColor colorWithCalibratedRed:73.0 / 255.0 green:109.0 / 255.0 blue:187.0 / 255.0 alpha:1.0],
-            CPSourceListTopLineColor,
-            [CPColor colorWithCalibratedRed:44.0 / 255.0 green:79.0 / 255.0 blue:155.0 / 255.0 alpha:1.0],
-            CPSourceListBottomLineColor
-        ],
+            CPSourceListTopLineColor: [CPColor colorWithCalibratedRed:70.0 / 255.0 green:107.0 / 255.0 blue:215.0 / 255.0 alpha:1.0],
+            CPSourceListBottomLineColor: [CPColor colorWithCalibratedRed:42.0 / 255.0 green:74.0 / 255.0 blue:177.0 / 255.0 alpha:1.0]
+        },
 
         themedTableViewValues =
         [
@@ -1383,7 +1381,7 @@ var themedButtonValues = nil,
         suppressionButtonXOffset = 2.0,
         suppressionButtonYOffset = 10.0,
         suppressionButtonFont = [CPFont systemFontOfSize:CPFontCurrentSystemSize],
-        warningIcon = PatternImage("alert-warning.png", 53.0, 46.0);
+        warningIcon = PatternImage("alert-warning.png", 48.0, 43.0);
 
     // Global
     themedAlertValues =
@@ -1775,7 +1773,7 @@ var themedButtonValues = nil,
 {
     var windowView = [[_CPWindowView alloc] initWithFrame:CGRectMakeZero(0.0, 0.0, 200, 200)],
 
-        sheetShadow = PatternColor(@"window-attached-sheet-shadow.png", 9, 8),
+        sheetShadow = PatternColor(@"window-attached-sheet-shadow.png", 1, 8),
         resizeIndicator = PatternImage(@"window-resize-indicator.png", 12, 12),
 
         shadowColor = PatternColor(
@@ -1796,6 +1794,7 @@ var themedButtonValues = nil,
         [@"window-shadow-color",            shadowColor],
         [@"resize-indicator",               resizeIndicator],
         [@"attached-sheet-shadow-color",    sheetShadow],
+        [@"shadow-height",                  8],
         [@"size-indicator",                 CGSizeMake(12, 12)]
     ];
 
@@ -1892,7 +1891,6 @@ var themedButtonValues = nil,
         minimizeButtonImage =               PatternImage(@"window-standard-minimize-button.png", 16, 16),
         minimizeButtonImageHighlighted =    PatternImage(@"window-standard-minimize-button-highlighted.png", 16, 16),
 
-        sheetShadow = PatternColor(@"window-attached-sheet-shadow.png", 9, 8),
         resizeIndicator = PatternImage(@"window-resize-indicator.png", 12, 12),
 
         themeValues =
@@ -1932,7 +1930,6 @@ var themedButtonValues = nil,
             [@"close-image-origin",             CGPointMake(8.0, 10.0)],
 
             [@"resize-indicator",               resizeIndicator],
-            [@"attached-sheet-shadow-color",    sheetShadow],
             [@"size-indicator",                 CGSizeMake(12, 12)]
         ];
 
@@ -1953,13 +1950,9 @@ var themedButtonValues = nil,
                 height: 5.0
             }),
 
-        sheetShadow = PatternColor(@"window-attached-sheet-shadow.png", 9, 8),
-
         themeValues =
         [
-            [@"body-color",                     bezelColor],
-            [@"height-shadow",                  8],
-            [@"attached-sheet-shadow-color",    sheetShadow]
+            [@"body-color", bezelColor]
         ];
 
     [self registerThemeValues:themeValues forView:docModalWindowView inherit:themedWindowViewValues];
@@ -2030,7 +2023,7 @@ var themedButtonValues = nil,
         [
             [@"menu-item-selection-color",                              [CPColor colorWithHexString:@"5C85D8"]],
             [@"menu-item-text-shadow-color",                            [CPColor colorWithCalibratedRed:26.0 / 255.0 green: 73.0 / 255.0 blue:109.0 / 255.0 alpha:1.0]],
-            [@"horizontal-margin",                                      12.0],
+            [@"horizontal-margin",                                      9.0],
             [@"submenu-indicator-margin",                               3.0],
             [@"vertical-margin",                                        4.0]
         ];
@@ -2229,7 +2222,7 @@ var themedButtonValues = nil,
             [@"text-color",         [CPColor colorWithCalibratedWhite:1.0 alpha:0.6], CPThemeStateDisabled],
             [@"text-shadow-color",  [CPColor blackColor]],
             [@"text-shadow-color",  [CPColor blackColor], CPThemeStateDisabled],
-            [@"text-shadow-offset", CGSizeMake(-1.0, -1.0)]
+            [@"text-shadow-offset", CGSizeMake(0, 1.0)]
         ];
 
     if (themeValues)

@@ -80,13 +80,15 @@ _CPMenuWindowAttachedMenuBackgroundStyle    = 2;
 
 - (id)initWithContentRect:(CGRect)aRect styleMask:(unsigned)aStyleMask
 {
-    _constraintRect = _CGRectMakeZero();
-    _unconstrainedFrame = _CGRectMakeZero();
+    _constraintRect = CGRectMakeZero();
+    _unconstrainedFrame = CGRectMakeZero();
 
     self = [super initWithContentRect:aRect styleMask:CPBorderlessWindowMask];
 
     if (self)
     {
+        _constrainsToUsableScreen = NO;
+
         [self setLevel:CPPopUpMenuWindowLevel];
         [self setHasShadow:YES];
         [self setShadowStyle:CPMenuWindowShadowStyle];
@@ -207,26 +209,26 @@ _CPMenuWindowAttachedMenuBackgroundStyle    = 2;
 
 - (CGRect)unconstrainedFrame
 {
-    return _CGRectMakeCopy(_unconstrainedFrame);
+    return CGRectMakeCopy(_unconstrainedFrame);
 }
 
 // We need this because if not this will call setFrame: with -frame instead of -unconstrainedFrame, turning
 // the constrained frame into the unconstrained frame.
 - (void)setFrameOrigin:(CGPoint)aPoint
 {
-    [super setFrame:_CGRectMake(aPoint.x, aPoint.y, _CGRectGetWidth(_unconstrainedFrame), _CGRectGetHeight(_unconstrainedFrame))];
+    [super setFrame:CGRectMake(aPoint.x, aPoint.y, CGRectGetWidth(_unconstrainedFrame), CGRectGetHeight(_unconstrainedFrame))];
 }
 
 - (void)setFrameSize:(CGSize)aSize
 {
-    [super setFrame:_CGRectMake(_CGRectGetMinX(_unconstrainedFrame), _CGRectGetMinY(_unconstrainedFrame), aSize.width, aSize.height)];
+    [super setFrame:CGRectMake(CGRectGetMinX(_unconstrainedFrame), CGRectGetMinY(_unconstrainedFrame), aSize.width, aSize.height)];
 }
 
 - (void)setFrame:(CGRect)aFrame display:(BOOL)shouldDisplay animate:(BOOL)shouldAnimate
 {
     // FIXME: There are integral window issues with platform windows.
     // FIXME: This gets called far too often.
-    _unconstrainedFrame = _CGRectMakeCopy(aFrame);
+    _unconstrainedFrame = CGRectMakeCopy(aFrame);
 
     var constrainedFrame = CGRectIntersection(_unconstrainedFrame, _constraintRect),
         marginInset = [_menuView valueForThemeAttribute:@"menu-window-margin-inset"],
@@ -434,39 +436,34 @@ _CPMenuWindowAttachedMenuBackgroundStyle    = 2;
 
 + (id)themeAttributes
 {
-    return [CPDictionary dictionaryWithObjects:[    [CPNull null], [CPNull null], [CPNull null], [CPNull null], CGInsetMake(5.0, 1.0, 1.0, 5.0), 16.0,
-                                                    [CPNull null], [CPNull null], [CPNull null], 30.0, 10.0, 10.0, 10.0,
-                                                    [CPNull null], [CPNull null], [CPNull null], [CPNull null], [CPNull null], [CPNull null], [CPNull null], 28.0, [CPNull null], 1.0,
-                                                    [CPNull null], [CPNull null], [CPNull null]]
-                                       forKeys:[    @"menu-window-more-above-image",
-                                                    @"menu-window-more-below-image",
-                                                    @"menu-window-pop-up-background-style-color",
-                                                    @"menu-window-menu-bar-background-style-color",
-                                                    @"menu-window-margin-inset",
-                                                    @"menu-window-scroll-indicator-height",
-
-                                                    @"menu-bar-window-background-color",
-                                                    @"menu-bar-window-background-selected-color",
-                                                    @"menu-bar-window-font",
-                                                    @"menu-bar-window-height",
-                                                    @"menu-bar-window-margin",
-                                                    @"menu-bar-window-left-margin",
-                                                    @"menu-bar-window-right-margin",
-
-                                                    @"menu-bar-text-color",
-                                                    @"menu-bar-title-color",
-                                                    @"menu-bar-text-shadow-color",
-                                                    @"menu-bar-title-shadow-color",
-                                                    @"menu-bar-highlight-color",
-                                                    @"menu-bar-highlight-text-color",
-                                                    @"menu-bar-highlight-text-shadow-color",
-                                                    @"menu-bar-height",
-                                                    @"menu-bar-icon-image",
-                                                    @"menu-bar-icon-image-alpha-value",
-
-                                                    @"menu-general-icon-new",
-                                                    @"menu-general-icon-save",
-                                                    @"menu-general-icon-open"]];
+    return @{
+            @"menu-window-more-above-image": [CPNull null],
+            @"menu-window-more-below-image": [CPNull null],
+            @"menu-window-pop-up-background-style-color": [CPNull null],
+            @"menu-window-menu-bar-background-style-color": [CPNull null],
+            @"menu-window-margin-inset": CGInsetMake(5.0, 1.0, 1.0, 5.0),
+            @"menu-window-scroll-indicator-height": 16.0,
+            @"menu-bar-window-background-color": [CPNull null],
+            @"menu-bar-window-background-selected-color": [CPNull null],
+            @"menu-bar-window-font": [CPNull null],
+            @"menu-bar-window-height": 30.0,
+            @"menu-bar-window-margin": 10.0,
+            @"menu-bar-window-left-margin": 10.0,
+            @"menu-bar-window-right-margin": 10.0,
+            @"menu-bar-text-color": [CPNull null],
+            @"menu-bar-title-color": [CPNull null],
+            @"menu-bar-text-shadow-color": [CPNull null],
+            @"menu-bar-title-shadow-color": [CPNull null],
+            @"menu-bar-highlight-color": [CPNull null],
+            @"menu-bar-highlight-text-color": [CPNull null],
+            @"menu-bar-highlight-text-shadow-color": [CPNull null],
+            @"menu-bar-height": 28.0,
+            @"menu-bar-icon-image": [CPNull null],
+            @"menu-bar-icon-image-alpha-value": 1.0,
+            @"menu-general-icon-new": [CPNull null],
+            @"menu-general-icon-save": [CPNull null],
+            @"menu-general-icon-open": [CPNull null],
+        };
 }
 
 - (unsigned)numberOfUnhiddenItems
