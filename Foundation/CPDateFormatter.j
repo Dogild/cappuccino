@@ -23,12 +23,19 @@
 @import "CPDate.j"
 @import "CPString.j"
 @import "CPFormatter.j"
+@import "CPLocale.j"
 
 CPDateFormatterNoStyle     = 0;
 CPDateFormatterShortStyle  = 1;
 CPDateFormatterMediumStyle = 2;
 CPDateFormatterLongStyle   = 3;
 CPDateFormatterFullStyle   = 4;
+
+CPDateFormatterBehaviorDefault = 0;
+CPDateFormatterBehavior10_0    = 1000;
+CPDateFormatterBehavior10_4    = 1040;
+
+var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
 /*!
     @ingroup foundation
@@ -42,7 +49,59 @@ CPDateFormatterFullStyle   = 4;
 */
 @implementation CPDateFormatter : CPFormatter
 {
-    CPDateFormatterStyle _dateStyle @accessors(property=dateStyle);
+    BOOL                    _allowNaturalLanguage;              @accessors(property=allowNaturalLanguage, readonly);
+    BOOL                    _doesRelativeDateFormatting         @accessors(property=doesRelativeDateFormatting);
+    CPArray                 _weekdaySymbols                     @accessors(property=weekdaySymbols);
+    CPArray                 _shortWeekdaySymbols                @accessors(property=shortWeekdaySymbols);
+    CPArray                 _veryShortWeekdaySymbols            @accessors(property=veryShortWeekdaySymbols);
+    CPArray                 _standaloneWeekdaySymbols           @accessors(property=standaloneWeekdaySymbols);
+    CPArray                 _shortStandaloneWeekdaySymbols      @accessors(property=shortStandaloneWeekdaySymbols);
+    CPArray                 _veryShortStandaloneWeekdaySymbols  @accessors(property=veryShortSandaloneWeekdaySymbols);
+    CPArray                 _monthSymbols                       @accessors(property=monthSymbols);
+    CPArray                 _shortMonthSymbols                  @accessors(property=shortMonthSymbols);
+    CPArray                 _veryShortMonthSymbols              @accessors(property=veryShortMonthSymbols);
+    CPArray                 _standaloneMonthSymbols             @accessors(property=standaloneMonthSymbols);
+    CPArray                 _shortStandaloneMonthSymbols        @accessors(property=shortStandaloneMonthSymbols);
+    CPArray                 _veryShortStandaloneMonthSymbols    @accessors(property=veryShortSandaloneMonthSymbols);
+    CPArray                 _quarterSymbols                     @accessors(property=quarterSymbols);
+    CPArray                 _shortQuarterSymbols                @accessors(property=shortQuarterSymbols);
+    CPArray                 _standaloneQuarterSymbols           @accessors(property=standaloneQuarterSymbols);
+    CPArray                 _shortSandaloneQuarterSymbols       @accessors(property=shortStandaloneQuarterSymbols);
+    CPDate                  _defaultDate                        @accessors(property=defaultDate);
+    CPDate                  _twoDigitStartDate                  @accessors(property=twoDigitStartDate);
+    CPDateFormatterBehavior _formatterBehavior                  @accessors(property=formatterBehavior);
+    CPDateFormatterStyle    _dateStyle                          @accessors(property=dateStyle);
+    CPDateFormatterStyle    _timeStyle                          @accessors(property=timeStyle);
+    CPLocale                _locale                             @accessors(property=locale);
+    CPString                _AMSymbol                           @accessors(property=AMSymbol);
+    CPString                _dateFormat                         @accessors(property=dateFormat);
+    CPString                _PMSymbol                           @accessors(property=PMSymbol);
+}
+
++ (CPString)localizedStringFromDate:(CPDate)aDate dateStyle:(CPDateFormatterStyle)dateStyle timeStyle:(CPDateFormatterStyle)timeStyle
+{
+    var formatter = [[CPDateFormatter alloc] init];
+
+    [formatter setFormatterBehavior:CPDateFormatterBehavior10_4];
+    [formatter setDateStyle:dateStyle];
+    [formatter setTimeStyle:timeStyle];
+
+    return [formatter stringForObjectValue:date];
+}
+
++ (CPString)dateFormatFromTemplate:(CPString)template options:(CPUInteger)opts locale:(CPLocale)locale
+{
+
+}
+
++ (CPDateFormatterBehavior)defaultFormatterBehavior
+{
+    return defaultDateFormatterBehavior;
+}
+
++ (void)setDefaultFormatterBehavior:(CPDateFormatterBehavior)behavior
+{
+    defaultDateFormatterBehavior = behavior;
 }
 
 - (id)init
@@ -50,9 +109,23 @@ CPDateFormatterFullStyle   = 4;
     if (self = [super init])
     {
         _dateStyle = CPDateFormatterShortStyle;
+        _timeStyle = CPDateFormatterShortStyle;
+        _AMSymbol = @"AM";
+        _PMSymbole = @"PM";
     }
 
     return self;
+}
+
+- (id)initWithDateFormat:(CPString)format allowNaturalLanguage:(BOOL)flag
+{
+    if (self = [self init])
+    {
+        _dateFormat = format;
+        _allowNaturalLanguage = flag;
+    }
+
+    return self
 }
 
 - (CPString)stringFromDate:(CPDate)aDate
@@ -109,7 +182,8 @@ CPDateFormatterFullStyle   = 4;
 
 @end
 
-var CPDateFormatterStyleKey = "CPDateFormatterStyle";
+var CPDateFormatterStyleKey = @"CPDateFormatterStyle",
+    CPDateFormatterLocaleKey = @"CPDateFormatterLocaleKey";
 
 @implementation CPDateFormatter (CPCoding)
 
@@ -120,6 +194,7 @@ var CPDateFormatterStyleKey = "CPDateFormatterStyle";
     if (self)
     {
         _dateStyle = [aCoder decodeIntForKey:CPDateFormatterStyleKey];
+        _locale = [aCoder decodeObjectForKey:CPDateFormatterLocaleKey];
     }
 
     return self;
@@ -130,6 +205,7 @@ var CPDateFormatterStyleKey = "CPDateFormatterStyle";
     [super encodeWithCoder:aCoder];
 
     [aCoder encodeInt:_dateStyle forKey:CPDateFormatterStyleKey];
+    [aCoder encodeInt:_locale forKey:CPDateFormatterLocaleKey];
 }
 
 @end
