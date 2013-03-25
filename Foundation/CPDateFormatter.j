@@ -403,7 +403,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     if ([anObject isKindOfClass:[CPDate class]])
         return [self stringFromDate:anObject];
     else
-        return [anObject description];
+        return [CPNull null];
 }
 
 /*! Return a string
