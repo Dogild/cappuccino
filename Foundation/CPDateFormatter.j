@@ -79,7 +79,13 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     CPString                _PMSymbol                           @accessors(property=PMSymbol);
 }
 
-+ (CPString)localizedStringFromDate:(CPDate)aDate dateStyle:(CPDateFormatterStyle)dateStyle timeStyle:(CPDateFormatterStyle)timeStyle
+/*! Return a string representation of the given date, dateStyle and timeStyle
+    @param date the given date
+    @param dateStyle the dateStyle
+    @param timeStyle the timeStyle
+    @return a CPString reprensenting the given date
+*/
++ (CPString)localizedStringFromDate:(CPDate)date dateStyle:(CPDateFormatterStyle)dateStyle timeStyle:(CPDateFormatterStyle)timeStyle
 {
     var formatter = [[CPDateFormatter alloc] init];
 
@@ -90,21 +96,36 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     return [formatter stringForObjectValue:date];
 }
 
+/*! Return a string representation of the given template, opts and locale
+    @param template the template
+    @param opts, pass 0
+    @param locale the locale
+    @return a CPString representing the givent template
+*/
 + (CPString)dateFormatFromTemplate:(CPString)template options:(CPUInteger)opts locale:(CPLocale)locale
 {
 
 }
 
+/*! Return the defaultFormatterBehavior
+    @return a CPDateFormatterBehavior
+*/
 + (CPDateFormatterBehavior)defaultFormatterBehavior
 {
     return defaultDateFormatterBehavior;
 }
 
+/*! Set the defaultFormatterBehavior
+    @param behavior
+*/
 + (void)setDefaultFormatterBehavior:(CPDateFormatterBehavior)behavior
 {
     defaultDateFormatterBehavior = behavior;
 }
 
+/*! Init a dateFormatter
+    @return a new CPDateFormatter
+*/
 - (id)init
 {
     if (self = [super init])
@@ -118,6 +139,11 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     return self;
 }
 
+/*! Init a dateFormatter with a format and the naturalLanguage
+    @param format the format
+    @param flag flag representation of allowNaturalLanguage
+    @return a new CPDateFormatter
+*/
 - (id)initWithDateFormat:(CPString)format allowNaturalLanguage:(BOOL)flag
 {
     if (self = [self init])
@@ -129,6 +155,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     return self
 }
 
+/*! Private init
+*/
 - (void)_init
 {
     // TODO :  these datas have to be in CPUserDefault
@@ -155,6 +183,11 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     _shortStandaloneQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
 }
 
+/*! Return a string representation of a given date.
+    This method returns (if possible) a representation of the given date with the dateFormat of the CPDateFormatter, otherwise it takes the dateStyle and timeStyle
+    @param aDate the given date
+    @return CPString the string representation
+*/
 - (CPString)stringFromDate:(CPDate)aDate
 {
     if (!aDate)
@@ -221,6 +254,11 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     return [self _stringFromDate:aDate format:format];
 }
 
+/*! Return a date of the given string
+    This method returns (if possible) a representation of the given string with the dateFormat of the CPDateFormatter, otherwise it takes the dateStyle and timeStyle
+    @param aString
+    @return CPDate the date
+*/
 - (CPDate)dateFromString:(CPString)aString
 {
     if (!aString)
@@ -228,19 +266,70 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
     var format;
 
+    if (_dateFormat)
+        return [self _dateFromString:aString format:_dateFormat];
+
+    // TODO Add locale support.
     switch (_dateStyle)
     {
+        case CPDateFormatterNoStyle:
+            format = @"";
+            break;
+
         case CPDateFormatterShortStyle:
-            var format = "d/m/Y";
-            return Date.parseDate(aString, format);
+            format = @"M/d/yy";
+            break;
+
+        case CPDateFormatterMediumStyle:
+            format = @"MMM d, Y";
+            break;
+
+        case CPDateFormatterLongStyle:
+            format = @"MMMM d, Y";
+            break;
+
+        case CPDateFormatterFullStyle:
+            format = @"EEEE, MMMM d, Y";
+            break;
 
         default:
-            return Date.parseDate(aString);
+            format = @"";
+    }
+
+    switch (_timeStyle)
+    {
+        case CPDateFormatterNoStyle:
+            format += @"";
+            break;
+
+        case CPDateFormatterShortStyle:
+            format += @" h:mm a";
+            break;
+
+        case CPDateFormatterMediumStyle:
+            format += @" h:mm:ss a";
+            break;
+
+        case CPDateFormatterLongStyle:
+            format += @" h:mm:ss a V";
+            break;
+
+        case CPDateFormatterFullStyle:
+            format += @" h:mm:ss a vvvv";
+            break;
+
+        default:
+            format += @"";
     }
 
     return [self _dateFromString:aString format:format];
 }
 
+/*! Return a string representation of the given objectValue.
+    This method call the method stringFromDate if possible, otherwise it returns the description of the object
+    @param anObject
+    @return a string
+*/
 - (CPString)stringForObjectValue:(id)anObject
 {
     if ([anObject isKindOfClass:[CPDate class]])
@@ -249,11 +338,22 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
         return [anObject description];
 }
 
+/*! Return a string
+    This method call the method stringForObjectValue
+    @param anObject
+    @return a string
+*/
 - (CPString)editingStringForObjectValue:(id)anObject
 {
     return [self stringForObjectValue:anObject];
 }
 
+/*! Returns a boolean if the given object has been changed or not depending of the given string (use of ref)
+    @param anObject the given object
+    @param aString
+    @param anError, if it returns NO the error will be in anError (use of ref)
+    @return aBoolean for the success or fail of the method
+*/
 - (BOOL)getObjectValue:(id)anObject forString:(CPString)aString errorDescription:(CPString)anError
 {
     // TODO Error handling.
@@ -263,11 +363,21 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     return YES;
 }
 
+/*! Return a string representation of the given date and format
+    @patam aDate
+    @param aFormat
+    @return a string
+*/
 - (CPString)_stringFromDate:(CPDate)aDate format:(CPString)aFormat
 {
 
 }
 
+/*! Return a date representation of the given string and format
+    @patam aDate
+    @param aFormat
+    @return a string
+*/
 - (CPDate)_dateFromString:(CPString)aString format:(CPString)aFormat
 {
 
