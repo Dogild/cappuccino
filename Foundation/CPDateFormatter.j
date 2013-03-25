@@ -20,10 +20,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+@import "CPArray.j"
 @import "CPDate.j"
 @import "CPString.j"
 @import "CPFormatter.j"
-@import "CPLocale.j"
+//@import "CPLocale.j"
 
 CPDateFormatterNoStyle     = 0;
 CPDateFormatterShortStyle  = 1;
@@ -49,7 +50,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 */
 @implementation CPDateFormatter : CPFormatter
 {
-    BOOL                    _allowNaturalLanguage;              @accessors(property=allowNaturalLanguage, readonly);
+    BOOL                    _allowNaturalLanguage               @accessors(property=allowNaturalLanguage, readonly);
     BOOL                    _doesRelativeDateFormatting         @accessors(property=doesRelativeDateFormatting);
     CPArray                 _weekdaySymbols                     @accessors(property=weekdaySymbols);
     CPArray                 _shortWeekdaySymbols                @accessors(property=shortWeekdaySymbols);
@@ -72,7 +73,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     CPDateFormatterBehavior _formatterBehavior                  @accessors(property=formatterBehavior);
     CPDateFormatterStyle    _dateStyle                          @accessors(property=dateStyle);
     CPDateFormatterStyle    _timeStyle                          @accessors(property=timeStyle);
-    CPLocale                _locale                             @accessors(property=locale);
+    //CPLocale                _locale                             @accessors(property=locale);
     CPString                _AMSymbol                           @accessors(property=AMSymbol);
     CPString                _dateFormat                         @accessors(property=dateFormat);
     CPString                _PMSymbol                           @accessors(property=PMSymbol);
@@ -110,8 +111,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     {
         _dateStyle = CPDateFormatterShortStyle;
         _timeStyle = CPDateFormatterShortStyle;
-        _AMSymbol = @"AM";
-        _PMSymbole = @"PM";
+
+        [self _init];
     }
 
     return self;
@@ -126,6 +127,31 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     }
 
     return self
+}
+
+- (void)_init
+{
+    _AMSymbol = [CPString stringWithFormat:@"%s", @"AM"];
+    _PMSymbole = [CPString stringWithFormat:@"%s", @"PM"];
+
+    _weekdaySymbols = [CPArray arrayWithObjects:@"Sunday", @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday"];
+    _shortWeekdaySymbols = [CPArray arrayWithObjects:@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"];
+    _veryShortWeekdaySymbols = [CPArray arrayWithObjects:@"S", @"M", @"T", @"W", @"T", @"F", @"S"];
+    _standaloneWeekdaySymbols = [CPArray arrayWithObjects:@"Sunday", @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday"];
+    _shortStandaloneWeekdaySymbols = [CPArray arrayWithObjects:@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"];
+    _veryShortStandaloneWeekdaySymbols = [CPArray arrayWithObjects:@"S", @"M", @"T", @"W", @"T", @"F", @"S"];
+
+    _monthSymbols = [CPArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December"];
+    _shortMonthSymbols = [CPArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec"];
+    _veryShortMonthSymbols = [CPArray arrayWithObjects:@"J", @"F", @"M", @"A", @"M", @"J", @"J", @"A", @"S", @"O", @"N", @"D"];
+    _standaloneMonthSymbols = [CPArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December"];
+    _shortStandaloneMonthSymbols = [CPArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec"];
+    _veryShortStandaloneMonthSymbols = [CPArray arrayWithObjects:@"J", @"F", @"M", @"A", @"M", @"J", @"J", @"A", @"S", @"O", @"N", @"D"];
+
+    _quarterSymbols = [CPArray arrayWithObjects:@"1st quarter", @"2nd quarter", @"3rd quarter", @"4th quarter"];
+    _shortQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
+    _standaloneQuarterSymbols = [CPArray arrayWithObjects:@"1st quarter", @"2nd quarter", @"3rd quarter", @"4th quarter"];
+    _shortStandaloneQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
 }
 
 - (CPString)stringFromDate:(CPDate)aDate
