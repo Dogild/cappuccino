@@ -26,11 +26,21 @@
 
 - (id)NS_initWithCoder:(CPCoder)aCoder
 {
-    self = [super init];
+    self = [super NS_initWithCoder:aCoder];
 
     if (self)
     {
-        _dateStyle = CPDateFormatterShortStyle;
+        var attributes = [aCoder decodeObjectForKey:@"NS.attributes"];
+
+        _dateStyle = [attributes valueForKey:@"dateStyle"];
+        _timeStyle = [attributes valueForKey:@"timeStyle"];
+        _formatterBehavior = [attributes valueForKey:@"formatterBehavior"];
+
+        if ([attributes containsKey:@"doesRelativeDateFormatting"])
+            _doesRelativeDateFormatting = [attributes valueForKey:@"doesRelativeDateFormatting"];
+
+        _dateFormat = [aCoder decodeStringForKey:@"NS.format"];
+        _allowNaturalLanguage = [aCoder decodeBoolForKey:@"NS.natural"];
     }
 
     return self;
