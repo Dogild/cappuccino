@@ -131,6 +131,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
 - (void)_init
 {
+    // TODO :  these datas have to be in CPUserDefault
     _AMSymbol = [CPString stringWithFormat:@"%s", @"AM"];
     _PMSymbole = [CPString stringWithFormat:@"%s", @"PM"];
 
@@ -156,22 +157,76 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
 - (CPString)stringFromDate:(CPDate)aDate
 {
+    if (!aDate)
+        return;
+
+    var format;
+
+    if (_dateFormat)
+        return [self _stringFromDate:aDate format:_dateFormat];
+
     // TODO Add locale support.
     switch (_dateStyle)
     {
+        case CPDateFormatterNoStyle:
+            format = @"";
+            break;
+
         case CPDateFormatterShortStyle:
-            var format = "d/m/Y";
-            return aDate.dateFormat(format);
+            format = @"M/d/yy";
+            break;
+
+        case CPDateFormatterMediumStyle:
+            format = @"MMM d, Y";
+            break;
+
+        case CPDateFormatterLongStyle:
+            format = @"MMMM d, Y";
+            break;
+
+        case CPDateFormatterFullStyle:
+            format = @"EEEE, MMMM d, Y";
+            break;
 
         default:
-            return [aDate description];
+            format = @"";
     }
+
+    switch (_timeStyle)
+    {
+        case CPDateFormatterNoStyle:
+            format += @"";
+            break;
+
+        case CPDateFormatterShortStyle:
+            format += @" h:mm a";
+            break;
+
+        case CPDateFormatterMediumStyle:
+            format += @" h:mm:ss a";
+            break;
+
+        case CPDateFormatterLongStyle:
+            format += @" h:mm:ss a V";
+            break;
+
+        case CPDateFormatterFullStyle:
+            format += @" h:mm:ss a vvvv";
+            break;
+
+        default:
+            format += @"";
+    }
+
+    return [self _stringFromDate:aDate format:format];
 }
 
 - (CPDate)dateFromString:(CPString)aString
 {
     if (!aString)
         return nil;
+
+    var format;
 
     switch (_dateStyle)
     {
@@ -182,6 +237,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
         default:
             return Date.parseDate(aString);
     }
+
+    return [self _dateFromString:aString format:format];
 }
 
 - (CPString)stringForObjectValue:(id)anObject
@@ -204,6 +261,16 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     @deref(anObject) = value;
 
     return YES;
+}
+
+- (CPString)_stringFromDate:(CPDate)aDate format:(CPString)aFormat
+{
+
+}
+
+- (CPDate)_dateFromString:(CPString)aString format:(CPString)aFormat
+{
+
 }
 
 @end
