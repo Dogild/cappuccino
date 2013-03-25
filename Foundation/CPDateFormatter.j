@@ -198,7 +198,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     if (_dateFormat)
         return [self _stringFromDate:aDate format:_dateFormat];
 
-    // TODO Add locale support.
     switch (_dateStyle)
     {
         case CPDateFormatterNoStyle:
@@ -206,19 +205,36 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             break;
 
         case CPDateFormatterShortStyle:
-            format = @"M/d/yy";
+
+            if ([self _isAmericanFormat])
+                format = @"M/d/yy";
+            else
+                format = @"dd/MM/yy";
+
             break;
 
         case CPDateFormatterMediumStyle:
-            format = @"MMM d, Y";
+
+            if ([self _isAmericanFormat])
+                format = @"MMM d, Y";
+            else
+                format = @"d MMM Y";
             break;
 
         case CPDateFormatterLongStyle:
-            format = @"MMMM d, Y";
+
+            if ([self _isAmericanFormat])
+                format = @"MMMM d, Y";
+            else
+                format = @"d MMMM Y";
             break;
 
         case CPDateFormatterFullStyle:
-            format = @"EEEE, MMMM d, Y";
+
+            if ([self _isAmericanFormat])
+                format = @"EEEE, MMMM d, Y";
+            else
+                format = @"EEEE d MMMM Y";
             break;
 
         default:
@@ -232,19 +248,35 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             break;
 
         case CPDateFormatterShortStyle:
-            format += @" h:mm a";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm a";
+            else
+                format += @" H:mm";
             break;
 
         case CPDateFormatterMediumStyle:
-            format += @" h:mm:ss a";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a";
+            else
+                format += @" H:mm:ss"
             break;
 
         case CPDateFormatterLongStyle:
-            format += @" h:mm:ss a V";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a z";
+            else
+                format += @" H:mm:ss z";
             break;
 
         case CPDateFormatterFullStyle:
-            format += @" h:mm:ss a vvvv";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a zzzz";
+            else
+                format += @" h:mm:ss zzzz";
             break;
 
         default:
@@ -269,7 +301,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     if (_dateFormat)
         return [self _dateFromString:aString format:_dateFormat];
 
-    // TODO Add locale support.
     switch (_dateStyle)
     {
         case CPDateFormatterNoStyle:
@@ -277,19 +308,36 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             break;
 
         case CPDateFormatterShortStyle:
-            format = @"M/d/yy";
+
+            if ([self _isAmericanFormat])
+                format = @"M/d/yy";
+            else
+                format = @"dd/MM/yy";
+
             break;
 
         case CPDateFormatterMediumStyle:
-            format = @"MMM d, Y";
+
+            if ([self _isAmericanFormat])
+                format = @"MMM d, Y";
+            else
+                format = @"d MMM Y";
             break;
 
         case CPDateFormatterLongStyle:
-            format = @"MMMM d, Y";
+
+            if ([self _isAmericanFormat])
+                format = @"MMMM d, Y";
+            else
+                format = @"d MMMM Y";
             break;
 
         case CPDateFormatterFullStyle:
-            format = @"EEEE, MMMM d, Y";
+
+            if ([self _isAmericanFormat])
+                format = @"EEEE, MMMM d, Y";
+            else
+                format = @"EEEE d MMMM Y";
             break;
 
         default:
@@ -303,19 +351,35 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             break;
 
         case CPDateFormatterShortStyle:
-            format += @" h:mm a";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm a";
+            else
+                format += @" H:mm";
             break;
 
         case CPDateFormatterMediumStyle:
-            format += @" h:mm:ss a";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a";
+            else
+                format += @" H:mm:ss"
             break;
 
         case CPDateFormatterLongStyle:
-            format += @" h:mm:ss a V";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a z";
+            else
+                format += @" H:mm:ss z";
             break;
 
         case CPDateFormatterFullStyle:
-            format += @" h:mm:ss a vvvv";
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a zzzz";
+            else
+                format += @" h:mm:ss zzzz";
             break;
 
         default:
@@ -351,7 +415,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 /*! Returns a boolean if the given object has been changed or not depending of the given string (use of ref)
     @param anObject the given object
     @param aString
-    @param anError, if it returns NO the error will be in anError (use of ref)
+    @param anError, if it returns NO the describe error will be in anError (use of ref)
     @return aBoolean for the success or fail of the method
 */
 - (BOOL)getObjectValue:(id)anObject forString:(CPString)aString errorDescription:(CPString)anError
@@ -381,6 +445,20 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 - (CPDate)_dateFromString:(CPString)aString format:(CPString)aFormat
 {
 
+}
+
+/*! Check if we are in the american format or not. Depending on the locale
+*/
+- (BOOL)_isAmericanFormat
+{
+    return ;//[[_locale objectForKey:CPLocaleCountryCode] isEqualToString:@"US"];
+}
+
+/*! Check if we are in the english format or not. Depending on the locale
+*/
+- (BOOL)_isEnglishFormat
+{
+    return ;//[[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
 }
 
 @end
