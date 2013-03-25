@@ -24,7 +24,10 @@
 @import "CPDate.j"
 @import "CPString.j"
 @import "CPFormatter.j"
-//@import "CPLocale.j"
+//c@import "CPLocale.j"
+
+@global CPLocaleLanguageCode
+@global CPLocaleCountryCode
 
 CPDateFormatterNoStyle     = 0;
 CPDateFormatterShortStyle  = 1;
@@ -67,7 +70,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     CPArray                 _quarterSymbols                     @accessors(property=quarterSymbols);
     CPArray                 _shortQuarterSymbols                @accessors(property=shortQuarterSymbols);
     CPArray                 _standaloneQuarterSymbols           @accessors(property=standaloneQuarterSymbols);
-    CPArray                 _shortSandaloneQuarterSymbols       @accessors(property=shortStandaloneQuarterSymbols);
+    CPArray                 _shortStandaloneQuarterSymbols      @accessors(property=shortStandaloneQuarterSymbols);
     CPDate                  _defaultDate                        @accessors(property=defaultDate);
     CPDate                  _twoDigitStartDate                  @accessors(property=twoDigitStartDate);
     CPDateFormatterBehavior _formatterBehavior                  @accessors(property=formatterBehavior);
@@ -132,6 +135,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     {
         _dateStyle = CPDateFormatterShortStyle;
         _timeStyle = CPDateFormatterShortStyle;
+        _formatterBehavior = CPDateFormatterBehavior10_4;
 
         [self _init];
     }
@@ -161,7 +165,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 {
     // TODO :  these datas have to be in CPUserDefault
     _AMSymbol = [CPString stringWithFormat:@"%s", @"AM"];
-    _PMSymbole = [CPString stringWithFormat:@"%s", @"PM"];
+    _PMSymbol = [CPString stringWithFormat:@"%s", @"PM"];
 
     _weekdaySymbols = [CPArray arrayWithObjects:@"Sunday", @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday"];
     _shortWeekdaySymbols = [CPArray arrayWithObjects:@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"];
@@ -451,19 +455,24 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 */
 - (BOOL)_isAmericanFormat
 {
-    return ;//[[_locale objectForKey:CPLocaleCountryCode] isEqualToString:@"US"];
+    return [[_locale objectForKey:CPLocaleCountryCode] isEqualToString:@"US"];
 }
 
 /*! Check if we are in the english format or not. Depending on the locale
 */
 - (BOOL)_isEnglishFormat
 {
-    return ;//[[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
+    return [[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
 }
 
 @end
 
-var CPDateFormatterStyleKey = @"CPDateFormatterStyle",
+var CPDateFormatterDateStyleKey = @"CPDateFormatterDateStyle",
+    CPDateFormatterTimeStyleKey = @"CPDateFormatterTimeStyleKey",
+    CPDateFormatterFormatterBehaviorKey = @"CPDateFormatterFormatterBehaviorKey",
+    CPDateFormatterDoseRelativeDateFormattingKey = @"CPDateFormatterDoseRelativeDateFormattingKey",
+    CPDateFormatterDateFormatKey = @"CPDateFormatterDateFormatKey",
+    CPDateFormatterAllowNaturalLanguageKey = @"CPDateFormatterAllowNaturalLanguageKey",
     CPDateFormatterLocaleKey = @"CPDateFormatterLocaleKey";
 
 @implementation CPDateFormatter (CPCoding)
@@ -474,8 +483,13 @@ var CPDateFormatterStyleKey = @"CPDateFormatterStyle",
 
     if (self)
     {
-        _dateStyle = [aCoder decodeIntForKey:CPDateFormatterStyleKey];
+        _allowNaturalLanguage = [aCoder decodeBoolForKey:CPDateFormatterAllowNaturalLanguageKey];
+        _dateFormat = [aCoder decodeStringForKey:CPDateFormatterDateFormatKey];
+        _dateStyle = [aCoder decodeIntForKey:CPDateFormatterDateStyleKey];
+        _doesRelativeDateFormatting = [aCoder decodeBoolForKey:CPDateFormatterDoseRelativeDateFormattingKey];
+        _formatterBehavior = [aCoder decodeIntForKey:CPDateFormatterFormatterBehaviorKey];
         _locale = [aCoder decodeObjectForKey:CPDateFormatterLocaleKey];
+        _timeStyle = [aCoder decodeIntForKey:CPDateFormatterTimeStyleKey];
     }
 
     return self;
@@ -485,8 +499,13 @@ var CPDateFormatterStyleKey = @"CPDateFormatterStyle",
 {
     [super encodeWithCoder:aCoder];
 
-    [aCoder encodeInt:_dateStyle forKey:CPDateFormatterStyleKey];
+    [aCoder encodeBool:_allowNaturalLanguage forKey:CPDateFormatterAllowNaturalLanguageKey];
+    [aCoder encodeInt:_dateStyle forKey:CPDateFormatterDateStyleKey];
+    [aCoder encodeString:_dateFormat forKey:CPDateFormatterDateFormatKey];
+    [aCoder encodeBool:_doesRelativeDateFormatting forKey:CPDateFormatterDoseRelativeDateFormattingKey];
+    [aCoder encodeInt:_formatterBehavior forKey:CPDateFormatterFormatterBehaviorKey];
     [aCoder encodeInt:_locale forKey:CPDateFormatterLocaleKey];
+    [aCoder encodeInt:_timeStyle forKey:CPDateFormatterTimeStyleKey];
 }
 
 @end
