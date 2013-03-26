@@ -485,6 +485,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
         }
         else
         {
+            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:caractere])
+            {
+                result += [self _stringFromToken:currentToken date:aDate];
+                currentToken = [CPString new];
+            }
+
             currentToken += caractere;
 
             if (i == (length - 1))
