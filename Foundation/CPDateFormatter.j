@@ -62,7 +62,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     CPArray                 _veryShortWeekdaySymbols            @accessors(property=veryShortWeekdaySymbols);
     CPArray                 _standaloneWeekdaySymbols           @accessors(property=standaloneWeekdaySymbols);
     CPArray                 _shortStandaloneWeekdaySymbols      @accessors(property=shortStandaloneWeekdaySymbols);
-    CPArray                 _veryShortStandaloneWeekdaySymbols  @accessors(property=veryShortSandaloneWeekdaySymbols);
+    CPArray                 _veryShortStandaloneWeekdaySymbols  @accessors(property=veryShortStandaloneWeekdaySymbols);
     CPArray                 _monthSymbols                       @accessors(property=monthSymbols);
     CPArray                 _shortMonthSymbols                  @accessors(property=shortMonthSymbols);
     CPArray                 _veryShortMonthSymbols              @accessors(property=veryShortMonthSymbols);
@@ -451,7 +451,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
         if (isTextToken)
         {
-            if ([caractere isEqualToString:@"'"])
+            if ([character isEqualToString:@"'"])
             {
                 isTextToken = NO;
                 result += currentToken;
@@ -459,13 +459,13 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             }
             else
             {
-                currentToken += caractere;
+                currentToken += character;
             }
 
             continue;
         }
 
-        if ([caractere isEqualToString:@"'"])
+        if ([character isEqualToString:@"'"])
         {
             if (!isTextToken)
             {
@@ -521,93 +521,272 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     if ([aToken length])
         return aToken;
 
-    var character = [aToken characterAtIndex:0];
+    var character = [aToken characterAtIndex:0],
+        lenght = [aToken length];
 
     switch (character)
     {
-        case @"y":
+        case @"G":
+            // TODO
             break;
+
+        case @"y":
+            return [self _stringValueForValue:aDate.getFullYear() length:length];
 
         case @"Y":
-            break;
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getFullYear()] length];
+            return [self _stringValueForValue:aDate.getFullYear() length:MAX(currentLength,length)];
 
         case @"u":
-            break;
+            // TODO
+            return [self _stringValueForValue:aDate.getFullYear() length:length];
 
         case @"U":
-            break;
+            // TODO
+            return;
 
         case @"Q":
-            break;
+            var quarter = 1;
+
+            if (aDate.getMonth() < 6 && aDate.getMonth() > 2)
+                quarter = 2;
+
+            if (aDate.getMonth() > 5 && aDate.getMonth() < 9)
+                quarter = 3;
+
+            if (aDate.getMonth() >= 9)
+                quarter = 4;
+
+            if (length <= 2)
+                return [self _stringValueForValue:quarter length:MIN(2,length)];
+
+            if (length == 3)
+                return [[self shortQuarterSymbols] objectAtIndex:(quarter - 1)];
+
+            if (length >= 4)
+                return [[self quarterSymbols] objectAtIndex:(quarter - 1)];
 
         case @"q":
-            break;
+            var quarter = 1;
+
+            if (aDate.getMonth() < 6 && aDate.getMonth() > 2)
+                quarter = 2;
+
+            if (aDate.getMonth() > 5 && aDate.getMonth() < 9)
+                quarter = 3;
+
+            if (aDate.getMonth() >= 9)
+                quarter = 4;
+
+            if (length <= 2)
+                return [self _stringValueForValue:quarter length:MIN(2,length)];
+
+            if (length == 3)
+                return [[self shortStandaloneQuarterSymbols] objectAtIndex:(quarter - 1)];
+
+            if (length >= 4)
+                return [[self standaloneQuarterSymbols] objectAtIndex:(quarter - 1)];
 
         case @"M":
-            break;
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMonth() + 1] length];
+
+            if (length <= 2)
+                return [self _stringValueForValue:(aDate.getMonth() + 1) length:MAX(currentLength,length)];
+
+            if (length == 3)
+                return [[self shortMonthSymbols] objectAtIndex:aDate.getMonth()];
+
+            if (length == 4)
+                return [[self monthSymbols] objectAtIndex:aDate.getMonth()];
+
+            if (length >= 5)
+                return [[self veryShortMonthSymbols] objectAtIndex:aDate.getMonth()];
 
         case @"L":
-            break;
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMonth() + 1] length];
+
+            if (length <= 2)
+                return [self _stringValueForValue:(aDate.getMonth() + 1) length:MAX(currentLength,length)];
+
+            if (length == 3)
+                return [[self shortStandaloneMonthSymbols] objectAtIndex:aDate.getMonth()];
+
+            if (length == 4)
+                return [[self standaloneMonthSymbols] objectAtIndex:aDate.getMonth()];
+
+            if (length >= 5)
+                return [[self veryShortSandaloneMonthSymbols] objectAtIndex:aDate.getMonth()];
 
         case @"I":
+            // Deprecated
             break;
 
         case @"w":
-            break;
+
+            var d = new Date(aDate);
+            d.setHours(0,0,0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+
+            var yearStart = new Date(d.getFullYear(), 0, 1),
+                weekOfYear = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+
+            return [self _stringValueForValue:weekOfYear length:MIN(2, length)];
 
         case @"W":
-            break;
+
+            var firstDay = new Date(aDate.getFullYear(), aDate.getMonth(), 1).getDay(),
+                weekOfMonth =  Math.ceil((aDate.getDate() + firstDay) / 7);
+
+            return [self _stringValueForValue:weekOfYear length:1];
 
         case @"d":
-            break;
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getDate()] length];
+
+            return [self _stringValueForValue:aDate.getDate() length:MIN(currentLength, MIN(2, length))];
 
         case @"D":
-            break;
+
+            var oneJan = new Date(aDate.getFullYear(),0,1),
+                dayOfYear = Math.ceil((aDate - oneJan) / 86400000),
+                currentLength = [[CPString stringWithFormat:@"%i", dayOfYear] length];
+
+            return [self _stringValueForValue:dayOfYear length:MAX(currentLength, MIN(3, length))];
 
         case @"F":
-            break;
+            var dayOfWeek = 1,
+                day = aDate.getDate();
+
+            if (day > 7 && day < 15)
+                dayOfWeek = 2;
+
+            if (day > 14 && day < 22)
+                dayOfWeek = 3;
+
+            if (day > 21 && day < 29)
+                dayOfWeek = 4;
+
+            if (day > 28)
+                dayOfWeek = 5;
+
+            return [self _stringValueForValue:dayOfWeek length:1];
 
         case @"g":
             break;
 
         case @"E":
-            break;
+            var day = aDate.getDay();
+
+            if (length <= 3)
+                return [[self shortWeekdaySymbols] objectAtIndex:day];
+
+            if (length == 4)
+                return [[self weekdaySymbols] objectAtIndex:day];
+
+            if (length >= 5)
+                return [[self veryShortWeekdaySymbols] objectAtIndex:day];
 
         case @"e":
-            break;
+
+            var day = aDate.getDay();
+
+            if (length <= 2)
+                [self _stringValueForValue:(day + 1) length:MIN(2, length)];
+
+            if (length == 3)
+                return [[self shortWeekdaySymbols] objectAtIndex:day];
+
+            if (length == 4)
+                return [[self weekdaySymbols] objectAtIndex:day];
+
+            if (length >= 5)
+                return [[self veryShortWeekdaySymbols] objectAtIndex:day];
 
         case @"c":
-            break;
+
+            var day = aDate.getDay();
+
+            if (length <= 2)
+                [self _stringValueForValue:(day + 1) length:MIN(2, length)];
+
+            if (length == 3)
+                return [[self shortStandaloneWeekdaySymbols] objectAtIndex:day];
+
+            if (length == 4)
+                return [[self standaloneWeekdaySymbols] objectAtIndex:day];
+
+            if (length >= 5)
+                return [[self veryShortStandaloneWeekdaySymbols] objectAtIndex:day];
 
         case @"a":
-            break;
+
+            if (aDate.getHours() > 11)
+                return [self PMSymbol];
+            else
+                return [self AMSymbol];
 
         case @"h":
-            break;
+
+            var hours = aDate.getHours();
+
+            if (hours == 0)
+                hours = 12;
+            else if (hours > 12)
+                hours -= 12;
+
+            var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
+
+            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength, MIN(2, length))];
 
         case @"H":
-            break;
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getHours()] length];
+
+            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength,MIN(2, length))];
 
         case @"K":
-            break;
+
+            var hours = aDate.getHours();
+
+            if (hours > 12)
+                hours -= 12;
+
+            var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
+
+            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength,MIN(2, length))];
 
         case @"k":
-            break;
+
+            var hours = aDate.getHours();
+            hours += 1;
+
+            var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
+
+            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength,MIN(2, length))];
 
         case @"j":
             break;
 
         case @"m":
-            break;
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMinutes()] length];
+
+            return [self _stringValueForValue:aDate.getMinutes() length:MAX(currentLength,MIN(2, length))];
 
         case @"s":
-            break;
+
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMinutes()] length];
+
+            return [self _stringValueForValue:aDate.getSeconds() length:MAX(currentLength,MIN(2, length))];
 
         case @"S":
-            break;
+            return [self _stringValueForValue:aDate.getMilliseconds() length:length];
 
         case @"A":
-            break;
+            var date = [aDate copy];
+            date.setHours(0);
+            date.setMinutes(0);
+            date.setSeconds(0);
+            date.setMilliseconds(0);
+
+            return [self _stringValueForValue:[aDate timeIntervalSinceDate:date] length:length];
 
         case @"z":
             break;
@@ -624,6 +803,22 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
         default:
             return ;
     }
+}
+
+- (CPString)_stringValueForValue:(id)aValue length:(int)length
+{
+    var string = [CPString stringWithFormat:@"%i", aValue];
+
+    if ([string length] == length)
+        return string;
+
+    if ([string length] > length)
+        return [string substringFromIndex:([string length] - length)];
+
+    while ([string length] < length)
+        string = [CPString stringWithFormat:@"0%s", string];
+
+    return string;
 }
 
 /*! Check if we are in the american format or not. Depending on the locale
