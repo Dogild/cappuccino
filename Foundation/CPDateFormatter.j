@@ -447,7 +447,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
     for (var i = 0; i < length; i++)
     {
-        var caractere = [aFormat characterAtIndex:i];
+        var character = [aFormat characterAtIndex:i];
 
         if (isTextToken)
         {
@@ -477,21 +477,21 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             continue;
         }
 
-        if ([caractere isEqualToString:@","] || [caractere isEqualToString:@":"] || [caractere isEqualToString:@"/"] || [caractere isEqualToString:@"-"] || [caractere isEqualToString:@" "])
+        if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
         {
             result += [self _stringFromToken:currentToken date:aDate];
-            result += caractere;
+            result += character;
             currentToken = [CPString new];
         }
         else
         {
-            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:caractere])
+            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:character])
             {
                 result += [self _stringFromToken:currentToken date:aDate];
                 currentToken = [CPString new];
             }
 
-            currentToken += caractere;
+            currentToken += character;
 
             if (i == (length - 1))
                 result += [self _stringFromToken:currentToken date:aDate];
@@ -518,7 +518,112 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 */
 - (CPString)_stringFromToken:(CPString)aToken date:(CPDate)aDate
 {
-    console.log(aToken);
+    if ([aToken length])
+        return aToken;
+
+    var character = [aToken characterAtIndex:0];
+
+    switch (character)
+    {
+        case @"y":
+            break;
+
+        case @"Y":
+            break;
+
+        case @"u":
+            break;
+
+        case @"U":
+            break;
+
+        case @"Q":
+            break;
+
+        case @"q":
+            break;
+
+        case @"M":
+            break;
+
+        case @"L":
+            break;
+
+        case @"I":
+            break;
+
+        case @"w":
+            break;
+
+        case @"W":
+            break;
+
+        case @"d":
+            break;
+
+        case @"D":
+            break;
+
+        case @"F":
+            break;
+
+        case @"g":
+            break;
+
+        case @"E":
+            break;
+
+        case @"e":
+            break;
+
+        case @"c":
+            break;
+
+        case @"a":
+            break;
+
+        case @"h":
+            break;
+
+        case @"H":
+            break;
+
+        case @"K":
+            break;
+
+        case @"k":
+            break;
+
+        case @"j":
+            break;
+
+        case @"m":
+            break;
+
+        case @"s":
+            break;
+
+        case @"S":
+            break;
+
+        case @"A":
+            break;
+
+        case @"z":
+            break;
+
+        case @"Z":
+            break;
+
+        case @"v":
+            break;
+
+        case @"V":
+            break;
+
+        default:
+            return ;
+    }
 }
 
 /*! Check if we are in the american format or not. Depending on the locale
