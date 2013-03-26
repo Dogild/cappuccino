@@ -31,7 +31,7 @@
 @global CPDateFormatterLongStyle
 @global CPDateFormatterFullStyle
 
-@implementation CPDateFormatter : OJTestCase
+@implementation CPDateFormatterTest : OJTestCase
 {
     CPDate _date;
     CPDateFormatter _dateFormatter;
