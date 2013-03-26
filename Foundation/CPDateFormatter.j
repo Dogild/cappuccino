@@ -26,6 +26,8 @@
 @import "CPFormatter.j"
 //c@import "CPLocale.j"
 
+@class CPNull
+
 @global CPLocaleLanguageCode
 @global CPLocaleCountryCode
 
@@ -438,7 +440,59 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 */
 - (CPString)_stringFromDate:(CPDate)aDate format:(CPString)aFormat
 {
+    var length = [aFormat length],
+        currentToken = [CPString new],
+        isTextToken = NO,
+        result = [CPString new];
 
+    for (var i = 0; i < length; i++)
+    {
+        var caractere = [aFormat characterAtIndex:i];
+
+        if (isTextToken)
+        {
+            if ([caractere isEqualToString:@"'"])
+            {
+                isTextToken = NO;
+                result += currentToken;
+                currentToken = [CPString new];
+            }
+            else
+            {
+                currentToken += caractere;
+            }
+
+            continue;
+        }
+
+        if ([caractere isEqualToString:@"'"])
+        {
+            if (!isTextToken)
+            {
+                isTextToken = YES;
+                result += currentToken;
+                currentToken = [CPString new];
+            }
+
+            continue;
+        }
+
+        if ([caractere isEqualToString:@","] || [caractere isEqualToString:@":"] || [caractere isEqualToString:@"/"] || [caractere isEqualToString:@"-"] || [caractere isEqualToString:@" "])
+        {
+            result += [self _stringFromToken:currentToken date:aDate];
+            result += caractere;
+            currentToken = [CPString new];
+        }
+        else
+        {
+            currentToken += caractere;
+
+            if (i == (length - 1))
+                result += [self _stringFromToken:currentToken date:aDate];
+        }
+    }
+
+    return result;
 }
 
 /*! Return a date representation of the given string and format
@@ -451,18 +505,28 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
 }
 
+/*! Return a string representation of the given token and date
+    @param aToken
+    @param aDate
+    @return a string
+*/
+- (CPString)_stringFromToken:(CPString)aToken date:(CPDate)aDate
+{
+    console.log(aToken);
+}
+
 /*! Check if we are in the american format or not. Depending on the locale
 */
 - (BOOL)_isAmericanFormat
 {
-    return [[_locale objectForKey:CPLocaleCountryCode] isEqualToString:@"US"];
+    return YES; //[[_locale objectForKey:CPLocaleCountryCode] isEqualToString:@"US"];
 }
 
 /*! Check if we are in the english format or not. Depending on the locale
 */
 - (BOOL)_isEnglishFormat
 {
-    return [[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
+    return YES; //[[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
 }
 
 @end
