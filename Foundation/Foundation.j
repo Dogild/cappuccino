@@ -68,6 +68,7 @@
 @import "CPSortDescriptor.j"
 @import "CPString.j"
 @import "CPTimer.j"
+@import "CPTimeZone.j"
 @import "CPUndoManager.j"
 @import "CPURL.j"
 @import "CPURLConnection.j"
