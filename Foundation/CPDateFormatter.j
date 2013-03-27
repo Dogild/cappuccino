@@ -518,17 +518,18 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 */
 - (CPString)_stringFromToken:(CPString)aToken date:(CPDate)aDate
 {
-    if ([aToken length])
+    if (![aToken length])
         return aToken;
 
     var character = [aToken characterAtIndex:0],
-        lenght = [aToken length];
+        length = [aToken length];
 
     switch (character)
     {
         case @"G":
             // TODO
-            break;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"y":
             return [self _stringValueForValue:aDate.getFullYear() length:length];
@@ -543,7 +544,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
         case @"U":
             // TODO
-            return;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"Q":
             var quarter = 1;
@@ -619,7 +621,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
         case @"I":
             // Deprecated
-            break;
+            CPLog.warn(@"Depreacted - Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"w":
 
@@ -637,7 +640,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             var firstDay = new Date(aDate.getFullYear(), aDate.getMonth(), 1).getDay(),
                 weekOfMonth =  Math.ceil((aDate.getDate() + firstDay) / 7);
 
-            return [self _stringValueForValue:weekOfYear length:1];
+            return [self _stringValueForValue:weekOfMonth length:1];
 
         case @"d":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getDate()] length];
@@ -671,7 +674,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             return [self _stringValueForValue:dayOfWeek length:1];
 
         case @"g":
-            break;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"E":
             var day = aDate.getDay();
@@ -763,7 +767,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength,MIN(2, length))];
 
         case @"j":
-            break;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"m":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMinutes()] length];
@@ -789,20 +794,28 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             return [self _stringValueForValue:[aDate timeIntervalSinceDate:date] length:length];
 
         case @"z":
-            break;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"Z":
-            break;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"v":
-            break;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"V":
-            break;
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         default:
-            return ;
+            CPLog.warn(@"Token not pattern found for " + aToken);
+            return aToken;
     }
+
+    return [CPString new];
+
 }
 
 - (CPString)_stringValueForValue:(id)aValue length:(int)length
