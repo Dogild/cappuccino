@@ -540,7 +540,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
         case @"u":
             // TODO
-            return [self _stringValueForValue:aDate.getFullYear() length:length];
+            CPLog.warn(@"Token not yet implemented " + aToken);
+            return [CPString new];
 
         case @"U":
             // TODO
