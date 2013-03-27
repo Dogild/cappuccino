@@ -34,7 +34,7 @@ CPTimeZoneNameStyleShortGeneric = 5;
 CPSystemTimeZoneDidChangeNotification = @"CPSystemTimeZoneDidChangeNotification";
 
 var abbreviationDictionary,
-    knowTimeZoneNames,
+    knownTimeZoneNames,
     defaultTimeZone,
     localTimeZone,
     systemTimeZone,
@@ -50,7 +50,7 @@ var abbreviationDictionary,
 
 + (void)initialize
 {
-    knowTimeZoneNames = [
+    knownTimeZoneNames = [
         @"Africa/Abidjan",
         @"Africa/Accra",
         @"Africa/Addis_Ababa",
@@ -526,17 +526,20 @@ var abbreviationDictionary,
 
 + (id)timeZoneWithAbbreviation:(CPString)abbreviation
 {
+    if (![abbreviationDictionary containsKey:abbreviation])
+        return nil;
 
+    return [[CPTimeZone alloc] initWithName:[abbreviationDictionary valueForKey:abbreviation]];
 }
 
 + (id)timeZoneWithName:(CPString)tzName
 {
-
+    return [[CPTimeZone alloc] initWithName:tzName];
 }
 
 + (id)timeZoneWithName:(CPString)tzName date:(CPData)data
 {
-
+    return [[CPTimeZone alloc] initWithName:tzName data:data];
 }
 
 + (id)timeZoneForSecondsFromGMT:(CPInteger)seconds
@@ -589,14 +592,44 @@ var abbreviationDictionary,
     return knownTimeZoneNames;
 }
 
-- (id)initWithName:(CPString)name
+- (id)initWithName:(CPString)tzName
 {
+    if (!tzName)
+        [CPException raise:CPInvalidArgumentException reason:"Invalid value provided for tzName"];
 
+    if (![knownTimeZoneNames containsObject:tzName])
+        return nil;
+
+    if (self = [super init])
+    {
+        _name = tzName;
+
+        var keys = [abbreviationDictionary keyEnumerator],
+            key;
+
+        while (key = [keys nextEnumerator])
+        {
+            var value = [abbreviationDictionary valueForKey:key];
+
+            if ([value isEqualToString:_name])
+            {
+                _abbreviation = value;
+                break;
+            }
+        }
+    }
+
+    return self;
 }
 
-- (id)initWithName:(CPString)name date:(CPData)data
+- (id)initWithName:(CPString)tzName date:(CPData)data
 {
+    if (self = [super initWithName:tzName])
+    {
+        _data = data;
+    }
 
+    return self;
 }
 
 - (CPString)abbreviationForDate:(CPDate)date
