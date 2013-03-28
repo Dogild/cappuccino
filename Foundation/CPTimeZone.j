@@ -39,7 +39,8 @@ var abbreviationDictionary,
     defaultTimeZone,
     localTimeZone,
     systemTimeZone,
-    timeZoneDataVersion;
+    timeZoneDataVersion,
+    localizedName;
 
 @implementation CPTimeZone : CPObject
 {
@@ -207,6 +208,57 @@ var abbreviationDictionary,
         @"WIT" :    540
     };
 
+    localizedName = @{
+        @"EDT" : [@"Eastern Standard Time", @"EST", @"Eastern Daylight Time", @"EDT", @"Eastern Time", @"ET"],
+        @"GMT" : [@"GMT", @"GMT", @"GMT", @"GMT", @"GMT", @"GMT"],
+        @"AST" : [@"Atlantic Standard Time", @"AST", @"Atlantic Daylight Time", @"ADT", @"Atlantic Time", @"AT"],
+        @"IRST" : [@"Iran Standard Time", @"GMT+03:30", @"Iran Daylight Time", @"GMT+03:30", @"Iran Time", @"Iran Time"],
+        @"ICT" : [@"Indochina Time", @"GMT+07:00", @"GMT+07:00", @"GMT+07:00", @"Indochina Time", @"Thailand Time"],
+        @"PET" : [@"Peru Standard Time", @"GMT-05:00", @"Peru Summer Time", @"GMT-05:00", @"Peru Standard Time", @"Peru Time"],
+        @"KST" : [@"Korean Standard Time", @"GMT+09:00", @"Korean Daylight Time", @"GMT+09:00", @"Korean Standard Time", @"South Korea Time"],
+        @"PST" : [@"Pacific Standard Time", @"PST", @"Pacific Daylight Time", @"PDT", @"Pacific Time", @"PT"],
+        @"CDT" : [@"Central Standard Time", @"CST", @"Central Daylight Time", @"CDT", @"Central Time", @"CT"],
+        @"EEST" : [@"Eastern European Standard Time", @"GMT+02:00", @"Eastern European Summer Time", @"GMT+03:00", @"Eastern European Time", @"Turkey Time"],
+        @"NZDT" : [@"New Zealand Standard Time", @"GMT+12:00", @"New Zealand Daylight Time", @"GMT+13:00", @"New Zealand Time", @"New Zealand Time (Auckland)"],
+        @"WEST" : [@"Western European Standard Time", @"GMT", @"Western European Summer Time", @"GMT+01:00", @"Western European Time", @"Portugal Time (Lisbon)"],
+        @"EAT" : [@"East Africa Time", @"GMT+03:00", @"GMT+03:00", @"GMT+03:00", @"East Africa Time", @"Ethiopia Time"],
+        @"HKT" : [@"Hong Kong Standard Time", @"GMT+08:00", @"Hong Kong Summer Time", @"GMT+08:00", @"Hong Kong Standard Time", @"Hong Kong SAR China Time"],
+        @"IST" : [@"India Standard Time", @"GMT+05:30", @"GMT+05:30", @"GMT+05:30", @"India Standard Time", @"India Time"],
+        @"MDT" : [@"Mountain Standard Time", @"MST", @"Mountain Daylight Time", @"MDT", @"Mountain Time", @"MT"],
+        @"NZST" : [@"New Zealand Standard Time", @"GMT+12:00", @"New Zealand Daylight Time", @"GMT+13:00", @"New Zealand Time", @"New Zealand Time (Auckland)"],
+        @"WIT" : [@"Western Indonesia Time", @"GMT+07:00", @"GMT+07:00", @"GMT+07:00", @"Western Indonesia Time", @"Indonesia Time (Jakarta)"],
+        @"ADT" : [@"Atlantic Standard Time", @"AST", @"Atlantic Daylight Time", @"ADT", @"Atlantic Time", @"AT"],
+        @"BST" : [@"Greenwich Mean Time", @"GMT", @"British Summer Time", @"GMT+01:00", @"United Kingdom Time", @"United Kingdom Time"],
+        @"ART" : [@"Argentina Standard Time", @"GMT-03:00", @"Argentina Summer Time", @"GMT-03:00", @"Argentina Standard Time", @"Argentina Time (Buenos Aires)"],
+        @"CAT" : [@"Central Africa Time", @"GMT+02:00", @"GMT+02:00", @"GMT+02:00", @"Central Africa Time", @"Zimbabwe Time"],
+        @"GST" : [@"Gulf Standard Time", @"GMT+04:00", @"GMT+04:00", @"GMT+04:00", @"Gulf Standard Time", @"United Arab Emirates Time"],
+        @"PDT" : [@"Pacific Standard Time", @"PST", @"Pacific Daylight Time", @"PDT", @"Pacific Time", @"PT"],
+        @"SGT" : [@"Singapore Standard Time", @"GMT+08:00", @"GMT+08:00", @"GMT+08:00", @"Singapore Standard Time", @"Singapore Time"],
+        @"COT" : [@"Colombia Standard Time", @"GMT-05:00", @"Colombia Summer Time", @"GMT-05:00", @"Colombia Standard Time", @"Colombia Time"],
+        @"PKT" : [@"Pakistan Standard Time", @"GMT+05:00", @"Pakistan Summer Time", @"GMT+05:00", @"Pakistan Standard Time", @"Pakistan Time"],
+        @"EET" : [@"Eastern European Standard Time", @"GMT+02:00", @"Eastern European Summer Time", @"GMT+03:00", @"Eastern European Time", @"Turkey Time"],
+        @"UTC" : [@"GMT", @"GMT", @"GMT", @"GMT", @"GMT", @"GMT"],
+        @"WAT" : [@"West Africa Standard Time", @"GMT+01:00", @"West Africa Summer Time", @"GMT+01:00", @"West Africa Standard Time", @"Nigeria Time"],
+        @"EST" : [@"Eastern Standard Time", @"EST", @"Eastern Daylight Time", @"EDT", @"Eastern Time", @"ET"],
+        @"JST" : [@"Japan Standard Time", @"GMT+09:00", @"Japan Daylight Time", @"GMT+09:00", @"Japan Standard Time", @"Japan Time"],
+        @"CLST" : [@"Chile Standard Time", @"GMT-04:00", @"Chile Summer Time", @"GMT-04:00", @"Chile Time", @"Chile Time (Santiago)"],
+        @"CET" : [@"Central European Standard Time", @"GMT+01:00", @"Central European Summer Time", @"GMT+02:00", @"Central European Time", @"France Time"],
+        @"BDT" : [@"Bangladesh Standard Time", @"GMT+06:00", @"Bangladesh Summer Time", @"GMT+06:00", @"Bangladesh Standard Time", @"Bangladesh Time"],
+        @"MSK" : [@"Moscow Standard Time", @"GMT+04:00", @"Moscow Summer Time", @"GMT+04:00", @"Moscow Standard Time", @"Russia Time (Moscow)"],
+        @"AKDT" : [@"Alaska Standard Time", @"AKST", @"Alaska Daylight Time", @"AKDT", @"Alaska Time", @"AKT"],
+        @"CLT" : [@"Chile Standard Time", @"GMT-04:00", @"Chile Summer Time", @"GMT-04:00", @"Chile Time", @"Chile Time (Santiago)"],
+        @"AKST" : [@"Alaska Standard Time", @"AKST", @"Alaska Daylight Time", @"AKDT", @"Alaska Time", @"AKT"],
+        @"BRST" : [@"Brasilia Standard Time", @"GMT-03:00", @"Brasilia Summer Time", @"GMT-03:00", @"Brasilia Time", @"Brazil Time (Sao Paulo)"],
+        @"BRT" : [@"Brasilia Standard Time", @"GMT-03:00", @"Brasilia Summer Time", @"GMT-03:00", @"Brasilia Time", @"Brazil Time (Sao Paulo)"],
+        @"CEST" : [@"Central European Standard Time", @"GMT+01:00", @"Central European Summer Time", @"GMT+02:00", @"Central European Time", @"France Time"],
+        @"CST" : [@"Central Standard Time", @"CST", @"Central Daylight Time", @"CDT", @"Central Time", @"CT"],
+        @"HST" : [@"Hawaii-Aleutian Standard Time", @"HST", @"Hawaii-Aleutian Daylight Time", @"HDT", @"Hawaii-Aleutian Standard Time", @"HST"],
+        @"MSD" : [@"Moscow Standard Time", @"GMT+04:00", @"Moscow Summer Time", @"GMT+04:00", @"Moscow Standard Time", @"Russia Time (Moscow)"],
+        @"MST" : [@"Mountain Standard Time", @"MST", @"Mountain Daylight Time", @"MDT", @"Mountain Time", @"MT"],
+        @"PHT" : [@"Philippine Standard Time", @"GMT+08:00", @"Philippine Summer Time", @"GMT+08:00", @"Philippine Standard Time", @"Philippines Time"],
+        @"WET" : [@"Western European Standard Time", @"GMT", @"Western European Summer Time", @"GMT+01:00", @"Western European Time", @"Portugal Time (Lisbon)"]
+    };
+
     var date = [CPDate date],
         abbreviation = String(String(date).split("(")[1]).split(")")[0];
 
@@ -286,6 +338,8 @@ var abbreviationDictionary,
         abbreviation = String(String(date).split("(")[1]).split(")")[0];
 
     systemTimeZone = [self timeZoneWithAbbreviation:abbreviation];
+
+    [[CPNotification defaultCenter] postNotificationName:CPSystemTimeZoneDidChangeNotification object:systemTimeZone];
 }
 
 + (CPTimeZone)systemTimeZone
@@ -367,17 +421,25 @@ var abbreviationDictionary,
 
 - (CPString)abbreviationForDate:(CPDate)date
 {
+    if (!date)
+        return nil;
 
+    return String(String(date).split("(")[1]).split(")")[0];
 }
 
 - (CPInteger)secondsFromGMTForDate:(CPDate)date
 {
+    if (!date)
+        return nil;
 
+    var abbreviation = String(String(date).split("(")[1]).split(")")[0];
+
+    return [timeDifferenceFromUTC valueForKey:abbreviation] * 60;
 }
 
 - (BOOL)isEqualToTimeZone:(CPTimeZone)aTimeZone
 {
-
+    return [[aTimeZone name] isEqualToString:_name] && [aTimeZone data] == _data
 }
 
 - (CPString)description
@@ -387,7 +449,10 @@ var abbreviationDictionary,
 
 - (CPString)localizedName:(NSTimeZoneNameStyle)style locale:(CPLocale)locale
 {
+    if (style > 5)
+        return nil;
 
+    return [[localizedName valueForKey:_abbreviation] objectAtIndex:style];
 }
 
 @end
