@@ -51,6 +51,9 @@ var abbreviationDictionary,
 
 + (void)initialize
 {
+    if (self !== [CPTimeZone class])
+        return;
+
     knownTimeZoneNames = [
         @"America/Halifax",
         @"America/Juneau",
@@ -203,6 +206,13 @@ var abbreviationDictionary,
         @"WET" :    0,
         @"WIT" :    540
     };
+
+    var date = [CPDate date],
+        abbreviation = String(String(date).split("(")[1]).split(")")[0];
+
+    localTimeZone = [self timeZoneWithAbbreviation:abbreviation];
+    systemTimeZone = [self timeZoneWithAbbreviation:abbreviation];
+    defaultTimeZone = [self timeZoneWithAbbreviation:abbreviation];
 }
 
 + (id)timeZoneWithAbbreviation:(CPString)abbreviation
@@ -247,7 +257,7 @@ var abbreviationDictionary,
     if (!abbreviation)
         return nil;
 
-    return [[self class] timeZoneWithAbbreviation:abbreviation];
+    return [self timeZoneWithAbbreviation:abbreviation];
 }
 
 + (CPString)timeZoneDataVersion
@@ -272,7 +282,10 @@ var abbreviationDictionary,
 
 + (void)resetSystemTimeZone
 {
+    var date = [CPDate date],
+        abbreviation = String(String(date).split("(")[1]).split(")")[0];
 
+    systemTimeZone = [self timeZoneWithAbbreviation:abbreviation];
 }
 
 + (CPTimeZone)systemTimeZone
