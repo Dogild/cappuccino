@@ -369,7 +369,7 @@ var abbreviationDictionary,
 
 - (CPString)description
 {
-
+    return [CPString stringWithFormat:@"%s (%s) offset %i", _name, _abbreviation, [timeDifferenceFromUTC valueForKey:_abbreviation]];
 }
 
 - (CPString)localizedName:(NSTimeZoneNameStyle)style locale:(CPLocale)locale
