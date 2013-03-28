@@ -197,7 +197,7 @@ var abbreviationDictionary,
         @"PKT" :    300,
         @"PST" :    -480,
         @"SGT" :    480,
-        @"UTC" :    0
+        @"UTC" :    0,
         @"WAT" :    -540,
         @"WEST" :   60,
         @"WET" :    0,
@@ -210,7 +210,7 @@ var abbreviationDictionary,
     if (![abbreviationDictionary containsKey:abbreviation])
         return nil;
 
-    return [[CPTimeZone alloc] initWithName:[abbreviationDictionary valueForKey:abbreviation]];
+    return [[CPTimeZone alloc] _initWithName:[abbreviationDictionary valueForKey:abbreviation] abbreviation:abbreviation];
 }
 
 + (id)timeZoneWithName:(CPString)tzName
@@ -225,7 +225,29 @@ var abbreviationDictionary,
 
 + (id)timeZoneForSecondsFromGMT:(CPInteger)seconds
 {
+    if (seconds % 3600)
+        return nil;
 
+    var minutes = seconds / 60,
+        keys = [timeDifferenceFromUTC keyEnumerator],
+        key,
+        abbreviation = nil;
+
+    while (key = [keys nextObject])
+    {
+        var value = [timeDifferenceFromUTC valueForKey:key];
+
+        if (value == minutes)
+        {
+            abbreviation = key;
+            break;
+        }
+    }
+
+    if (!abbreviation)
+        return nil;
+
+    return [[self class] timeZoneWithAbbreviation:abbreviation];
 }
 
 + (CPString)timeZoneDataVersion
@@ -273,6 +295,23 @@ var abbreviationDictionary,
     return knownTimeZoneNames;
 }
 
+- (id)_initWithName:(CPString)tzName abbreviation:(CPString)abbreviation
+{
+    if (!tzName)
+        [CPException raise:CPInvalidArgumentException reason:"Invalid value provided for tzName"];
+
+    if (![knownTimeZoneNames containsObject:tzName])
+        return nil;
+
+    if (self = [super init])
+    {
+        _name = tzName;
+        _abbreviation = abbreviation;
+    }
+
+    return self;
+}
+
 - (id)initWithName:(CPString)tzName
 {
     if (!tzName)
@@ -288,13 +327,13 @@ var abbreviationDictionary,
         var keys = [abbreviationDictionary keyEnumerator],
             key;
 
-        while (key = [keys nextEnumerator])
+        while (key = [keys nextObject])
         {
             var value = [abbreviationDictionary valueForKey:key];
 
             if ([value isEqualToString:_name])
             {
-                _abbreviation = value;
+                _abbreviation = key;
                 break;
             }
         }
