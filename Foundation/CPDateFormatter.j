@@ -83,6 +83,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     CPString                _AMSymbol                           @accessors(property=AMSymbol);
     CPString                _dateFormat                         @accessors(property=dateFormat);
     CPString                _PMSymbol                           @accessors(property=PMSymbol);
+    CPTimeZone              _timeZone                           @accessors(property=timeZone);
 }
 
 /*! Return a string representation of the given date, dateStyle and timeStyle
@@ -188,6 +189,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     _shortQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
     _standaloneQuarterSymbols = [CPArray arrayWithObjects:@"1st quarter", @"2nd quarter", @"3rd quarter", @"4th quarter"];
     _shortStandaloneQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
+
+    _timeZone = [CPTimeZone systemTimeZone];
 }
 
 /*! Return a string representation of a given date.
