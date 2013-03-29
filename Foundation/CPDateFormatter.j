@@ -203,6 +203,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     if (!aDate)
         return;
 
+    [aDate _dateWithTimeZone:_timeZone];
+
     var format;
 
     if (_dateFormat)

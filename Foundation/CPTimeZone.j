@@ -50,7 +50,7 @@ var abbreviationDictionary,
 @implementation CPTimeZone : CPObject
 {
     CPData      _data           @accessors(property=data, readonly);
-    CPInteger   _secondsFromGMT @accessors(property=secondFromGMT);
+    CPInteger   _secondsFromGMT @accessors(property=secondFromGMT, readonly);
     CPString    _abbreviation   @accessors(property=abbreviation, readonly);
     CPString    _name           @accessors(property=name, readonly);
 }
@@ -518,7 +518,7 @@ var abbreviationDictionary,
     return String(String(date).split("(")[1]).split(")")[0];
 }
 
-/*! Returns the number of seconds from FMT for the given date
+/*! Returns the number of seconds from GMT for the given date
     Returns nil if the date is nil
     @param date
     @return the number of seconds
@@ -531,6 +531,14 @@ var abbreviationDictionary,
     var abbreviation = String(String(date).split("(")[1]).split(")")[0];
 
     return [timeDifferenceFromUTC valueForKey:abbreviation] * 60;
+}
+
+/*! Returns the number of seconds from GMT
+    @return the number of seconds
+*/
+- (CPInteger)secondsFromGMT
+{
+    return [timeDifferenceFromUTC valueForKey:_abbreviation] * 60;
 }
 
 
@@ -574,6 +582,21 @@ var abbreviationDictionary,
         return nil;
 
     return [[localizedName valueForKey:_abbreviation] objectAtIndex:style];
+}
+
+@end
+
+@implementation CPDate (CPTimeZone)
+
+/*! Convert a date from a timeZone
+*/
+- (void)_dateWithTimeZone:(CPTimeZone)aTimeZone
+{
+    var minutesDate = [aTimeZone secondsFromGMTForDate:self] / 60,
+        minutesTimeZone = [aTimeZone secondsFromGMT] / 60;
+
+    self.setMinutes(self.getMinutes() - minutesDate);
+    self.setMinutes(self.getMinutes() + minutesTimeZone);
 }
 
 @end
