@@ -24,6 +24,7 @@
 @import "CPDate.j"
 @import "CPString.j"
 @import "CPFormatter.j"
+@import "CPTimeZone.j"
 //c@import "CPLocale.j"
 
 @class CPNull
@@ -78,7 +79,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     CPDateFormatterBehavior _formatterBehavior                  @accessors(property=formatterBehavior);
     CPDateFormatterStyle    _dateStyle                          @accessors(property=dateStyle);
     CPDateFormatterStyle    _timeStyle                          @accessors(property=timeStyle);
-    //CPLocale                _locale                             @accessors(property=locale);
+    CPLocale                _locale                             @accessors(property=locale);
     CPString                _AMSymbol                           @accessors(property=AMSymbol);
     CPString                _dateFormat                         @accessors(property=dateFormat);
     CPString                _PMSymbol                           @accessors(property=PMSymbol);
@@ -522,7 +523,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
         return aToken;
 
     var character = [aToken characterAtIndex:0],
-        length = [aToken length];
+        length = [aToken length],
+        abbreviation = [[CPTimeZone new] abbreviationForDate:aDate],
+        timeZone = [CPTimeZone timeZoneWithAbbreviation:abbreviation];
 
     switch (character)
     {
@@ -795,23 +798,94 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
             return [self _stringValueForValue:[aDate timeIntervalSinceDate:date] length:length];
 
         case @"z":
-            CPLog.warn(@"Token not yet implemented " + aToken);
-            return [CPString new];
+
+            if (length <= 3)
+                return [timeZone localizedName:CPTimeZoneNameStyleShortDaylightSaving locale:_locale];
+            else
+                return [timeZone localizedName:CPTimeZoneNameStyleDaylightSaving locale:_locale];
 
         case @"Z":
-            CPLog.warn(@"Token not yet implemented " + aToken);
-            return [CPString new];
+
+            var seconds = [timeZone secondsFromGMTForDate:aDate],
+                minutes = seconds / 60,
+                hours = minutes / 60,
+                result,
+                diffMinutes =  (hours - parseInt(hours)) * 100 * 60 / 100;
+
+            if (length <= 3)
+            {
+                result = diffMinutes.toString();
+
+                while ([result length] < 2)
+                    result = @"0" + result;
+
+                result = ABS(parseInt(hours)) + result;
+
+                while ([result length] < 4)
+                    result = @"0" + result;
+
+                if (seconds > 0)
+                    result = @"+" + result;
+                else
+                    result = @"-" + result;
+
+                return result;
+            }
+            else if (length == 4)
+            {
+                result = diffMinutes.toString();
+
+                while ([result length] < 2)
+                    result = @"0" + result;
+
+                result = @":" + result;
+                result = ABS(parseInt(hours)) + result;
+
+                if (seconds > 0)
+                    result = @"+" + result;
+                else
+                    result = @"-" + result;
+
+                return @"HPG" + result;
+            }
+            else
+            {
+                result = diffMinutes.toString();
+
+                while ([result length] < 2)
+                    result = @"0" + result;
+
+                result = @":" + result;
+                result = ABS(parseInt(hours)) + result;
+
+                while ([result length] < 5)
+                    result = @"0" + result;
+
+                if (seconds > 0)
+                    result = @"+" + result;
+                else
+                    result = @"-" + result;
+
+                return result;
+            }
 
         case @"v":
-            CPLog.warn(@"Token not yet implemented " + aToken);
-            return [CPString new];
+
+            if (length <= 3)
+                return [timeZone localizedName:CPTimeZoneNameStyleShortGeneric locale:_locale];
+            else
+                return [timeZone localizedName:CPTimeZoneNameStyleGeneric locale:_locale];
 
         case @"V":
-            CPLog.warn(@"Token not yet implemented " + aToken);
-            return [CPString new];
+
+            if (length <= 3)
+                return [timeZone localizedName:CPTimeZoneNameStyleShortStandard locale:_locale];
+            else
+                return [timeZone localizedName:CPTimeZoneNameStyleStandard locale:_locale];
+
 
         default:
-            CPLog.warn(@"Token not pattern found for " + aToken);
+            CPLog.warn(@"No pattern found for " + aToken);
             return aToken;
     }
 
