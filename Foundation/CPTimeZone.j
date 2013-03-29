@@ -311,7 +311,7 @@ var abbreviationDictionary,
     @param data the data
     @return a new instance of CPTimeZone
 */
-+ (id)timeZoneWithName:(CPString)tzName date:(CPData)data
++ (id)timeZoneWithName:(CPString)tzName data:(CPData)data
 {
     return [[CPTimeZone alloc] initWithName:tzName data:data];
 }
