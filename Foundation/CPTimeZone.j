@@ -592,11 +592,14 @@ var abbreviationDictionary,
 */
 - (void)_dateWithTimeZone:(CPTimeZone)aTimeZone
 {
-    var minutesDate = [aTimeZone secondsFromGMTForDate:self] / 60,
-        minutesTimeZone = [aTimeZone secondsFromGMT] / 60;
+    self.setSeconds(self.getSeconds() - [aTimeZone secondsFromGMTForDate:self]);
+    self.setSeconds(self.getSeconds() + [aTimeZone secondsFromGMT]);
+}
 
-    self.setMinutes(self.getMinutes() - minutesDate);
-    self.setMinutes(self.getMinutes() + minutesTimeZone);
+// TODO : delete when merge with CPDatePicker
+- (int)_daysInMonth
+{
+    return 32 - new Date(self.getFullYear(), self.getMonth(), 32).getDate();
 }
 
 @end

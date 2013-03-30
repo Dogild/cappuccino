@@ -191,6 +191,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     _shortStandaloneQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
 
     _timeZone = [CPTimeZone systemTimeZone];
+    _twoDigitStartDate = [[CPDate alloc] initWithString:@"1950-01-01 00:00:00 +0000"];
 }
 
 /*! Return a string representation of a given date.
@@ -514,7 +515,103 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 */
 - (CPDate)_dateFromString:(CPString)aString format:(CPString)aFormat
 {
+    if (![aString length])
+        return nil;
 
+    // var date = [[CPDate alloc] initWithString:@"2000-01-01 00:00:00 +0000"];
+    // date.setSeconds([_timeZone secondsFromGMT]);
+
+
+    var currentToken = [CPString new],
+        isTextToken = NO,
+        tokens = [CPArray array],
+        dateComponents = [CPArray];
+
+    for (var i = 0; i < [aFormat length]; i++)
+    {
+        var character = [aFormat characterAtIndex:i];
+
+        if (isTextToken)
+        {
+            if ([character isEqualToString:@"'"])
+                currentToken = [CPString new];
+
+            continue;
+        }
+
+        if ([character isEqualToString:@"'"])
+        {
+            if (!isTextToken)
+                isTextToken = YES;
+
+            continue;
+        }
+
+        if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
+        {
+            [tokens addObject:currentToken];
+            currentToken = [CPString new];
+        }
+        else
+        {
+            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:character])
+            {
+                [tokens addObject:currentToken];
+                currentToken = [CPString new];
+            }
+
+            currentToken += character;
+
+            if (i == (length - 1))
+                [tokens addObject:currentToken];
+        }
+    }
+
+    isTextToken = NO;
+    currentToken = [CPString new];
+
+
+    for (var i = 0; i < [aString length]; i++)
+    {
+        var character = [aString characterAtIndex:i];
+
+        if (isTextToken)
+        {
+            if ([character isEqualToString:@"'"])
+                currentToken = [CPString new];
+
+            continue;
+        }
+
+        if ([character isEqualToString:@"'"])
+        {
+            if (!isTextToken)
+                isTextToken = YES;
+
+            continue;
+        }
+
+        if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
+        {
+            [dateComponents addObject:currentToken];
+            currentToken = [CPString new];
+        }
+        else
+        {
+            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:character])
+            {
+                [dateComponents addObject:currentToken];
+                currentToken = [CPString new];
+            }
+
+            currentToken += character;
+
+            if (i == (length - 1))
+                [dateComponents addObject:currentToken];
+        }
+    }
+
+    return date;
 }
 
 /*! Return a string representation of the given token and date
