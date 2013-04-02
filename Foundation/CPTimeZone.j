@@ -345,6 +345,26 @@ var abbreviationDictionary,
     return [self timeZoneWithAbbreviation:abbreviation];
 }
 
+/*! @ignore
+*/
++ (id)_timeZoneFromString:(CPString)aTimeZoneString style:(NSTimeZoneNameStyle)style
+{
+    if ([abbreviationDictionary containsKey:aTimeZoneString])
+        return [self timeZoneWithAbbreviation:aTimeZoneString];
+
+    var keys = [localizedName keyEnumerator],
+        key;
+
+    while (key = [keys nextObject])
+    {
+        var value = [[localizedName valueForKey:key] objectAtIndex:style];
+
+        if ([value isEqualToString:aTimeZoneString])
+            return [self timeZoneWithAbbreviation:key];
+    }
+
+    return nil;
+}
 
 #pragma mark -
 #pragma mark Class accessors

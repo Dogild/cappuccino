@@ -42,7 +42,8 @@ CPDateFormatterBehaviorDefault = 0;
 CPDateFormatterBehavior10_0    = 1000;
 CPDateFormatterBehavior10_4    = 1040;
 
-var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
+var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
+    relativeDateFormating;
 
 /*!
     @ingroup foundation
@@ -84,6 +85,18 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     CPString                _dateFormat                         @accessors(property=dateFormat);
     CPString                _PMSymbol                           @accessors(property=PMSymbol);
     CPTimeZone              _timeZone                           @accessors(property=timeZone);
+}
+
+
++ (void)initialize
+{
+    if (self !== [CPDateFormatter class])
+        return;
+
+    relativeDateFormating = @{
+      @"fr" : [@"demain", 3600, @"apr" + String.fromCharCode(233) + @"s-demain", 7200, @"apr" + String.fromCharCode(233) + @"s-apr" + String.fromCharCode(233) + @"s-demain", 10800, @"hier", -3600, @"avant-hier", -7200, @"avant-avant-hier", -10800],
+      @"en" : [@"tomorrow", 3600, @"yesterday", -3600]
+    };
 }
 
 /*! Return a string representation of the given date, dateStyle and timeStyle
@@ -518,14 +531,10 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
     if (![aString length])
         return nil;
 
-    // var date = [[CPDate alloc] initWithString:@"2000-01-01 00:00:00 +0000"];
-    // date.setSeconds([_timeZone secondsFromGMT]);
-
-
     var currentToken = [CPString new],
         isTextToken = NO,
         tokens = [CPArray array],
-        dateComponents = [CPArray];
+        dateComponents = [CPArray array];
 
     for (var i = 0; i < [aFormat length]; i++)
     {
@@ -562,14 +571,13 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
             currentToken += character;
 
-            if (i == (length - 1))
+            if (i == ([aFormat length] - 1))
                 [tokens addObject:currentToken];
         }
     }
 
     isTextToken = NO;
     currentToken = [CPString new];
-
 
     for (var i = 0; i < [aString length]; i++)
     {
@@ -598,20 +606,17 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
         }
         else
         {
-            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:character])
-            {
-                [dateComponents addObject:currentToken];
-                currentToken = [CPString new];
-            }
-
             currentToken += character;
 
-            if (i == (length - 1))
+            if (i == ([aString length] - 1))
                 [dateComponents addObject:currentToken];
         }
     }
 
-    return date;
+    if ([dateComponents count] != [tokens count])
+        return nil;
+
+    return [self _dateFromTokens:tokens dateComponents:dateComponents];
 }
 
 /*! Return a string representation of the given token and date
@@ -995,6 +1000,507 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 
 }
 
+- (CPDate)_dateFromTokens:(CPArray)tokens dateComponents:(CPArray)dateComponents
+{
+    var defaultTimeZoneSeconds = [_timeZone secondsFromGMT],
+        dateArray = [2000, 01, 01, 00, 00, 00, @"+0000"],
+        isPM = NO,
+        dayOfYear,
+        dayIndexInWeek,
+        weekOfYear,
+        weekOfMonth,
+        milliseconds = 0;
+
+    for (var i = 0; i < [tokens count]; i++)
+    {
+        var token = [tokens objectAtIndex:i],
+            dateComponent = [dateComponents objectAtIndex:i],
+            character = [token characterAtIndex:0],
+            length = [token length];
+
+        switch (character)
+        {
+            case @"G":
+                // TODO
+                CPLog.warn(@"Token not yet implemented " + token);
+                break;
+
+            case @"y":
+                break;
+
+            case @"Y":
+                break;
+
+            case @"u":
+                // TODO
+                CPLog.warn(@"Token not yet implemented " + token);
+                break;
+
+            case @"U":
+                // TODO
+                CPLog.warn(@"Token not yet implemented " + token);
+                break;
+
+            case @"Q":
+
+                var month;
+
+                if (length <= 2)
+                    month = 1 + (parseInt(dateComponent) - 1) * 3
+
+                if (length == 3)
+                {
+                    if (![[self shortStandaloneQuarterSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = 1 + ([[self shortStandaloneQuarterSymbols] indexOfObject:dateComponent] - 1 * 3)
+                }
+
+                if (length >= 4)
+                {
+                    if (![[self standaloneQuarterSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = 1 + ([[self standaloneQuarterSymbols] indexOfObject:dateComponent] - 1 * 3)
+                }
+
+                if (month > 11)
+                    return nil;
+
+                dateArray[1] = month;
+
+                break;
+
+            case @"q":
+
+                var month;
+
+                if (length <= 2)
+                    month = (parseInt(dateComponent) - 1) * 3
+
+                if (length == 3)
+                {
+                    if (![[self shortQuarterSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self shortQuarterSymbols] indexOfObject:dateComponent] * 3
+                }
+
+                if (length >= 4)
+                {
+                    if (![[self quarterSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self quarterSymbols] indexOfObject:dateComponent] * 3
+                }
+
+                if (month > 11)
+                    return nil;
+
+                dateArray[1] = month + 1;
+
+                break;
+
+            case @"M":
+
+                var month;
+
+                if (length <= 2)
+                    month = parseInt(dateComponent)
+
+                if (length == 3)
+                {
+                    if (![[self shortMonthSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self shortMonthSymbols] indexOfObject:dateComponent]
+                }
+
+                if (length == 4)
+                {
+                    if (![[self monthSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self monthSymbols] indexOfObject:dateComponent]
+                }
+
+                if (length >= 5)
+                {
+                    if (![[self veryShortMonthSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self veryShortMonthSymbols] indexOfObject:dateComponent]
+                }
+
+                if (month > 11)
+                    return nil;
+
+                dateArray[1] = month + 1
+
+                break;
+
+            case @"L":
+
+                var month;
+
+                if (length <= 2)
+                    month = parseInt(dateComponent)
+
+                if (length == 3)
+                {
+                    if (![[self shortStandaloneMonthSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self shortStandaloneMonthSymbols] indexOfObject:dateComponent]
+                }
+
+                if (length == 4)
+                {
+                    if (![[self standaloneMonthSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self standaloneMonthSymbols] indexOfObject:dateComponent]
+                }
+
+                if (length >= 5)
+                {
+                    if (![[self veryShortSandaloneMonthSymbols] containsObject:dateComponent])
+                        return nil;
+
+                    month = [[self veryShortSandaloneMonthSymbols] indexOfObject:dateComponent]
+                }
+
+                if (month > 11)
+                    return nil;
+
+                dateArray[1] = month + 1
+
+                break;
+
+            case @"I":
+                // Deprecated
+                CPLog.warn(@"Depreacted - Token not yet implemented " + token);
+                break;
+
+            case @"w":
+
+                if (dateComponent > 52)
+                    return nil;
+
+                weekOfYear = dateComponent;
+
+                break;
+
+            case @"W":
+
+                if (dateComponent > 52)
+                    return nil;
+
+                weekOfMonth = dateComponent;
+
+                break;
+
+            case @"d":
+
+                dateArray[2] = parseInt(dateComponent);
+                break;
+
+            case @"D":
+
+                if (dayOfYear > 345)
+                    return nil;
+
+                dayOfYear = parseInt(dateComponent);
+
+                break;
+
+            case @"F":
+
+                if (parseInt(dateComponent) > 5 || parseInt(dateComponent) == 0)
+                    return nil;
+
+                if (parseInt(dateComponent) == 1)
+                    dateArray[2] = 1;
+
+                if (parseInt(dateComponent) == 2)
+                    dateArray[2] = 8;
+
+                if (parseInt(dateComponent) == 3)
+                    dateArray[2] = 15;
+
+                if (parseInt(dateComponent) == 4)
+                    dateArray[2] = 22;
+
+                if (parseInt(dateComponent) == 5)
+                    dateArray[2] = 29;
+
+                break;
+
+            case @"g":
+                CPLog.warn(@"Token not yet implemented " + token);
+                break;
+
+            case @"E":
+
+                if (length <= 3)
+                    dayIndexInWeek = [[self shortWeekdaySymbols] indexOfObject:dateComponent];
+
+                if (length == 4)
+                    dayIndexInWeek = [[self weekdaySymbols] indexOfObject:dateComponent];
+
+                if (length == 5)
+                    dayIndexInWeek = [[self veryShortWeekdaySymbols] indexOfObject:dateComponent];
+
+                if (dayIndexInWeek == CPNotFound)
+                    return nil;
+
+                break;
+
+            case @"e":
+
+                if (length <= 2)
+                    dayIndexInWeek = dateComponent;
+
+                if (length == 3)
+                    dayIndexInWeek = [[self shortWeekdaySymbols] indexOfObject:dateComponent];
+
+                if (length == 4)
+                    dayIndexInWeek = [[self weekdaySymbols] indexOfObject:dateComponent];
+
+                if (length == 5)
+                    dayIndexInWeek = [[self veryShortWeekdaySymbols] indexOfObject:dateComponent];
+
+                if (dayIndexInWeek == CPNotFound)
+                    return nil;
+
+                break;
+
+            case @"c":
+
+                if (length <= 2)
+                    dayIndexInWeek = dateComponent;
+
+                if (length == 3)
+                    dayIndexInWeek = [[self shortStandaloneWeekdaySymbols] indexOfObject:dateComponent];
+
+                if (length == 4)
+                    dayIndexInWeek = [[self standaloneWeekdaySymbols] indexOfObject:dateComponent];
+
+                if (length == 5)
+                    dayIndexInWeek = [[self veryShortStandaloneWeekdaySymbols] indexOfObject:dateComponent];
+
+                if (dayIndexInWeek == CPNotFound)
+                    return nil;
+
+                break;
+
+            case @"a":
+
+                if (![dateComponent isEqualToString:_PMSymbol] && ![dateComponent isEqualToString:_AMSymbol])
+                    return nil;
+
+                if ([dateComponent isEqualToString:_PMSymbol])
+                    isPM = YES;
+
+                break;
+
+            case @"h":
+
+                if (parseInt(dateComponent) < 1 || parseInt(dateComponent) > 12)
+                    return nil;
+
+                dateArray[3] = parseInt(dateComponent);
+
+                break;
+
+            case @"H":
+
+                if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 23)
+                    return nil;
+
+                dateArray[3] = parseInt(dateComponent);
+
+                break;
+
+            case @"K":
+
+                if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 11)
+                    return nil;
+
+                dateArray[3] = parseInt(dateComponent) + 1;
+
+                break;
+
+            case @"k":
+
+                if (parseInt(dateComponent) < 1 || parseInt(dateComponent) > 24)
+                    return nil;
+
+                dateArray[3] = parseInt(dateComponent) - 1;
+
+                break;
+
+            case @"j":
+                CPLog.warn(@"Token not yet implemented " + token);
+                break;
+
+            case @"m":
+
+                var minutes = parseInt(dateComponent);
+
+                if (minutes > 59)
+                    return nil;
+
+                dateArray[4] = minutes;
+
+                break;
+
+            case @"s":
+
+                var seconds = parseInt(dateComponent);
+
+                if (seconds > 59)
+                    return nil;
+
+                dateArray[5] = seconds;
+
+                break;
+
+            case @"S":
+
+                var result = [dateComponent substringFromIndex:0 toIndex:length];
+
+                milliseconds = parseInt(result);
+
+                if (milliseconds > 99)
+                    return nil;
+
+                break;
+
+            case @"A":
+
+                var result = [dateComponent substringFromIndex:0 toIndex:length],
+                    millisecondsInDay = parseInt(result);
+
+                var tmpDate = new Date();
+                tmpDate.setHours(0);
+                tmpDate.setMinutes(0);
+                tmpDate.setSeconds(0);
+                tmpDate.setMilliseconds(0);
+
+                tmpDate.setMilliseconds(millisecondsInDay);
+
+                dateArray[3] = tmpDate.getHours();
+                dateArray[4] = tmpDate.getMinutes();
+                dateArray[5] = tmpDate.getSeconds();
+
+                milliseconds = tmpDate.getMilliseconds()
+
+                break;
+
+            case @"z":
+
+                if (length < 4)
+                    var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleShortDaylightSaving];
+                else
+                    var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleDaylightSaving];
+
+                if (!seconds)
+                    seconds = [self _secondsFromTimeZoneDefaultFormatString:dateComponent];
+
+                if (!seconds)
+                    return nil;
+
+                defaultTimeZoneSeconds = seconds;
+
+                break;
+
+            case @"Z":
+
+                var seconds = [self _secondsFromTimeZoneDefaultFormatString:dateComponent];
+
+                if (!seconds)
+                    return nil;
+
+                defaultTimeZoneSeconds = seconds;
+
+                break;
+
+            case @"v":
+
+                if (length <= 3)
+                    var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleShortGeneric];
+                else
+                    var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleGeneric];
+
+                if (!seconds && length == 4)
+                    seconds = [self _secondsFromTimeZoneDefaultFormatString:dateComponent];
+
+                if (!seconds)
+                    return nil;
+
+                defaultTimeZoneSeconds = seconds;
+
+                break;
+
+            case @"V":
+
+                if (length <= 3)
+                    var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleShortStandard];
+                else
+                    var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleStandard];
+
+                if (!seconds)
+                    seconds = [self _secondsFromTimeZoneDefaultFormatString:dateComponent];
+
+                if (!seconds)
+                    return nil;
+
+                defaultTimeZoneSeconds = seconds;
+
+                break;
+
+            default:
+                CPLog.warn(@"No pattern found for " + token);
+                return nil;
+        }
+    }
+    //
+    // Make th calcul day of the year
+    if (dayOfYear)
+    {
+        var tmpDate = new Date();
+        tmpDate.setFullYear(dateArray[0]);
+        tmpDate.setMonth(0);
+
+        tmpDate.setDate(dayOfYear)
+
+        dateArray[1] = tmpDate.getMonth() + 1;
+        dateArray[2] = tmpDate.getDate();
+    }
+
+    // Check if the day is possible in the current month
+    var tmpDate = new Date();
+    tmpDate.setMonth(dateArray[1]);
+    tmpDate.setFullYear(dateArray[0]);
+
+    if (dateArray[2] <= 0 || dateArray[2] > [tmpDate _daysInMonth])
+        return nil;
+
+    // Change the hour
+    if ([self _isEnglishFormat])
+    {
+        if (dateArray[2] > 12)
+            return nil;
+    }
+
+    var dateResult = [[CPDate alloc] initWithString:[CPString stringWithFormat:@"%i-%i-%i %i:%i:%i %s", dateArray[0], dateArray[1], dateArray[2], dateArray[3], dateArray[4], dateArray[5], dateArray[6]]];
+    dateResult.setMilliseconds(milliseconds);
+    dateResult.setSeconds(dateResult.getSeconds() + [defaultTimeZoneSeconds secondsFromGMT]);
+
+    return dateResult;
+}
+
 - (CPString)_stringValueForValue:(id)aValue length:(int)length
 {
     var string = [CPString stringWithFormat:@"%i", aValue];
@@ -1023,6 +1529,33 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault;
 - (BOOL)_isEnglishFormat
 {
     return YES; //[[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
+}
+
+- (int)_secondsFromTimeZoneDefaultFormatString:(CPString)aTimeZoneFormatString
+{
+    var format = /([HPG-GMT])?([+-])(\d{1,2})([:])?(\d{2})/,
+        result = aTimeZoneFormatString.match(new RegExp(format)),
+        seconds = 0;
+
+    if (!result)
+        return nil;
+
+    seconds = result[2] * 60 * 60 + result[4] * 60;
+
+    if ([result[1] isEqualToString:@"-"])
+        seconds = -seconds;
+
+    return seconds;
+}
+
+- (int)_secondsFromTimeZoneString:(CPString)aTimeZoneString style:(NSTimeZoneNameStyle)aStyle
+{
+    var timeZone = [CPTimeZone _timeZoneFromString:aTimeZoneString style:aStyle];
+
+    if (!timeZone)
+        return nil;
+
+    return [timeZone secondsFromGMT];
 }
 
 @end
