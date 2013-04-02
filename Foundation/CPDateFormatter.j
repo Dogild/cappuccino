@@ -219,9 +219,11 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
 
     [aDate _dateWithTimeZone:_timeZone];
 
-    var format;
+    var format,
+        relativeWord,
+        result;
 
-    if (_dateFormat)
+    if (_dateFormat && !_doesRelativeDateFormatting)
         return [self _stringFromDate:aDate format:_dateFormat];
 
     switch (_dateStyle)
@@ -267,6 +269,31 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
             format = @"";
     }
 
+
+    if ([self doesRelativeDateFormatting])
+    {
+        var language = [_locale objectForKey:CPLocaleLanguageCode];
+
+        var relativeWords = [relativeDateFormating valueForKey:language];
+
+        for (var i = 1; i < [relativeWords count]; i = i + 2)
+        {
+            var date = [CPDate date];
+            date.setHours(aDate.getHours());
+            date.setMinutes(aDate.getMinutes());
+            date.setSeconds(aDate.getSeconds());
+
+            date.setMinutes([relativeWords objectAtIndex:i]);
+
+            if (date.getDate() == aDate.getDate() && date.getMonth() && aDate.getMonth() && date.getFullYear() == aDate.getFullYear())
+            {
+                relativeWord = [relativeWords objectAtIndex:(i - 1)];
+                format = @"";
+                break;
+            }
+        }
+    }
+
     switch (_timeStyle)
     {
         case CPDateFormatterNoStyle:
@@ -309,7 +336,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
             format += @"";
     }
 
-    return [self _stringFromDate:aDate format:format];
+    result = [self _stringFromDate:aDate format:format];
+
+    if (relativeWord)
+        result = relativeWord + result;
+
+    return result;
 }
 
 /*! Return a date of the given string
