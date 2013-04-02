@@ -42,7 +42,7 @@ CPDateFormatterBehaviorDefault = 0;
 CPDateFormatterBehavior10_0    = 1000;
 CPDateFormatterBehavior10_4    = 1040;
 
-var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
+var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     relativeDateFormating;
 
 /*!
@@ -150,9 +150,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
 {
     if (self = [super init])
     {
-        _dateStyle = CPDateFormatterShortStyle;
-        _timeStyle = CPDateFormatterShortStyle;
-        _formatterBehavior = CPDateFormatterBehavior10_4;
+        _dateStyle = nil;
+        _timeStyle = nil;
 
         [self _init];
     }
@@ -272,9 +271,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
 
     if ([self doesRelativeDateFormatting])
     {
-        var language = [_locale objectForKey:CPLocaleLanguageCode];
-
-        var relativeWords = [relativeDateFormating valueForKey:language];
+        var language = [_locale objectForKey:CPLocaleLanguageCode],
+            relativeWords = [relativeDateFormating valueForKey:language];
 
         for (var i = 1; i < [relativeWords count]; i = i + 2)
         {
@@ -1058,9 +1056,31 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
                 break;
 
             case @"y":
+
+                var u = _twoDigitStartDate.getFullYear() % 10,
+                    d = parseInt(_twoDigitStartDate.getFullYear() / 10) % 10,
+                    c = parseInt(_twoDigitStartDate.getFullYear() / 100) % 10,
+                    m = parseInt(_twoDigitStartDate.getFullYear() / 1000) % 10;
+
+                if ((u + d * 10) > dateComponents)
+                    dateArray[0] = parseInt(dateComponent);
+                else
+                    dateArray[0] = c * 100 + m * 1000 + parseInt(dateComponent);
+
                 break;
 
             case @"Y":
+
+                var u = _twoDigitStartDate.getFullYear() % 10,
+                    d = (_twoDigitStartDate.getFullYear() / 10) % 10,
+                    c = parseInt(_twoDigitStartDate.getFullYear() / 100) % 10,
+                    m = parseInt(_twoDigitStartDate.getFullYear() / 1000) % 10;
+
+                if ((u + d) > dateComponents)
+                    dateArray[0] = parseInt(dateComponent);
+                else
+                    dateArray[0] = c * 100 + m * 1000 + parseInt(dateComponent);
+
                 break;
 
             case @"u":
@@ -1497,7 +1517,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
                 return nil;
         }
     }
-    //
+
     // Make th calcul day of the year
     if (dayOfYear)
     {
@@ -1511,9 +1531,42 @@ var defaultDateFormatterBehavior = CPDateFormatterBehaviorDefault,
         dateArray[2] = tmpDate.getDate();
     }
 
+    if (weekOfMonth)
+        dateArray[2] = (weekOfMonth - 1) * 7 + 1
+
+    if (weekOfYear)
+    {
+        var tmpDate = new Date();
+        tmpDate.setFullYear(dateArray[0]);
+        tmpDate.setMonth(0);
+        tmpDate.setDate(1);
+
+        while (tmpDate.getDay() != 0)
+            tmpDate.setDate(tmpDate.getDate() + 1);
+
+        tmpDate.setDate(tmpDate.getDate() + (weekOfYear - 1) * 7);
+
+        dateArray[1] = tmpDate.getMonth() + 1;
+        dateArray[2] = tmpDate.getDate();
+    }
+
+    if (dayIndexInWeek)
+    {
+        var tmpDate = new Date();
+        tmpDate.setFullYear(dateArray[0]);
+        tmpDate.setMonth(dateArray[1] - 1);
+        tmpDate.setDate(dateArray[2]);
+
+        while (tmpDate.getDay() != dayIndexInWeek)
+            tmpDate.setDate(tmpDate.getDate() + 1);
+
+        dateArray[1] = tmpDate.getMonth() + 1;
+        dateArray[2] = tmpDate.getDate();
+    }
+
     // Check if the day is possible in the current month
     var tmpDate = new Date();
-    tmpDate.setMonth(dateArray[1]);
+    tmpDate.setMonth(dateArray[1] - 1);
     tmpDate.setFullYear(dateArray[0]);
 
     if (dateArray[2] <= 0 || dateArray[2] > [tmpDate _daysInMonth])
