@@ -294,6 +294,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         }
     }
 
+    if ((relativeWord || format.length) && _timeStyle != CPDateFormatterNoStyle)
+        format += @" ";
+
     switch (_timeStyle)
     {
         case CPDateFormatterNoStyle:
@@ -303,33 +306,33 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         case CPDateFormatterShortStyle:
 
             if ([self _isEnglishFormat])
-                format += @" h:mm a";
+                format += @"h:mm a";
             else
-                format += @" H:mm";
+                format += @"H:mm";
             break;
 
         case CPDateFormatterMediumStyle:
 
             if ([self _isEnglishFormat])
-                format += @" h:mm:ss a";
+                format += @"h:mm:ss a";
             else
-                format += @" H:mm:ss"
+                format += @"H:mm:ss"
             break;
 
         case CPDateFormatterLongStyle:
 
             if ([self _isEnglishFormat])
-                format += @" h:mm:ss a z";
+                format += @"h:mm:ss a z";
             else
-                format += @" H:mm:ss z";
+                format += @"H:mm:ss z";
             break;
 
         case CPDateFormatterFullStyle:
 
             if ([self _isEnglishFormat])
-                format += @" h:mm:ss a zzzz";
+                format += @"h:mm:ss a zzzz";
             else
-                format += @" h:mm:ss zzzz";
+                format += @"h:mm:ss zzzz";
             break;
 
         default:
