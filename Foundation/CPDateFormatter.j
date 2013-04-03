@@ -25,12 +25,13 @@
 @import "CPString.j"
 @import "CPFormatter.j"
 @import "CPTimeZone.j"
-//c@import "CPLocale.j"
+@import "CPLocale.j"
 
 @class CPNull
 
 @global CPLocaleLanguageCode
 @global CPLocaleCountryCode
+
 
 CPDateFormatterNoStyle     = 0;
 CPDateFormatterShortStyle  = 1;
@@ -204,6 +205,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
     _timeZone = [CPTimeZone systemTimeZone];
     _twoDigitStartDate = [[CPDate alloc] initWithString:@"1950-01-01 00:00:00 +0000"];
+    _locale = [CPLocale currentLocale];
 }
 
 /*! Return a string representation of a given date.
@@ -1606,14 +1608,14 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 */
 - (BOOL)_isAmericanFormat
 {
-    return YES; //[[_locale objectForKey:CPLocaleCountryCode] isEqualToString:@"US"];
+    return [[_locale objectForKey:CPLocaleCountryCode] isEqualToString:@"US"];
 }
 
 /*! Check if we are in the english format or not. Depending on the locale
 */
 - (BOOL)_isEnglishFormat
 {
-    return YES; //[[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
+    return [[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
 }
 
 - (int)_secondsFromTimeZoneDefaultFormatString:(CPString)aTimeZoneFormatString
@@ -1662,7 +1664,7 @@ var CPDateFormatterDateStyleKey = @"CPDateFormatterDateStyle",
     if (self)
     {
         _allowNaturalLanguage = [aCoder decodeBoolForKey:CPDateFormatterAllowNaturalLanguageKey];
-        _dateFormat = [aCoder decodeStringForKey:CPDateFormatterDateFormatKey];
+        _dateFormat = [aCoder decodeObjectForKey:CPDateFormatterDateFormatKey];
         _dateStyle = [aCoder decodeIntForKey:CPDateFormatterDateStyleKey];
         _doesRelativeDateFormatting = [aCoder decodeBoolForKey:CPDateFormatterDoseRelativeDateFormattingKey];
         _formatterBehavior = [aCoder decodeIntForKey:CPDateFormatterFormatterBehaviorKey];
@@ -1679,7 +1681,7 @@ var CPDateFormatterDateStyleKey = @"CPDateFormatterDateStyle",
 
     [aCoder encodeBool:_allowNaturalLanguage forKey:CPDateFormatterAllowNaturalLanguageKey];
     [aCoder encodeInt:_dateStyle forKey:CPDateFormatterDateStyleKey];
-    [aCoder encodeString:_dateFormat forKey:CPDateFormatterDateFormatKey];
+    [aCoder encodeObject:_dateFormat forKey:CPDateFormatterDateFormatKey];
     [aCoder encodeBool:_doesRelativeDateFormatting forKey:CPDateFormatterDoseRelativeDateFormattingKey];
     [aCoder encodeInt:_formatterBehavior forKey:CPDateFormatterFormatterBehaviorKey];
     [aCoder encodeInt:_locale forKey:CPDateFormatterLocaleKey];
