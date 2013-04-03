@@ -1,4 +1,4 @@
-/* CPDatePicker.j
+/* CPDateFormatterTest.j
 * Foundation
 *
 * Created by Alexandre Wilhelm
@@ -20,7 +20,7 @@
 */
 
 @import <Foundation/CPDateFormatter.j>
-//@import <Foundation/CPLocale.j>
+@import <Foundation/CPLocale.j>
 @import <Foundation/CPDate.j>
 
 @import <OJUnit/OJTestCase.j>
@@ -41,13 +41,13 @@
 {
     _date = [[CPDate alloc] initWithString:@"2011-10-05 16:34:38 +0000"];
     _dateFormatter = [[CPDateFormatter alloc] init];
-    //[_dateFormatter setLocale:[[CPLocale alloc] initWithIdentifier:@"en_US"]];
+    [_dateFormatter setLocale:[[CPLocale alloc] initWithLocaleIdentifier:@"en_US"]];
 }
 
 - (void)testLocalizedStringFromDate
 {
     var result = [CPDateFormatter localizedStringFromDate:_date dateStyle:CPDateFormatterMediumStyle timeStyle:CPDateFormatterLongStyle];
-    [self assert:result equals:@"Oct 5, 2011 9:34:38 AM PDT"];
+    [self assert:result equals:@"5 Oct 2011 9:34:38 AM PDT"];
 }
 
 - (void)testInit
@@ -55,13 +55,15 @@
     var dateFormatter = [[CPDateFormatter alloc] init],
         result = [dateFormatter stringFromDate:_date];
 
-    [self assert:result equals:@""]
+    [self assert:result.length equals:@"".length];
 }
 
 - (void)testInitWithDateFormat
 {
-    var dateFormatter = [[CPDateFormatter alloc] initWithDateFormat:@"d EEEE, MMM, Y H:mm:ss a z" allowNaturalLanguage:NO],
-        result = [dateFormatter stringFromDate:_date];
+    var dateFormatter = [[CPDateFormatter alloc] initWithDateFormat:@"d EEEE, MMM, Y H:mm:ss a z" allowNaturalLanguage:NO];
+    [dateFormatter setLocale:[[CPLocale alloc] initWithLocaleIdentifier:@"en_US"]];
+
+    var result = [dateFormatter stringFromDate:_date];
 
     [self assert:result equals:@"5 Wednesday, Oct, 2011 9:34:38 AM PDT"]
 }
@@ -72,7 +74,7 @@
     [_dateFormatter setTimeStyle:CPDateFormatterNoStyle];
 
     var result = [_dateFormatter stringFromDate:_date];
-    [self assert:result equals:@""];
+    [self assert:result.length equals:@"".length];
 }
 
 - (void)testStringFromDateDateShortStyleTimeNoStyle
@@ -162,7 +164,7 @@
     [_dateFormatter setTimeStyle:CPDateFormatterShortStyle];
 
     var result = [_dateFormatter stringForObjectValue:_date];
-    [self assert:result equals:@"Oct 5, 2011 9:34:38 AM PDT"];
+    [self assert:result equals:@"Oct 5, 2011 9:34 AM"];
 }
 
 - (void)testStringForObjectValueWithString
@@ -180,7 +182,7 @@
     [_dateFormatter setTimeStyle:CPDateFormatterShortStyle];
 
     var result = [_dateFormatter editingStringForObjectValue:_date];
-    [self assert:result equals:@"Oct 5, 2011 9:34:38 AM PDT"];
+    [self assert:result equals:@"Oct 5, 2011 9:34 AM"];
 }
 
 @end
