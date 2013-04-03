@@ -95,8 +95,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         return;
 
     relativeDateFormating = @{
-      @"fr" : [@"demain", 3600, @"apr" + String.fromCharCode(233) + @"s-demain", 7200, @"apr" + String.fromCharCode(233) + @"s-apr" + String.fromCharCode(233) + @"s-demain", 10800, @"hier", -3600, @"avant-hier", -7200, @"avant-avant-hier", -10800],
-      @"en" : [@"tomorrow", 3600, @"yesterday", -3600]
+      @"fr" : [@"demain", 1440, @"apr" + String.fromCharCode(233) + @"s-demain", 2880, @"apr" + String.fromCharCode(233) + @"s-apr" + String.fromCharCode(233) + @"s-demain", 4320, @"hier", -1440, @"avant-hier", -2880, @"avant-avant-hier", -4320],
+      @"en" : [@"tomorrow", 1440, @"yesterday", -1440]
     };
 }
 
@@ -840,7 +840,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             var day = aDate.getDay();
 
             if (length <= 2)
-                [self _stringValueForValue:(day + 1) length:MIN(2, length)];
+                return [self _stringValueForValue:(day + 1) length:MIN(2, length)];
 
             if (length == 3)
                 return [[self shortWeekdaySymbols] objectAtIndex:day];
@@ -856,7 +856,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             var day = aDate.getDay();
 
             if (length <= 2)
-                [self _stringValueForValue:(day + 1) length:MIN(2, length)];
+                return [self _stringValueForValue:(day + 1) length:MIN(2, length)];
 
             if (length == 3)
                 return [[self shortStandaloneWeekdaySymbols] objectAtIndex:day];
@@ -878,14 +878,17 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             var hours = aDate.getHours();
 
-            if (hours == 0)
-                hours = 12;
-            else if (hours > 12)
-                hours -= 12;
+            if ([self _isAmericanFormat] || [self _isEnglishFormat])
+            {
+                if (hours == 0)
+                    hours = 12;
+                else if (hours > 12)
+                    hours = hours - 12;
+            }
 
             var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
 
-            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength, MIN(2, length))];
+            return [self _stringValueForValue:hours length:MAX(currentLength, MIN(2, length))];
 
         case @"H":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getHours()] length];
