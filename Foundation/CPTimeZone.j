@@ -22,7 +22,7 @@
 @import "CPObject.j"
 @import "CPString.j"
 @import "CPDate.j"
-//@import "CPLocale.j"
+@import "CPLocale.j"
 
 CPTimeZoneNameStyleStandard = 0;
 CPTimeZoneNameStyleShortStandard = 1;
@@ -512,9 +512,9 @@ var abbreviationDictionary,
     @param data the data
     @return a new instance of CPTimeZone
 */
-- (id)initWithName:(CPString)tzName date:(CPData)data
+- (id)initWithName:(CPString)tzName data:(CPData)data
 {
-    if (self = [super initWithName:tzName])
+    if (self = [self initWithName:tzName])
     {
         _data = data;
     }
@@ -584,7 +584,7 @@ var abbreviationDictionary,
 */
 - (CPString)description
 {
-    return [CPString stringWithFormat:@"%s (%s) offset %i", _name, _abbreviation, [timeDifferenceFromUTC valueForKey:_abbreviation]];
+    return [CPString stringWithFormat:@"%s (%s) offset %i", _name, _abbreviation, [self secondsFromGMT]];
 }
 
 
@@ -614,12 +614,6 @@ var abbreviationDictionary,
 {
     self.setSeconds(self.getSeconds() - [aTimeZone secondsFromGMTForDate:self]);
     self.setSeconds(self.getSeconds() + [aTimeZone secondsFromGMT]);
-}
-
-// TODO : delete when merge with CPDatePicker
-- (int)_daysInMonth
-{
-    return 32 - new Date(self.getFullYear(), self.getMonth(), 32).getDate();
 }
 
 @end
