@@ -792,7 +792,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         case @"d":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getDate()] length];
 
-            return [self _stringValueForValue:aDate.getDate() length:currentLength];
+            return [self _stringValueForValue:aDate.getDate() length:MAX(length, currentLength)];
 
         case @"D":
 
@@ -987,12 +987,15 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 result = @":" + result;
                 result = ABS(parseInt(hours)) + result;
 
+                while ([result length] < 5)
+                    result = @"0" + result;
+
                 if (seconds > 0)
                     result = @"+" + result;
                 else
                     result = @"-" + result;
 
-                return @"HPG" + result;
+                return @"GMT" + result;
             }
             else
             {
@@ -1017,18 +1020,27 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
         case @"v":
 
-            if (length <= 3)
+            if (length == 1)
                 return [timeZone localizedName:CPTimeZoneNameStyleShortGeneric locale:_locale];
-            else
+            else if (length == 4)
                 return [timeZone localizedName:CPTimeZoneNameStyleGeneric locale:_locale];
+
+            return @" ";
 
         case @"V":
 
-            if (length <= 3)
-                return [timeZone localizedName:CPTimeZoneNameStyleShortStandard locale:_locale];
-            else
-                return [timeZone localizedName:CPTimeZoneNameStyleStandard locale:_locale];
+            if (length == 1)
+            {
+                return [timeZone localizedName:CPTimeZoneNameStyleShortDaylightSaving locale:_locale];
+            }
+            else if (length == 4)
+            {
+                CPLog.warn(@"No pattern found for " + aToken);
+                return @"";
+            }
 
+
+            return @" ";
 
         default:
             CPLog.warn(@"No pattern found for " + aToken);

@@ -320,11 +320,11 @@
 
 - (void)testTokensZones
 {
-    [_dateFormatter setDateFormat:@"z zz zzz zzzz Z ZZ ZZZ ZZZZ ZZZZ v vvvv V VVVV"];
+    [_dateFormatter setDateFormat:@"z zz zzz zzzz Z ZZ ZZZ ZZZZ ZZZZ v vvvv V"];
 
     var result = [_dateFormatter stringFromDate:_date];
 
-    [self assert:result equals:@"PDT PDT PDT Pacific Daylight Time -0700 -0700 -0700 GMT-07:00 GMT-07:00 PT Pacific Time PDT United States Time (Los Angeles)"];
+    [self assert:result equals:@"PDT PDT PDT Pacific Daylight Time -0700 -0700 -0700 GMT-07:00 GMT-07:00 PT Pacific Time PDT"];
 }
 
 @end
