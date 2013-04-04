@@ -780,7 +780,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             var yearStart = new Date(d.getFullYear(), 0, 1),
                 weekOfYear = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 
-            return [self _stringValueForValue:weekOfYear length:MIN(2, length)];
+            return [self _stringValueForValue:(weekOfYear + 1) length:MAX(2, length)];
 
         case @"W":
 
@@ -929,19 +929,15 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMinutes()] length];
 
-            return [self _stringValueForValue:aDate.getSeconds() length:MAX(currentLength,MIN(2, length))];
+            return [self _stringValueForValue:aDate.getSeconds() length:MIN(2, length)];
 
         case @"S":
             return [self _stringValueForValue:aDate.getMilliseconds() length:length];
 
         case @"A":
-            var date = [aDate copy];
-            date.setHours(0);
-            date.setMinutes(0);
-            date.setSeconds(0);
-            date.setMilliseconds(0);
+            var value = aDate.getHours() * 60 * 60 * 1000 + aDate.getMinutes() * 60 * 1000 + aDate.getSeconds() * 1000 + aDate.getMilliseconds();
 
-            return [self _stringValueForValue:[aDate timeIntervalSinceDate:date] length:length];
+            return [self _stringValueForValue:value length:value.toString().length];
 
         case @"z":
 

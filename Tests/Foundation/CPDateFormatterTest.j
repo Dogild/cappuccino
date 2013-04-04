@@ -279,7 +279,7 @@
 
     var result = [_dateFormatter stringFromDate:_date];
 
-    [self assert:result equals:@"8 08 0 00 000 0000 65108000 65108000 65108000 65108000"];
+    [self assert:result equals:@"8 08 0 00 000 0000 66848000 66848000 66848000 66848000"];
 }
 
 - (void)testTokensMinutes
