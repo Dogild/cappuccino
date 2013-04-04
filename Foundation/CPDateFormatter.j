@@ -677,11 +677,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             return [CPString new];
 
         case @"y":
-            return [self _stringValueForValue:aDate.getFullYear() length:length];
+            var currentLength = [[CPString stringWithFormat:@"%i", aDate.getFullYear()] length];
+            return [self _stringValueForValue:aDate.getFullYear() length:(length == 2)?length:currentLength];
 
         case @"Y":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getFullYear()] length];
-            return [self _stringValueForValue:aDate.getFullYear() length:MAX(currentLength,length)];
+            return [self _stringValueForValue:aDate.getFullYear() length:(length == 2)?length:currentLength];
 
         case @"u":
             // TODO
@@ -791,7 +792,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         case @"d":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getDate()] length];
 
-            return [self _stringValueForValue:aDate.getDate() length:MIN(currentLength, MIN(2, length))];
+            return [self _stringValueForValue:aDate.getDate() length:currentLength];
 
         case @"D":
 
@@ -856,7 +857,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             var day = aDate.getDay();
 
             if (length <= 2)
-                return [self _stringValueForValue:(day + 1) length:MIN(2, length)];
+                return [self _stringValueForValue:(day + 1) length:aDate.getDay().toString().length];
 
             if (length == 3)
                 return [[self shortStandaloneWeekdaySymbols] objectAtIndex:day];
