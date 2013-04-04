@@ -209,7 +209,7 @@
     [self assert:result equals:@"yesterday 11:10 AM"];
 }
 
-- (void)testTokensYears
+- (void)testStringFromDateTokensYears
 {
     [_dateFormatter setDateFormat:@"y yy yyy yyyy Y YY YYY YYYY"];
 
@@ -218,7 +218,7 @@
     [self assert:result equals:@"2011 11 2011 2011 2011 11 2011 2011"];
 }
 
-- (void)testTokensQuarters
+- (void)testStringFromDateTokensQuarters
 {
     [_dateFormatter setDateFormat:@"Q QQ QQQ QQQQ q qq qqq qqqq"];
 
@@ -227,7 +227,7 @@
     [self assert:result equals:@"4 04 Q4 4th quarter 4 04 Q4 4th quarter"];
 }
 
-- (void)testTokensMonths
+- (void)testStringFromDateTokensMonths
 {
     [_dateFormatter setDateFormat:@"M MM MMM MMMM MMMMM L LL LLL LLLL LLLLL"];
 
@@ -236,7 +236,7 @@
     [self assert:result equals:@"10 10 Oct October O 10 10 Oct October O"];
 }
 
-- (void)testTokensWeeks
+- (void)testStringFromDateTokensWeeks
 {
     [_dateFormatter setDateFormat:@"w ww W"];
 
@@ -245,7 +245,7 @@
     [self assert:result equals:@"41 41 2"];
 }
 
-- (void)testTokensDays
+- (void)testStringFromDateTokensDays
 {
     [_dateFormatter setDateFormat:@"d dd D DD DDD F"];
 
@@ -254,7 +254,7 @@
     [self assert:result equals:@"5 05 278 278 278 1"];
 }
 
-- (void)testTokensWeekDays
+- (void)testStringFromDateTokensWeekDays
 {
     [_dateFormatter setDateFormat:@"E EE EEE EEEE EEEEE e ee eee eeee eeeee c cc ccc cccc ccccc"];
 
@@ -263,16 +263,20 @@
     [self assert:result equals:@"Wed Wed Wed Wednesday W 4 04 Wed Wednesday W 4 4 Wed Wednesday W"];
 }
 
-- (void)testTokensPeriods
+- (void)testStringFromDateTokensPeriods
 {
     [_dateFormatter setDateFormat:@"a"];
 
     var result = [_dateFormatter stringFromDate:_date];
 
     [self assert:result equals:@"PM"];
+
+    _date.setHours(2);
+    var result = [_dateFormatter stringFromDate:_date];
+    [self assert:result equals:@"AM"];
 }
 
-- (void)testTokensSeconds
+- (void)testStringFromDateTokensSeconds
 {
     [_dateFormatter setDateFormat:@"s ss S SS SSS SSSS A AA AAA AAAA"];
     _date.setSeconds(8);
@@ -282,7 +286,7 @@
     [self assert:result equals:@"8 08 0 00 000 0000 66848000 66848000 66848000 66848000"];
 }
 
-- (void)testTokensMinutes
+- (void)testStringFromDateTokensMinutes
 {
     [_dateFormatter setDateFormat:@"m mm"];
     _date.setMinutes(5);
@@ -292,33 +296,26 @@
     [self assert:result equals:@"5 05"];
 }
 
-- (void)testTokensHours
+- (void)testStringFromDateTokensHours
 {
+    var date = [[CPDate alloc] initWithString:@"2011-10-05 22:34:08 -0900"];
+
     [_dateFormatter setDateFormat:@"h hh HH k kk K KK"];
-    _date.setHours(22);
-
-    var result = [_dateFormatter stringFromDate:_date];
-
+    var result = [_dateFormatter stringFromDate:date];
     [self assert:result equals:@"12 12 00 24 24 0 00"];
 
-
+    date = [[CPDate alloc] initWithString:@"2011-10-05 06:34:08 -0900"];
     [_dateFormatter setDateFormat:@"h hh HH k kk K KK"];
-    _date.setHours(6);
-
-    var result = [_dateFormatter stringFromDate:_date];
-
+    result = [_dateFormatter stringFromDate:date];
     [self assert:result equals:@"8 08 08 8 08 8 08"];
 
-
+    date = [[CPDate alloc] initWithString:@"2011-10-05 16:34:08 -0900"];
     [_dateFormatter setDateFormat:@"h hh HH k kk K KK"];
-    _date.setHours(16);
-
-    var result = [_dateFormatter stringFromDate:_date];
-
+    var result = [_dateFormatter stringFromDate:date];
     [self assert:result equals:@"6 06 18 18 18 6 06"];
 }
 
-- (void)testTokensZones
+- (void)testStringFromDateTokensZones
 {
     [_dateFormatter setDateFormat:@"z zz zzz zzzz Z ZZ ZZZ ZZZZ ZZZZ v vvvv V"];
 

@@ -905,16 +905,18 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
 
-            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength,MIN(2, length))];
+            return [self _stringValueForValue:hours length:MAX(currentLength,MIN(2, length))];
 
         case @"k":
 
             var hours = aDate.getHours();
-            hours += 1;
+
+            if (aDate.getHours() == 0)
+                hours = 24;
 
             var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
 
-            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength,MIN(2, length))];
+            return [self _stringValueForValue:hours length:MAX(currentLength,MIN(2, length))];
 
         case @"j":
             CPLog.warn(@"Token not yet implemented " + aToken);
