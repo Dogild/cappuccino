@@ -211,7 +211,7 @@
 
 - (void)testTokensYears
 {
-    [_dateFormatter setDateFormat:@"y yy yyyy yyyy Y YY YYYY YYYY"];
+    [_dateFormatter setDateFormat:@"y yy yyy yyyy Y YY YYY YYYY"];
 
     var result = [_dateFormatter stringFromDate:_date];
 
