@@ -324,6 +324,10 @@
     [self assert:result equals:@"PDT PDT PDT Pacific Daylight Time -0700 -0700 -0700 GMT-07:00 GMT-07:00 PT Pacific Time PDT"];
 }
 
+
+#pragma mark -
+#pragma mark Date From string
+
 - (void)testDateFromStringToken
 {
     [_dateFormatter setDateFormat:@""];
@@ -356,6 +360,22 @@
     [_dateFormatter setDateFormat:@"yyyy"];
     result = [_dateFormatter dateFromString:@"2012"];
     [self assert:result equals:[[CPDate alloc] initWithString:@"2012-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"y"];
+    var result = [_dateFormatter dateFromString:@"eze"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"yy"];
+    result = [_dateFormatter dateFromString:@"dezd"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"yyy"];
+    result = [_dateFormatter dateFromString:@"dezdez"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"yyyy"];
+    result = [_dateFormatter dateFromString:@"dezdezd"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenY
@@ -383,6 +403,22 @@
     [_dateFormatter setDateFormat:@"YYYY"];
     result = [_dateFormatter dateFromString:@"2012"];
     [self assert:result equals:[[CPDate alloc] initWithString:@"2012-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"Y"];
+    var result = [_dateFormatter dateFromString:@"eze"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"YY"];
+    result = [_dateFormatter dateFromString:@"dezd"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"YYY"];
+    result = [_dateFormatter dateFromString:@"dezdez"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"YYYY"];
+    result = [_dateFormatter dateFromString:@"dezdezd"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenq
@@ -408,8 +444,16 @@
     var result = [_dateFormatter dateFromString:@"12"];
     [self assert:result equals:[CPNull null]];
 
+    [_dateFormatter setDateFormat:@"q"];
+    var result = [_dateFormatter dateFromString:@"eze"];
+    [self assert:result equals:[CPNull null]];
+
     [_dateFormatter setDateFormat:@"qq"];
     var result = [_dateFormatter dateFromString:@"12"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"qq"];
+    var result = [_dateFormatter dateFromString:@"zaz"];
     [self assert:result equals:[CPNull null]];
 
     [_dateFormatter setDateFormat:@"qqq"];
@@ -443,8 +487,16 @@
     var result = [_dateFormatter dateFromString:@"12"];
     [self assert:result equals:[CPNull null]];
 
+    [_dateFormatter setDateFormat:@"Q"];
+    var result = [_dateFormatter dateFromString:@"ezeze"];
+    [self assert:result equals:[CPNull null]];
+
     [_dateFormatter setDateFormat:@"QQ"];
     var result = [_dateFormatter dateFromString:@"12"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"QQ"];
+    var result = [_dateFormatter dateFromString:@"zazasz"];
     [self assert:result equals:[CPNull null]];
 
     [_dateFormatter setDateFormat:@"QQQ"];
@@ -483,8 +535,16 @@
     var result = [_dateFormatter dateFromString:@"76"];
     [self assert:result equals:[CPNull null]];
 
+    [_dateFormatter setDateFormat:@"M"];
+    var result = [_dateFormatter dateFromString:@"ezeze"];
+    [self assert:result equals:[CPNull null]];
+
     [_dateFormatter setDateFormat:@"MM"];
     var result = [_dateFormatter dateFromString:@"76"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"MM"];
+    var result = [_dateFormatter dateFromString:@"zdazdza"];
     [self assert:result equals:[CPNull null]];
 
     [_dateFormatter setDateFormat:@"MMM"];
@@ -522,8 +582,16 @@
     var result = [_dateFormatter dateFromString:@"76"];
     [self assert:result equals:[CPNull null]];
 
+    [_dateFormatter setDateFormat:@"L"];
+    var result = [_dateFormatter dateFromString:@"dzadza"];
+    [self assert:result equals:[CPNull null]];
+
     [_dateFormatter setDateFormat:@"LL"];
     var result = [_dateFormatter dateFromString:@"76"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"LL"];
+    var result = [_dateFormatter dateFromString:@"dzadza"];
     [self assert:result equals:[CPNull null]];
 
     [_dateFormatter setDateFormat:@"LLL"];
@@ -544,6 +612,10 @@
     [_dateFormatter setDateFormat:@"w"];
     var result = [_dateFormatter dateFromString:@"76"];
     [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"w"];
+    var result = [_dateFormatter dateFromString:@"dzadza"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenW
@@ -558,6 +630,10 @@
 
     [_dateFormatter setDateFormat:@"W"];
     var result = [_dateFormatter dateFromString:@"76"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"W"];
+    var result = [_dateFormatter dateFromString:@"dzadzad"];
     [self assert:result equals:[CPNull null]];
 }
 
@@ -582,6 +658,10 @@
     [_dateFormatter setDateFormat:@"ddd"];
     var result = [_dateFormatter dateFromString:@"62"];
     [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"ddd"];
+    var result = [_dateFormatter dateFromString:@"dzadza"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenD
@@ -592,6 +672,10 @@
 
     [_dateFormatter setDateFormat:@"D"];
     var result = [_dateFormatter dateFromString:@"1076"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"D"];
+    var result = [_dateFormatter dateFromString:@"dzeezd"];
     [self assert:result equals:[CPNull null]];
 }
 
@@ -604,21 +688,90 @@
     [_dateFormatter setDateFormat:@"F"];
     var result = [_dateFormatter dateFromString:@"23"];
     [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"F"];
+    var result = [_dateFormatter dateFromString:@"dezdez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenE
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"EEE"];
+    var result = [_dateFormatter dateFromString:@"Tue"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"EEEE"];
+    var result = [_dateFormatter dateFromString:@"Tuesday"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"EEEEE"];
+    var result = [_dateFormatter dateFromString:@"T"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"EEE"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"EEEE"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokene
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"ee"];
+    var result = [_dateFormatter dateFromString:@"1"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"eee"];
+    var result = [_dateFormatter dateFromString:@"Tue"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"eeee"];
+    var result = [_dateFormatter dateFromString:@"Tuesday"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"eeeee"];
+    var result = [_dateFormatter dateFromString:@"T"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"eee"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"eeee"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenc
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"cc"];
+    var result = [_dateFormatter dateFromString:@"1"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"ccc"];
+    var result = [_dateFormatter dateFromString:@"Tue"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"cccc"];
+    var result = [_dateFormatter dateFromString:@"Tuesday"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"ccccc"];
+    var result = [_dateFormatter dateFromString:@"T"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"ccc"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"cccc"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokena
@@ -661,6 +814,10 @@
     [_dateFormatter setDateFormat:@"hh"];
     var result = [_dateFormatter dateFromString:@"13"];
     [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"hh"];
+    var result = [_dateFormatter dateFromString:@"edze"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenH
@@ -682,7 +839,7 @@
     [self assert:result equals:[CPNull null]];
 
     [_dateFormatter setDateFormat:@"HH"];
-    var result = [_dateFormatter dateFromString:@"24"];
+    var result = [_dateFormatter dateFromString:@"dezdez"];
     [self assert:result equals:[CPNull null]];
 }
 
@@ -711,6 +868,10 @@
     [_dateFormatter setDateFormat:@"KK"];
     var result = [_dateFormatter dateFromString:@"13"];
     [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"KK"];
+    var result = [_dateFormatter dateFromString:@"dezdez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenk
@@ -734,6 +895,10 @@
     [_dateFormatter setDateFormat:@"kk"];
     var result = [_dateFormatter dateFromString:@"13"];
     [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"kk"];
+    var result = [_dateFormatter dateFromString:@"dezdezd"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenm
@@ -748,6 +913,10 @@
 
     [_dateFormatter setDateFormat:@"mm"];
     var result = [_dateFormatter dateFromString:@"61"];
+    [self assert:result equals:[CPNull null]]
+
+    [_dateFormatter setDateFormat:@"mm"];
+    var result = [_dateFormatter dateFromString:@"ezdezd"];
     [self assert:result equals:[CPNull null]]
 }
 
@@ -764,11 +933,22 @@
     [_dateFormatter setDateFormat:@"ss"];
     var result = [_dateFormatter dateFromString:@"64"];
     [self assert:result equals:[CPNull null]]
+
+    [_dateFormatter setDateFormat:@"ss"];
+    var result = [_dateFormatter dateFromString:@"dezdez"];
+    [self assert:result equals:[CPNull null]]
 }
 
 - (void)testDateFromStringTokenS
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"SSS"];
+    var result = [_dateFormatter dateFromString:@"21212"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"SSS"];
+    var result = [_dateFormatter dateFromString:@"rer"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDateFromStringTokenA
@@ -776,26 +956,99 @@
     [_dateFormatter setDateFormat:@"AAAAAAAA"];
     var result = [_dateFormatter dateFromString:@"69540000"];
     [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-02 03:19:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"AAAAAAAA"];
+    var result = [_dateFormatter dateFromString:@"ezde"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDataFromStringTokenz
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"zzz"];
+    var result = [_dateFormatter dateFromString:@"PDT"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"zzzz"];
+    var result = [_dateFormatter dateFromString:@"GMT-08:35"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"zzz"];
+    var result = [_dateFormatter dateFromString:@"PezST"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"zzzz"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDataFromStringTokenZ
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"zzz"];
+    var result = [_dateFormatter dateFromString:@"-0800"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"zzzz"];
+    var result = [_dateFormatter dateFromString:@"HPG-8:00"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"zzzzz"];
+    var result = [_dateFormatter dateFromString:@"-08:00"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"zzz"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"zzzz"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"zzzzz"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 - (void)testDataFromStringTokenv
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"v"];
+    var result = [_dateFormatter dateFromString:@"PT"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"vvvv"];
+    var result = [_dateFormatter dateFromString:@"GMT-08:35"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"v"];
+    var result = [_dateFormatter dateFromString:@"PezST"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"vvvv"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
+
 }
 
 - (void)testDataFromStringTokenV
 {
     // No logic in cocoa (or I didn't get it :/)
+    [_dateFormatter setDateFormat:@"V"];
+    var result = [_dateFormatter dateFromString:@"PST"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"VVVV"];
+    var result = [_dateFormatter dateFromString:@"GMT-08:35"];
+    [self assert:result equals:[[CPDate alloc] initWithString:@"2000-01-01 08:00:00 +0000"]];
+
+    [_dateFormatter setDateFormat:@"V"];
+    var result = [_dateFormatter dateFromString:@"PezST"];
+    [self assert:result equals:[CPNull null]];
+
+    [_dateFormatter setDateFormat:@"VVVV"];
+    var result = [_dateFormatter dateFromString:@"dehez"];
+    [self assert:result equals:[CPNull null]];
 }
 
 @end
