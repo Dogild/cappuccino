@@ -117,7 +117,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     return [formatter stringForObjectValue:date];
 }
 
-/*! Return a string representation of the given template, opts and locale
+/*! Not yet implemented
+    Return a string representation of the given template, opts and locale
     @param template the template
     @param opts, pass 0
     @param locale the locale
@@ -224,7 +225,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         relativeWord,
         result;
 
-    if (_dateFormat && !_doesRelativeDateFormatting)
+    if (_dateFormat)
         return [self _stringFromDate:aDate format:_dateFormat];
 
     switch (_dateStyle)
