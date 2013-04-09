@@ -354,12 +354,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 */
 - (CPDate)dateFromString:(CPString)aString
 {
-    if (!aString)
+    if (aString == nil)
         return nil;
 
     var format;
 
-    if (_dateFormat)
+    if (_dateFormat != nil)
         return [self _dateFromString:aString format:_dateFormat];
 
     switch (_dateStyle)
@@ -563,7 +563,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 */
 - (CPDate)_dateFromString:(CPString)aString format:(CPString)aFormat
 {
-    if (![aString length])
+    if (aString == nil || aFormat == nil)
         return nil;
 
     var currentToken = [CPString new],
@@ -1081,24 +1081,38 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     c = parseInt(_twoDigitStartDate.getFullYear() / 100) % 10,
                     m = parseInt(_twoDigitStartDate.getFullYear() / 1000) % 10;
 
-                if ((u + d * 10) > dateComponents)
-                    dateArray[0] = parseInt(dateComponent);
+                if (length == 2 && dateComponent.length == 2)
+                {
+                    if ((u + d * 10) >= parseInt(dateComponent))
+                        dateArray[0] = (c + 1) * 100 + m * 1000 + parseInt(dateComponent);
+                    else
+                        dateArray[0] = c * 100 + m * 1000 + parseInt(dateComponent);
+                }
                 else
-                    dateArray[0] = c * 100 + m * 1000 + parseInt(dateComponent);
+                {
+                    dateArray[0] = parseInt(dateComponent);
+                }
 
                 break;
 
             case @"Y":
 
                 var u = _twoDigitStartDate.getFullYear() % 10,
-                    d = (_twoDigitStartDate.getFullYear() / 10) % 10,
+                    d = parseInt(_twoDigitStartDate.getFullYear() / 10) % 10,
                     c = parseInt(_twoDigitStartDate.getFullYear() / 100) % 10,
                     m = parseInt(_twoDigitStartDate.getFullYear() / 1000) % 10;
 
-                if ((u + d) > dateComponents)
-                    dateArray[0] = parseInt(dateComponent);
+                if (length == 2 && dateComponent.length == 2)
+                {
+                    if ((u + d * 10) >= parseInt(dateComponent))
+                        dateArray[0] = (c + 1) * 100 + m * 1000 + parseInt(dateComponent);
+                    else
+                        dateArray[0] = c * 100 + m * 1000 + parseInt(dateComponent);
+                }
                 else
-                    dateArray[0] = c * 100 + m * 1000 + parseInt(dateComponent);
+                {
+                    dateArray[0] = parseInt(dateComponent);
+                }
 
                 break;
 
@@ -1117,28 +1131,28 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 var month;
 
                 if (length <= 2)
-                    month = 1 + (parseInt(dateComponent) - 1) * 3
+                    month = (parseInt(dateComponent) - 1) * 3;
 
                 if (length == 3)
                 {
-                    if (![[self shortStandaloneQuarterSymbols] containsObject:dateComponent])
+                    if (![[self shortQuarterSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = 1 + ([[self shortStandaloneQuarterSymbols] indexOfObject:dateComponent] - 1 * 3)
+                    month = [[self shortQuarterSymbols] indexOfObject:dateComponent] * 3;
                 }
 
                 if (length >= 4)
                 {
-                    if (![[self standaloneQuarterSymbols] containsObject:dateComponent])
+                    if (![[self quarterSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = 1 + ([[self standaloneQuarterSymbols] indexOfObject:dateComponent] - 1 * 3)
+                    month = [[self quarterSymbols] indexOfObject:dateComponent] * 3;
                 }
 
                 if (month > 11)
                     return nil;
 
-                dateArray[1] = month;
+                dateArray[1] = month + 1;
 
                 break;
 
@@ -1147,14 +1161,14 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 var month;
 
                 if (length <= 2)
-                    month = (parseInt(dateComponent) - 1) * 3
+                    month = (parseInt(dateComponent) - 1) * 3;
 
                 if (length == 3)
                 {
                     if (![[self shortQuarterSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = [[self shortQuarterSymbols] indexOfObject:dateComponent] * 3
+                    month = [[self shortQuarterSymbols] indexOfObject:dateComponent] * 3;
                 }
 
                 if (length >= 4)
@@ -1162,7 +1176,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     if (![[self quarterSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = [[self quarterSymbols] indexOfObject:dateComponent] * 3
+                    month = [[self quarterSymbols] indexOfObject:dateComponent] * 3;
                 }
 
                 if (month > 11)
@@ -1184,7 +1198,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     if (![[self shortMonthSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = [[self shortMonthSymbols] indexOfObject:dateComponent]
+                    month = [[self shortMonthSymbols] indexOfObject:dateComponent] + 1;
                 }
 
                 if (length == 4)
@@ -1192,21 +1206,13 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     if (![[self monthSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = [[self monthSymbols] indexOfObject:dateComponent]
+                    month = [[self monthSymbols] indexOfObject:dateComponent] + 1;
                 }
 
-                if (length >= 5)
-                {
-                    if (![[self veryShortMonthSymbols] containsObject:dateComponent])
-                        return nil;
-
-                    month = [[self veryShortMonthSymbols] indexOfObject:dateComponent]
-                }
-
-                if (month > 11)
+                if (month > 11 || length >= 5)
                     return nil;
 
-                dateArray[1] = month + 1
+                dateArray[1] = month;
 
                 break;
 
@@ -1215,14 +1221,14 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 var month;
 
                 if (length <= 2)
-                    month = parseInt(dateComponent)
+                    month = parseInt(dateComponent);
 
                 if (length == 3)
                 {
                     if (![[self shortStandaloneMonthSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = [[self shortStandaloneMonthSymbols] indexOfObject:dateComponent]
+                    month = [[self shortStandaloneMonthSymbols] indexOfObject:dateComponent] + 1;
                 }
 
                 if (length == 4)
@@ -1230,21 +1236,13 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     if (![[self standaloneMonthSymbols] containsObject:dateComponent])
                         return nil;
 
-                    month = [[self standaloneMonthSymbols] indexOfObject:dateComponent]
+                    month = [[self standaloneMonthSymbols] indexOfObject:dateComponent] + 1;
                 }
 
-                if (length >= 5)
-                {
-                    if (![[self veryShortSandaloneMonthSymbols] containsObject:dateComponent])
-                        return nil;
-
-                    month = [[self veryShortSandaloneMonthSymbols] indexOfObject:dateComponent]
-                }
-
-                if (month > 11)
+                if (month > 11 || length >= 5)
                     return nil;
 
-                dateArray[1] = month + 1
+                dateArray[1] = month;
 
                 break;
 
@@ -1278,7 +1276,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             case @"D":
 
-                if (dayOfYear > 345)
+                if (isNaN(parseInt(dateComponent)) || parseInt(dateComponent) > 345)
                     return nil;
 
                 dayOfYear = parseInt(dateComponent);
@@ -1287,7 +1285,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             case @"F":
 
-                if (parseInt(dateComponent) > 5 || parseInt(dateComponent) == 0)
+                if (isNaN(parseInt(dateComponent)) || parseInt(dateComponent) > 5 || parseInt(dateComponent) == 0)
                     return nil;
 
                 if (parseInt(dateComponent) == 1)
@@ -1319,18 +1317,18 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 if (length == 4)
                     dayIndexInWeek = [[self weekdaySymbols] indexOfObject:dateComponent];
 
-                if (length == 5)
-                    dayIndexInWeek = [[self veryShortWeekdaySymbols] indexOfObject:dateComponent];
-
-                if (dayIndexInWeek == CPNotFound)
+                if (dayIndexInWeek == CPNotFound || length >= 5)
                     return nil;
 
                 break;
 
             case @"e":
 
+                if (length <= 2 && isNaN(parseInt(dateComponent)))
+                    return nil;
+
                 if (length <= 2)
-                    dayIndexInWeek = dateComponent;
+                    dayIndexInWeek = parseInt(dateComponent);
 
                 if (length == 3)
                     dayIndexInWeek = [[self shortWeekdaySymbols] indexOfObject:dateComponent];
@@ -1338,15 +1336,15 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 if (length == 4)
                     dayIndexInWeek = [[self weekdaySymbols] indexOfObject:dateComponent];
 
-                if (length == 5)
-                    dayIndexInWeek = [[self veryShortWeekdaySymbols] indexOfObject:dateComponent];
-
-                if (dayIndexInWeek == CPNotFound)
+                if (dayIndexInWeek == CPNotFound || length >= 5)
                     return nil;
 
                 break;
 
             case @"c":
+
+                if (length <= 2 && isNaN(parseInt(dateComponent)))
+                    return nil;
 
                 if (length <= 2)
                     dayIndexInWeek = dateComponent;
@@ -1360,7 +1358,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 if (length == 5)
                     dayIndexInWeek = [[self veryShortStandaloneWeekdaySymbols] indexOfObject:dateComponent];
 
-                if (dayIndexInWeek == CPNotFound)
+                if (dayIndexInWeek == CPNotFound || length >= 5)
                     return nil;
 
                 break;
@@ -1377,7 +1375,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             case @"h":
 
-                if (parseInt(dateComponent) < 1 || parseInt(dateComponent) > 12)
+                if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 12)
                     return nil;
 
                 dateArray[3] = parseInt(dateComponent);
@@ -1398,16 +1396,16 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 11)
                     return nil;
 
-                dateArray[3] = parseInt(dateComponent) + 1;
+                dateArray[3] = parseInt(dateComponent);
 
                 break;
 
             case @"k":
 
-                if (parseInt(dateComponent) < 1 || parseInt(dateComponent) > 24)
+                if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 12)
                     return nil;
 
-                dateArray[3] = parseInt(dateComponent) - 1;
+                dateArray[3] = parseInt(dateComponent);
 
                 break;
 
@@ -1439,21 +1437,19 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             case @"S":
 
-                var result = [dateComponent substringFromIndex:0 toIndex:length];
-
-                milliseconds = parseInt(result);
-
-                if (milliseconds > 99)
+                if (isNaN(parseInt(dateComponent)))
                     return nil;
 
                 break;
 
             case @"A":
 
-                var result = [dateComponent substringFromIndex:0 toIndex:length],
-                    millisecondsInDay = parseInt(result);
+                if (isNaN(parseInt(dateComponent)))
+                    return nil;
 
-                var tmpDate = new Date();
+                var millisecondsInDay = parseInt(dateComponent),
+                    tmpDate = new Date();
+
                 tmpDate.setHours(0);
                 tmpDate.setMinutes(0);
                 tmpDate.setSeconds(0);
@@ -1482,8 +1478,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 if (!seconds)
                     return nil;
 
-                defaultTimeZoneSeconds = seconds;
-
                 break;
 
             case @"Z":
@@ -1492,8 +1486,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
                 if (!seconds)
                     return nil;
-
-                defaultTimeZoneSeconds = seconds;
 
                 break;
 
@@ -1510,8 +1502,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 if (!seconds)
                     return nil;
 
-                defaultTimeZoneSeconds = seconds;
-
                 break;
 
             case @"V":
@@ -1527,8 +1517,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 if (!seconds)
                     return nil;
 
-                defaultTimeZoneSeconds = seconds;
-
                 break;
 
             default:
@@ -1537,7 +1525,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         }
     }
 
-    // Make th calcul day of the year
+    // Make the calcul day of the year
     if (dayOfYear)
     {
         var tmpDate = new Date();
@@ -1551,7 +1539,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     }
 
     if (weekOfMonth)
-        dateArray[2] = (weekOfMonth - 1) * 7 + 1
+        dateArray[2] = (weekOfMonth - 1) * 7 + 1;
 
     if (weekOfYear)
     {
@@ -1566,22 +1554,22 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         tmpDate.setDate(tmpDate.getDate() + (weekOfYear - 1) * 7);
 
         dateArray[1] = tmpDate.getMonth() + 1;
-        dateArray[2] = tmpDate.getDate();
+        dateArray[2] = tmpDate.getDate() - 1;
     }
 
-    if (dayIndexInWeek)
-    {
-        var tmpDate = new Date();
-        tmpDate.setFullYear(dateArray[0]);
-        tmpDate.setMonth(dateArray[1] - 1);
-        tmpDate.setDate(dateArray[2]);
-
-        while (tmpDate.getDay() != dayIndexInWeek)
-            tmpDate.setDate(tmpDate.getDate() + 1);
-
-        dateArray[1] = tmpDate.getMonth() + 1;
-        dateArray[2] = tmpDate.getDate();
-    }
+    // if (dayIndexInWeek)
+    // {
+    //     var tmpDate = new Date();
+    //     tmpDate.setFullYear(dateArray[0]);
+    //     tmpDate.setMonth(dateArray[1] - 1);
+    //     tmpDate.setDate(dateArray[2]);
+    //
+    //     while (tmpDate.getDay() != dayIndexInWeek)
+    //         tmpDate.setDate(tmpDate.getDate() + 1);
+    //
+    //     dateArray[1] = tmpDate.getMonth() + 1;
+    //     dateArray[2] = tmpDate.getDate();
+    // }
 
     // Check if the day is possible in the current month
     var tmpDate = new Date();
@@ -1591,16 +1579,15 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     if (dateArray[2] <= 0 || dateArray[2] > [tmpDate _daysInMonth])
         return nil;
 
-    // Change the hour
-    if ([self _isEnglishFormat])
-    {
-        if (dateArray[2] > 12)
-            return nil;
-    }
+    // PM hours
+    if (isPM)
+        dateArray[3] += 12;
 
-    var dateResult = [[CPDate alloc] initWithString:[CPString stringWithFormat:@"%i-%i-%i %i:%i:%i %s", dateArray[0], dateArray[1], dateArray[2], dateArray[3], dateArray[4], dateArray[5], dateArray[6]]];
-    dateResult.setMilliseconds(milliseconds);
-    dateResult.setSeconds(dateResult.getSeconds() + [defaultTimeZoneSeconds secondsFromGMT]);
+    if (isNaN(parseInt(dateArray[0])) || isNaN(parseInt(dateArray[1])) || isNaN(parseInt(dateArray[2])) || isNaN(parseInt(dateArray[3])) || isNaN(parseInt(dateArray[4])) || isNaN(parseInt(dateArray[5])) || isNaN(parseInt(dateArray[6])))
+        return nil;
+
+    var dateResult = [[CPDate alloc] initWithString:[CPString stringWithFormat:@"%04d-%02d-%02d %02d:%02d:%02d %s", dateArray[0], dateArray[1], dateArray[2], dateArray[3], dateArray[4], dateArray[5], dateArray[6]]];
+    dateResult.setSeconds(dateResult.getSeconds() - defaultTimeZoneSeconds + 60 * 60);
 
     return dateResult;
 }
