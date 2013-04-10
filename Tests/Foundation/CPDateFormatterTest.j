@@ -1059,4 +1059,30 @@
     [self assert:result equals:nil];
 }
 
+- (void)testGetObjectValueReturnYes
+{
+    [_dateFormatter setDateFormat:@"d mm"];
+
+    var date = nil,
+        error = @"",
+        result = [_dateFormatter getObjectValue:@ref(date) forString:@"10 12" errorDescription:@ref(error)];
+
+    [self assert:result equals:YES];
+    [self assert:date equals:[[CPDate alloc] initWithString:@"2000-01-10 08:12:00 +0000"]];
+    [self assert:error equals:@""];
+}
+
+- (void)testGetObjectValueReturnNo
+{
+    [_dateFormatter setDateFormat:@"d mm"];
+
+    var date = nil,
+        error = @"",
+        result = [_dateFormatter getObjectValue:@ref(date) forString:@"ezr 12" errorDescription:@ref(error)];
+
+    [self assert:result equals:NO];
+    [self assert:date equals:nil];
+    [self assert:error equals:@"The value \"ezr 12\" is invalid."];
+}
+
 @end
