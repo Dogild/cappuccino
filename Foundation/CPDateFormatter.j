@@ -482,7 +482,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 */
 - (BOOL)getObjectValue:(id)anObject forString:(CPString)aString errorDescription:(CPString)anError
 {
-    // TODO Error handling.
     var value = [self dateFromString:aString];
     @deref(anObject) = value;
 
