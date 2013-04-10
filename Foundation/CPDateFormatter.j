@@ -486,6 +486,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     var value = [self dateFromString:aString];
     @deref(anObject) = value;
 
+    if (!value)
+    {
+        @deref(anError) = @"The value \"" + aString + "\" is invalid.";
+        return NO;
+    }
+
     return YES;
 }
 
