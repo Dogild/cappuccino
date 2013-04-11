@@ -606,6 +606,7 @@ var abbreviationDictionary,
 
 @end
 
+
 @implementation CPDate (CPTimeZone)
 
 /*! Convert a date from a timeZone
@@ -614,6 +615,23 @@ var abbreviationDictionary,
 {
     self.setSeconds(self.getSeconds() - [aTimeZone secondsFromGMTForDate:self]);
     self.setSeconds(self.getSeconds() + [aTimeZone secondsFromGMT]);
+}
+
+@end
+
+
+@implementation CPTimeZone (LocalizeName)
+
++ (CPArray)_namesForStyle:(NSTimeZoneNameStyle)style locale:(CPLocale)aLocale
+{
+    var array = [CPArray array],
+        keys = [localizedName keyEnumerator],
+        key;
+
+    while (key = [keys nextObject])
+        [array addObject:[[localizedName valueForKey:key] objectAtIndex:style]];
+
+    return array;
 }
 
 @end

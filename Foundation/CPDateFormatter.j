@@ -32,7 +32,6 @@
 @global CPLocaleLanguageCode
 @global CPLocaleCountryCode
 
-
 CPDateFormatterNoStyle     = 0;
 CPDateFormatterShortStyle  = 1;
 CPDateFormatterMediumStyle = 2;
@@ -44,7 +43,8 @@ CPDateFormatterBehavior10_0    = 1000;
 CPDateFormatterBehavior10_4    = 1040;
 
 var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
-    relativeDateFormating;
+    relativeDateFormating,
+    patternStringTokens;
 
 /*!
     @ingroup foundation
@@ -98,6 +98,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
       @"fr" : [@"demain", 1440, @"apr" + String.fromCharCode(233) + @"s-demain", 2880, @"apr" + String.fromCharCode(233) + @"s-apr" + String.fromCharCode(233) + @"s-demain", 4320, @"hier", -1440, @"avant-hier", -2880, @"avant-avant-hier", -4320],
       @"en" : [@"tomorrow", 1440, @"yesterday", -1440]
     };
+
+    patternStringTokens = [@"QQQ", @"qqq", @"QQQQ", @"qqqq", @"MMM", @"MMMM", @"LLL", @"LLLL", @"E", @"EE", @"EEE", @"eee", @"eeee", @"eeeee", @"a", @"z", @"zz", @"zzz", @"zzzz", @"Z", @"ZZ", @"ZZZ", @"ZZZZ", @"ZZZZZ", @"v", @"vv", @"vvv", @"vvvv", @"V", @"VV", @"VVV", @"VVVV"];
 }
 
 /*! Return a string representation of the given date, dateStyle and timeStyle
@@ -575,7 +577,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     var currentToken = [CPString new],
         isTextToken = NO,
         tokens = [CPArray array],
-        dateComponents = [CPArray array];
+        dateComponents = [CPArray array],
+        patternTokens = [CPArray array];
 
     for (var i = 0; i < [aFormat length]; i++)
     {
@@ -600,6 +603,10 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
         {
             [tokens addObject:currentToken];
+
+            if ([patternStringTokens containsObject:currentToken])
+                [patternTokens addObject:[tokens count] - 1];
+
             currentToken = [CPString new];
         }
         else
@@ -607,18 +614,32 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:character])
             {
                 [tokens addObject:currentToken];
+
+                if ([patternStringTokens containsObject:currentToken])
+                    [patternTokens addObject:[tokens count] - 1];
+
                 currentToken = [CPString new];
             }
 
             currentToken += character;
 
             if (i == ([aFormat length] - 1))
+            {
                 [tokens addObject:currentToken];
+
+                if ([patternStringTokens containsObject:currentToken])
+                    [patternTokens addObject:[tokens count] - 1];
+            }
         }
     }
 
     isTextToken = NO;
     currentToken = [CPString new];
+
+    var currentIndexSpecialPattern = 0;
+
+    if ([patternTokens count] == 0)
+        [patternTokens addObject:CPNotFound];
 
     for (var i = 0; i < [aString length]; i++)
     {
@@ -636,6 +657,21 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         {
             if (!isTextToken)
                 isTextToken = YES;
+
+            continue;
+        }
+
+        // Need to do this to check if the word match with the token. We can get some words with space...
+        if ([dateComponents count] == [patternTokens objectAtIndex:currentIndexSpecialPattern])
+        {
+            var j = [self _lastIndexMatchedString:aString token:[tokens objectAtIndex:[dateComponents count]] index:i];
+
+            if (j == CPNotFound)
+                return nil;
+
+            currentIndexSpecialPattern++;
+            [dateComponents addObject:[aString substringWithRange:CPMakeRange(i, (j - i))]];
+            i = j;
 
             continue;
         }
@@ -1042,7 +1078,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 CPLog.warn(@"No pattern found for " + aToken);
                 return @"";
             }
-
 
             return @" ";
 
@@ -1630,16 +1665,16 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
 - (int)_secondsFromTimeZoneDefaultFormatString:(CPString)aTimeZoneFormatString
 {
-    var format = /([HPG-GMT])?([+-])(\d{1,2})([:])?(\d{2})/,
+    var format =  /\w*([HPG-GMT])?([+-])(\d{1,2})([:])?(\d{2})\w*/,
         result = aTimeZoneFormatString.match(new RegExp(format)),
         seconds = 0;
 
     if (!result)
         return nil;
 
-    seconds = result[2] * 60 * 60 + result[4] * 60;
+    seconds = result[3] * 60 * 60 + result[5] * 60;
 
-    if ([result[1] isEqualToString:@"-"])
+    if ([result[2] isEqualToString:@"-"])
         seconds = -seconds;
 
     return seconds;
@@ -1653,6 +1688,172 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         return nil;
 
     return [timeZone secondsFromGMT];
+}
+
+- (int)_lastIndexMatchedString:(CPString)aString token:(CPString)aToken index:anIndex
+{
+    var character = [aToken characterAtIndex:0],
+        length = [aToken length],
+        targetedArray,
+        format = /\w*([HPG-GMT])?([+-])(\d{1,2})([:])?(\d{2})\w*/,
+        result = aString.match(new RegExp(format));
+
+    switch (character)
+    {
+        case @"Q":
+
+            if (length == 3)
+                targetedArray = [self shortQuarterSymbols];
+
+            if (length >= 4)
+                targetedArray = [self quarterSymbols];
+
+            break;
+
+        case @"q":
+
+            if (length == 3)
+                targetedArray = [self shortStandaloneQuarterSymbols];
+
+            if (length >= 4)
+                targetedArray = [self standaloneQuarterSymbols];
+
+            break;
+
+        case @"M":
+
+            if (length == 3)
+                targetedArray = [self shortMonthSymbols];
+
+            if (length == 4)
+                targetedArray = [self monthSymbols];
+
+            if (length >= 5)
+                targetedArray = [self veryShortMonthSymbols];
+
+            break;
+
+        case @"L":
+
+            if (length == 3)
+                targetedArray = [self shortStandaloneMonthSymbols];
+
+            if (length == 4)
+                targetedArray = [self standaloneMonthSymbols];
+
+            if (length >= 5)
+                targetedArray = [self veryShortSandaloneMonthSymbols];
+
+            break;
+
+        case @"E":
+
+            if (length <= 3)
+                targetedArray = [self shortWeekdaySymbols];
+
+            if (length == 4)
+                targetedArray = [self weekdaySymbols];
+
+            if (length >= 5)
+                targetedArray = [self veryShortWeekdaySymbols];
+
+            break;
+
+        case @"e":
+
+            if (length == 3)
+                targetedArray = [self shortWeekdaySymbols];
+
+            if (length == 4)
+                targetedArray = [self weekdaySymbols];
+
+            if (length >= 5)
+                targetedArray = [self veryShortWeekdaySymbols];
+
+            break;
+
+        case @"c":
+
+            if (length == 3)
+                targetedArray = [self shortStandaloneWeekdaySymbols];
+
+            if (length == 4)
+                targetedArray = [self standaloneWeekdaySymbols];
+
+            if (length >= 5)
+                targetedArray = [self veryShortStandaloneWeekdaySymbols];
+
+            break;
+
+        case @"a":
+
+            targetedArray = [[self PMSymbol], [self AMSymbol]];
+
+            break;
+
+        case @"z":
+
+            if (length <= 3)
+                targetedArray =  [CPTimeZone _namesForStyle:CPTimeZoneNameStyleShortDaylightSaving locale:_locale];
+            else
+                targetedArray =  [CPTimeZone _namesForStyle:CPTimeZoneNameStyleDaylightSaving locale:_locale];
+
+            if (result)
+                return anIndex + [result objectAtIndex:0].length;
+
+            break;
+
+        case @"Z":
+
+            if (result)
+                return anIndex + [result objectAtIndex:0].length;
+
+            return CPNotFound;
+
+        case @"v":
+
+            if (length == 1)
+                targetedArray =  [CPTimeZone _namesForStyle:CPTimeZoneNameStyleShortGeneric locale:_locale];
+            else if (length == 4)
+                targetedArray =  [CPTimeZone _namesForStyle:CPTimeZoneNameStyleGeneric locale:_locale];
+
+            if (result)
+                return anIndex + [result objectAtIndex:0].length;
+
+            break;
+
+        case @"V":
+
+            if (length == 1)
+                targetedArray = [CPTimeZone _namesForStyle:CPTimeZoneNameStyleShortStandard locale:_locale];
+
+            if (result)
+                return anIndex + [result objectAtIndex:0].length;
+
+            break;
+
+        default:
+            CPLog.warn(@"No pattern found for " + aToken);
+            return CPNotFound;
+    }
+
+    for (var i = 0; i < [targetedArray count]; i++)
+    {
+        var currentObject = [targetedArray objectAtIndex:i],
+            range = [aString rangeOfString:currentObject];
+
+        if (range.length == 0)
+            continue;
+
+        character = [aString characterAtIndex:(anIndex + range.length)];
+
+        if ([character isEqualToString:@"'"] || [character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "] || [character isEqualToString:@""])
+            return anIndex + range.length;
+
+        return CPNotFound;
+    }
+
+    return CPNotFound;
 }
 
 @end
