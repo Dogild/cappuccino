@@ -128,7 +128,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 */
 + (CPString)dateFormatFromTemplate:(CPString)template options:(CPUInteger)opts locale:(CPLocale)locale
 {
-
+    // TODO : check every template from cocoa and return a good format (have fun ^^)
 }
 
 /*! Return the defaultFormatterBehavior
