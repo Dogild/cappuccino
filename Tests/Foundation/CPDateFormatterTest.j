@@ -47,6 +47,121 @@
     [_dateFormatter setTimeZone:[CPTimeZone timeZoneWithAbbreviation:@"PDT"]];
 }
 
+
+#pragma mark -
+#pragma mark Setter
+
+- (void)testSetterAMSymbol
+{
+    [_dateFormatter setAMSymbol:@"Hej hej"];
+    [self assert:[_dateFormatter AMSymbol] equals:@"Hej hej"];
+}
+
+- (void)testSetterPMSymbol
+{
+    [_dateFormatter setPMSymbol:@"Hej hej"];
+    [self assert:[_dateFormatter PMSymbol] equals:@"Hej hej"];
+}
+
+- (void)testSetterWeekdaySymbols
+{
+    [_dateFormatter setWeekdaySymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter weekdaySymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterShortWeekdaySymbols
+{
+    [_dateFormatter setShortWeekdaySymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter shortWeekdaySymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterVeryShortWeekdaySymbols
+{
+    [_dateFormatter setVeryShortWeekdaySymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter veryShortWeekdaySymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterStandaloneWeekdaySymbols
+{
+    [_dateFormatter setStandaloneWeekdaySymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter standaloneWeekdaySymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterShortStandaloneWeekdaySymbols
+{
+    [_dateFormatter setShortStandaloneWeekdaySymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter shortStandaloneWeekdaySymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterVeryShortStandaloneWeekdaySymbols
+{
+    [_dateFormatter setVeryShortStandaloneWeekdaySymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter veryShortStandaloneWeekdaySymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterMonthSymbols
+{
+    [_dateFormatter setMonthSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter monthSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterShortMonthSymbols
+{
+    [_dateFormatter setShortMonthSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter shortMonthSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterVeryShortMonthSymbols
+{
+    [_dateFormatter setVeryShortMonthSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter veryShortMonthSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterStandaloneMonthSymbols
+{
+    [_dateFormatter setStandaloneMonthSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter standaloneMonthSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterShortStandaloneMonthSymbols
+{
+    [_dateFormatter setShortStandaloneMonthSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter shortStandaloneMonthSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterVeryShortStandaloneMonthSymbols
+{
+    [_dateFormatter setVeryShortStandaloneMonthSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter veryShortStandaloneMonthSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterQuarterSymbols
+{
+    [_dateFormatter setQuarterSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter quarterSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterShortQuarterSymbols
+{
+    [_dateFormatter setShortQuarterSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter shortQuarterSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterStandaloneQuarterSymbols
+{
+    [_dateFormatter setStandaloneQuarterSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter standaloneQuarterSymbols] equals:[@"Hej hej"]];
+}
+
+- (void)testSetterShortStandaloneQuarterSymbols
+{
+    [_dateFormatter setShortStandaloneQuarterSymbols:[@"Hej hej"]];
+    [self assert:[_dateFormatter shortStandaloneQuarterSymbols] equals:[@"Hej hej"]];
+}
+
+#pragma mark -
+#pragma mark string from date
+
 - (void)testLocalizedStringFromDate
 {
     var result = [CPDateFormatter localizedStringFromDate:_date dateStyle:CPDateFormatterMediumStyle timeStyle:CPDateFormatterNoStyle];
