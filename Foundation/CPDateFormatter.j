@@ -225,181 +225,253 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 #pragma mark -
 #pragma mark Setter Getter
 
+/*! Return AMSymbol
+*/
 - (CPString)AMSymbol
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"AMSymbol"];
 }
 
+/*! Set the AMSymbol
+*/
 - (void)setAMSymbol:(CPString)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"AMSymbol"];
 }
 
+/*! Return a PMSymbol
+*/
 - (CPString)PMSymbol
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"PMSymbol"];
 }
 
+/*! Set the PMSymbol
+*/
 - (void)setPMSymbol:(CPString)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"PMSymbol"];
 }
 
+/*! Return the weekdaySymbols
+*/
 - (CPArray)weekdaySymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"weekdaySymbols"];
 }
 
+/*! Set the weekdaySymbols
+*/
 - (void)setWeekdaySymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"weekdaySymbols"];
 }
 
+/*! Return a shortWeekdaySymbols
+*/
 - (CPArray)shortWeekdaySymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortWeekdaySymbols"];
 }
 
+/*! Set the shortWeekdaySymbols
+*/
 - (void)setShortWeekdaySymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortWeekdaySymbols"];
 }
 
+/*! Return veryShortWeekdaySymbols
+*/
 - (CPArray)veryShortWeekdaySymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortWeekdaySymbols"];
 }
 
+/*! Set the veryShortWeekdaySymbols
+*/
 - (void)setVeryShortWeekdaySymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortWeekdaySymbols"];
 }
 
+/*! Return the standaloneWeekdaySymbols
+*/
 - (CPArray)standaloneWeekdaySymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"standaloneWeekdaySymbols"];
 }
 
+/*! Set the standaloneWeekdaySymbols
+*/
 - (void)setStandaloneWeekdaySymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"standaloneWeekdaySymbols"];
 }
 
+/*! Return the shortStandaloneWeekdaySymbols
+*/
 - (CPArray)shortStandaloneWeekdaySymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortStandaloneWeekdaySymbols"];
 }
 
+/*! Set the shortStandaloneWeekdaySymbols
+*/
 - (void)setShortStandaloneWeekdaySymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortStandaloneWeekdaySymbols"];
 }
 
+/*! Return the veryShortStandaloneWeekdaySymbols
+*/
 - (CPArray)veryShortStandaloneWeekdaySymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortStandaloneWeekdaySymbols"];
 }
 
+/*! Set the veryShortStandaloneWeekdaySymbols
+*/
 - (void)setVeryShortStandaloneWeekdaySymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortStandaloneWeekdaySymbols"];
 }
 
+/*! Return the monthSymbols
+*/
 - (CPArray)monthSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"monthSymbols"];
 }
 
+/*! Set the monthSymbols
+*/
 - (void)setMonthSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"monthSymbols"];
 }
 
+/*! Return a shortMonthSymbols
+*/
 - (CPArray)shortMonthSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortMonthSymbols"];
 }
 
+/*! Set the shortMonthSymbols
+*/
 - (void)setShortMonthSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortMonthSymbols"];
 }
 
+/*! Return veryShortMonthSymbols
+*/
 - (CPArray)veryShortMonthSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortMonthSymbols"];
 }
 
+/*! Set the veryShortMonthSymbols
+*/
 - (void)setVeryShortMonthSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortMonthSymbols"];
 }
 
+/*! Return standaloneMonthSymbols
+*/
 - (CPArray)standaloneMonthSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"standaloneMonthSymbols"];
 }
 
+/*! Set the standaloneMonthSymbols
+*/
 - (void)setStandaloneMonthSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"standaloneMonthSymbols"];
 }
 
+/*! Return the shortStandaloneMonthSymbols
+*/
 - (CPArray)shortStandaloneMonthSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortStandaloneMonthSymbols"];
 }
 
+/*! Set the shortStandaloneMonthSymbols
+*/
 - (void)setShortStandaloneMonthSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortStandaloneMonthSymbols"];
 }
 
+/*! Return the veryShortStandaloneMonthSymbols
+*/
 - (CPArray)veryShortStandaloneMonthSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortStandaloneMonthSymbols"];
 }
 
+/*! Set the veryShortStandaloneMonthSymbols
+*/
 - (void)setVeryShortStandaloneMonthSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortStandaloneMonthSymbols"];
 }
 
+/*! Return the quarterSymbols
+*/
 - (CPArray)quarterSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"quarterSymbols"];
 }
 
+/*! Set the quarterSymbols
+*/
 - (void)setQuarterSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"quarterSymbols"];
 }
 
+/*! Return the shortQuarterSymbols
+*/
 - (CPArray)shortQuarterSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortQuarterSymbols"];
 }
 
+/*! Set the shortQuarterSymbols
+*/
 - (void)setShortQuarterSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortQuarterSymbols"];
 }
 
+/*! Return the standaloneQuarterSymbols
+*/
 - (CPArray)standaloneQuarterSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"standaloneQuarterSymbols"];
 }
 
+/*! Set the standaloneQuarterSymbols
+*/
 - (void)setStandaloneQuarterSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"standaloneQuarterSymbols"];
 }
 
+/*! Return the shortStandaloneQuarterSymbols
+*/
 - (CPArray)shortStandaloneQuarterSymbols
 {
     return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortStandaloneQuarterSymbols"];
 }
 
+/*! Set the shortStandaloneQuarterSymbols
+*/
 - (void)setShortStandaloneQuarterSymbols:(CPArray)aValue
 {
     [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortStandaloneQuarterSymbols"];
