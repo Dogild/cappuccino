@@ -623,16 +623,3 @@ var abbreviationDictionary,
 }
 
 @end
-
-
-@implementation CPDate (CPTimeZone)
-
-/*! Convert a date from a timeZone
-*/
-- (void)_dateWithTimeZone:(CPTimeZone)aTimeZone
-{
-    self.setSeconds(self.getSeconds() - [aTimeZone secondsFromGMTForDate:self]);
-    self.setSeconds(self.getSeconds() + [aTimeZone secondsFromGMT]);
-}
-
-@end
