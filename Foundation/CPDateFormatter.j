@@ -60,22 +60,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 {
     BOOL                    _allowNaturalLanguage               @accessors(property=allowNaturalLanguage, readonly);
     BOOL                    _doesRelativeDateFormatting         @accessors(property=doesRelativeDateFormatting);
-    CPArray                 _weekdaySymbols                     @accessors(property=weekdaySymbols);
-    CPArray                 _shortWeekdaySymbols                @accessors(property=shortWeekdaySymbols);
-    CPArray                 _veryShortWeekdaySymbols            @accessors(property=veryShortWeekdaySymbols);
-    CPArray                 _standaloneWeekdaySymbols           @accessors(property=standaloneWeekdaySymbols);
-    CPArray                 _shortStandaloneWeekdaySymbols      @accessors(property=shortStandaloneWeekdaySymbols);
-    CPArray                 _veryShortStandaloneWeekdaySymbols  @accessors(property=veryShortStandaloneWeekdaySymbols);
-    CPArray                 _monthSymbols                       @accessors(property=monthSymbols);
-    CPArray                 _shortMonthSymbols                  @accessors(property=shortMonthSymbols);
-    CPArray                 _veryShortMonthSymbols              @accessors(property=veryShortMonthSymbols);
-    CPArray                 _standaloneMonthSymbols             @accessors(property=standaloneMonthSymbols);
-    CPArray                 _shortStandaloneMonthSymbols        @accessors(property=shortStandaloneMonthSymbols);
-    CPArray                 _veryShortStandaloneMonthSymbols    @accessors(property=veryShortSandaloneMonthSymbols);
-    CPArray                 _quarterSymbols                     @accessors(property=quarterSymbols);
-    CPArray                 _shortQuarterSymbols                @accessors(property=shortQuarterSymbols);
-    CPArray                 _standaloneQuarterSymbols           @accessors(property=standaloneQuarterSymbols);
-    CPArray                 _shortStandaloneQuarterSymbols      @accessors(property=shortStandaloneQuarterSymbols);
     CPDate                  _defaultDate                        @accessors(property=defaultDate);
     CPDate                  _twoDigitStartDate                  @accessors(property=twoDigitStartDate);
     CPDateFormatterBehavior _formatterBehavior                  @accessors(property=formatterBehavior);
@@ -86,6 +70,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     CPString                _dateFormat                         @accessors(property=dateFormat);
     CPString                _PMSymbol                           @accessors(property=PMSymbol);
     CPTimeZone              _timeZone                           @accessors(property=timeZone);
+
+    CPDictionary            _symbols;
 }
 
 
@@ -96,7 +82,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
     relativeDateFormating = @{
       @"fr" : [@"demain", 1440, @"apr" + String.fromCharCode(233) + @"s-demain", 2880, @"apr" + String.fromCharCode(233) + @"s-apr" + String.fromCharCode(233) + @"s-demain", 4320, @"hier", -1440, @"avant-hier", -2880, @"avant-avant-hier", -4320],
-      @"en" : [@"tomorrow", 1440, @"yesterday", -1440]
+      @"en" : [@"tomorrow", 1440, @"yesterday", -1440],
+      @"de" : [],
+      @"es" : []
     };
 
     patternStringTokens = [@"QQQ", @"qqq", @"QQQQ", @"qqqq", @"MMM", @"MMMM", @"LLL", @"LLLL", @"E", @"EE", @"EEE", @"eee", @"eeee", @"eeeee", @"a", @"z", @"zz", @"zzz", @"zzzz", @"Z", @"ZZ", @"ZZZ", @"ZZZZ", @"ZZZZZ", @"v", @"vv", @"vvv", @"vvvv", @"V", @"VV", @"VVV", @"VVVV"];
@@ -183,33 +171,243 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 */
 - (void)_init
 {
-    // TODO :  these datas have to be in CPUserDefault
-    _AMSymbol = [CPString stringWithFormat:@"%s", @"AM"];
-    _PMSymbol = [CPString stringWithFormat:@"%s", @"PM"];
+    var AMSymbol = [CPString stringWithFormat:@"%s", @"AM"],
+        PMSymbol = [CPString stringWithFormat:@"%s", @"PM"],
+        weekdaySymbols = [CPArray arrayWithObjects:@"Sunday", @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday"],
+        shortWeekdaySymbols = [CPArray arrayWithObjects:@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"],
+        veryShortWeekdaySymbols = [CPArray arrayWithObjects:@"S", @"M", @"T", @"W", @"T", @"F", @"S"],
+        standaloneWeekdaySymbols = [CPArray arrayWithObjects:@"Sunday", @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday"],
+        shortStandaloneWeekdaySymbols = [CPArray arrayWithObjects:@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"],
+        veryShortStandaloneWeekdaySymbols = [CPArray arrayWithObjects:@"S", @"M", @"T", @"W", @"T", @"F", @"S"],
+        monthSymbols = [CPArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December"],
+        shortMonthSymbols = [CPArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec"],
+        veryShortMonthSymbols = [CPArray arrayWithObjects:@"J", @"F", @"M", @"A", @"M", @"J", @"J", @"A", @"S", @"O", @"N", @"D"],
+        standaloneMonthSymbols = [CPArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December"],
+        shortStandaloneMonthSymbols = [CPArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec"],
+        veryShortStandaloneMonthSymbols = [CPArray arrayWithObjects:@"J", @"F", @"M", @"A", @"M", @"J", @"J", @"A", @"S", @"O", @"N", @"D"],
+        quarterSymbols = [CPArray arrayWithObjects:@"1st quarter", @"2nd quarter", @"3rd quarter", @"4th quarter"],
+        shortQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"],
+        standaloneQuarterSymbols = [CPArray arrayWithObjects:@"1st quarter", @"2nd quarter", @"3rd quarter", @"4th quarter"],
+        shortStandaloneQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
 
-    _weekdaySymbols = [CPArray arrayWithObjects:@"Sunday", @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday"];
-    _shortWeekdaySymbols = [CPArray arrayWithObjects:@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"];
-    _veryShortWeekdaySymbols = [CPArray arrayWithObjects:@"S", @"M", @"T", @"W", @"T", @"F", @"S"];
-    _standaloneWeekdaySymbols = [CPArray arrayWithObjects:@"Sunday", @"Monday", @"Tuesday", @"Wednesday", @"Thursday", @"Friday", @"Saturday"];
-    _shortStandaloneWeekdaySymbols = [CPArray arrayWithObjects:@"Sun", @"Mon", @"Tue", @"Wed", @"Thu", @"Fri", @"Sat"];
-    _veryShortStandaloneWeekdaySymbols = [CPArray arrayWithObjects:@"S", @"M", @"T", @"W", @"T", @"F", @"S"];
-
-    _monthSymbols = [CPArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December"];
-    _shortMonthSymbols = [CPArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec"];
-    _veryShortMonthSymbols = [CPArray arrayWithObjects:@"J", @"F", @"M", @"A", @"M", @"J", @"J", @"A", @"S", @"O", @"N", @"D"];
-    _standaloneMonthSymbols = [CPArray arrayWithObjects:@"January", @"February", @"March", @"April", @"May", @"June", @"July", @"August", @"September", @"October", @"November", @"December"];
-    _shortStandaloneMonthSymbols = [CPArray arrayWithObjects:@"Jan", @"Feb", @"Mar", @"Apr", @"May", @"Jun", @"Jul", @"Aug", @"Sep", @"Oct", @"Nov", @"Dec"];
-    _veryShortStandaloneMonthSymbols = [CPArray arrayWithObjects:@"J", @"F", @"M", @"A", @"M", @"J", @"J", @"A", @"S", @"O", @"N", @"D"];
-
-    _quarterSymbols = [CPArray arrayWithObjects:@"1st quarter", @"2nd quarter", @"3rd quarter", @"4th quarter"];
-    _shortQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
-    _standaloneQuarterSymbols = [CPArray arrayWithObjects:@"1st quarter", @"2nd quarter", @"3rd quarter", @"4th quarter"];
-    _shortStandaloneQuarterSymbols = [CPArray arrayWithObjects:@"Q1", @"Q2", @"Q3", @"Q4"];
+    _symbols = @{
+        @"en" : @{
+            @"AMSymbol" : AMSymbol,
+            @"PMSymbol" : PMSymbol,
+            @"weekdaySymbols" : weekdaySymbols,
+            @"shortWeekdaySymbols" : shortWeekdaySymbols,
+            @"veryShortWeekdaySymbols" : veryShortWeekdaySymbols,
+            @"standaloneWeekdaySymbols" : standaloneWeekdaySymbols,
+            @"shortStandaloneWeekdaySymbols" : shortStandaloneWeekdaySymbols,
+            @"veryShortStandaloneWeekdaySymbols" : veryShortStandaloneWeekdaySymbols,
+            @"monthSymbols" : monthSymbols,
+            @"shortMonthSymbols" : shortMonthSymbols,
+            @"veryShortMonthSymbols" : veryShortMonthSymbols,
+            @"standaloneMonthSymbols" : standaloneMonthSymbols,
+            @"shortStandaloneMonthSymbols" : shortStandaloneMonthSymbols,
+            @"veryShortStandaloneMonthSymbols" : veryShortStandaloneMonthSymbols,
+            @"quarterSymbols" : quarterSymbols,
+            @"shortQuarterSymbols" : shortQuarterSymbols,
+            @"standaloneQuarterSymbols" : standaloneQuarterSymbols,
+            @"shortStandaloneQuarterSymbols" : shortStandaloneQuarterSymbols
+        },
+        @"fr" : @{},
+        @"es" : @{},
+        @"de" : @{}
+    };
 
     _timeZone = [CPTimeZone systemTimeZone];
     _twoDigitStartDate = [[CPDate alloc] initWithString:@"1950-01-01 00:00:00 +0000"];
     _locale = [CPLocale currentLocale];
 }
+
+
+#pragma mark -
+#pragma mark Setter Getter
+
+- (CPString)AMSymbol
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"AMSymbol"];
+}
+
+- (void)setAMSymbol:(CPString)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"AMSymbol"];
+}
+
+- (CPString)PMSymbol
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"PMSymbol"];
+}
+
+- (void)setPMSymbol:(CPString)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"PMSymbol"];
+}
+
+- (CPArray)weekdaySymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"weekdaySymbols"];
+}
+
+- (void)setWeekdaySymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"weekdaySymbols"];
+}
+
+- (CPArray)shortWeekdaySymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortWeekdaySymbols"];
+}
+
+- (void)setShortWeekdaySymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortWeekdaySymbols"];
+}
+
+- (CPArray)veryShortWeekdaySymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortWeekdaySymbols"];
+}
+
+- (void)setVeryShortWeekdaySymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortWeekdaySymbols"];
+}
+
+- (CPArray)standaloneWeekdaySymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"standaloneWeekdaySymbols"];
+}
+
+- (void)setStandaloneWeekdaySymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"standaloneWeekdaySymbols"];
+}
+
+- (CPArray)shortStandaloneWeekdaySymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortStandaloneWeekdaySymbols"];
+}
+
+- (void)setShortStandaloneWeekdaySymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortStandaloneWeekdaySymbols"];
+}
+
+- (CPArray)veryShortStandaloneWeekdaySymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortStandaloneWeekdaySymbols"];
+}
+
+- (void)setVeryShortStandaloneWeekdaySymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortStandaloneWeekdaySymbols"];
+}
+
+- (CPArray)monthSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"monthSymbols"];
+}
+
+- (void)setMonthSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"monthSymbols"];
+}
+
+- (CPArray)shortMonthSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortMonthSymbols"];
+}
+
+- (void)setShortMonthSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortMonthSymbols"];
+}
+
+- (CPArray)veryShortMonthSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortMonthSymbols"];
+}
+
+- (void)setVeryShortMonthSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortMonthSymbols"];
+}
+
+- (CPArray)standaloneMonthSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"standaloneMonthSymbols"];
+}
+
+- (void)setStandaloneMonthSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"standaloneMonthSymbols"];
+}
+
+- (CPArray)shortStandaloneMonthSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortStandaloneMonthSymbols"];
+}
+
+- (void)setShortStandaloneMonthSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortStandaloneMonthSymbols"];
+}
+
+- (CPArray)veryShortStandaloneMonthSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"veryShortStandaloneMonthSymbols"];
+}
+
+- (void)setVeryShortStandaloneMonthSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"veryShortStandaloneMonthSymbols"];
+}
+
+- (CPArray)quarterSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"quarterSymbols"];
+}
+
+- (void)setQuarterSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"quarterSymbols"];
+}
+
+- (CPArray)shortQuarterSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortQuarterSymbols"];
+}
+
+- (void)setShortQuarterSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortQuarterSymbols"];
+}
+
+- (CPArray)standaloneQuarterSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"standaloneQuarterSymbols"];
+}
+
+- (void)setStandaloneQuarterSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"standaloneQuarterSymbols"];
+}
+
+- (CPArray)shortStandaloneQuarterSymbols
+{
+    return [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] valueForKey:@"shortStandaloneQuarterSymbols"];
+}
+
+- (void)setShortStandaloneQuarterSymbols:(CPArray)aValue
+{
+    [[_symbols valueForKey:[_locale objectForKey:CPLocaleLanguageCode]] setValue:aValue forKey:@"shortStandaloneQuarterSymbols"];
+}
+
+
+#pragma mark -
+#pragma mark StringFromDate methods
 
 /*! Return a string representation of a given date.
     This method returns (if possible) a representation of the given date with the dateFormat of the CPDateFormatter, otherwise it takes the dateStyle and timeStyle
@@ -350,109 +548,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     return result;
 }
 
-/*! Return a date of the given string
-    This method returns (if possible) a representation of the given string with the dateFormat of the CPDateFormatter, otherwise it takes the dateStyle and timeStyle
-    @param aString
-    @return CPDate the date
-*/
-- (CPDate)dateFromString:(CPString)aString
-{
-    if (aString == nil)
-        return nil;
-
-    var format;
-
-    if (_dateFormat != nil)
-        return [self _dateFromString:aString format:_dateFormat];
-
-    switch (_dateStyle)
-    {
-        case CPDateFormatterNoStyle:
-            format = @"";
-            break;
-
-        case CPDateFormatterShortStyle:
-
-            if ([self _isAmericanFormat])
-                format = @"M/d/yy";
-            else
-                format = @"dd/MM/yy";
-
-            break;
-
-        case CPDateFormatterMediumStyle:
-
-            if ([self _isAmericanFormat])
-                format = @"MMM d, Y";
-            else
-                format = @"d MMM Y";
-            break;
-
-        case CPDateFormatterLongStyle:
-
-            if ([self _isAmericanFormat])
-                format = @"MMMM d, Y";
-            else
-                format = @"d MMMM Y";
-            break;
-
-        case CPDateFormatterFullStyle:
-
-            if ([self _isAmericanFormat])
-                format = @"EEEE, MMMM d, Y";
-            else
-                format = @"EEEE d MMMM Y";
-            break;
-
-        default:
-            format = @"";
-    }
-
-    switch (_timeStyle)
-    {
-        case CPDateFormatterNoStyle:
-            format += @"";
-            break;
-
-        case CPDateFormatterShortStyle:
-
-            if ([self _isEnglishFormat])
-                format += @" h:mm a";
-            else
-                format += @" H:mm";
-            break;
-
-        case CPDateFormatterMediumStyle:
-
-            if ([self _isEnglishFormat])
-                format += @" h:mm:ss a";
-            else
-                format += @" H:mm:ss"
-            break;
-
-        case CPDateFormatterLongStyle:
-
-            if ([self _isEnglishFormat])
-                format += @" h:mm:ss a z";
-            else
-                format += @" H:mm:ss z";
-            break;
-
-        case CPDateFormatterFullStyle:
-
-            if ([self _isEnglishFormat])
-                format += @" h:mm:ss a zzzz";
-            else
-                format += @" h:mm:ss zzzz";
-            break;
-
-        default:
-            format += @"";
-    }
-
-    return [self _dateFromString:aString format:format];
-}
-
 /*! Return a string representation of the given objectValue.
     This method call the method stringFromDate if possible, otherwise it returns the description of the object
     @param anObject
@@ -474,26 +569,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 - (CPString)editingStringForObjectValue:(id)anObject
 {
     return [self stringForObjectValue:anObject];
-}
-
-/*! Returns a boolean if the given object has been changed or not depending of the given string (use of ref)
-    @param anObject the given object
-    @param aString
-    @param anError, if it returns NO the describe error will be in anError (use of ref)
-    @return aBoolean for the success or fail of the method
-*/
-- (BOOL)getObjectValue:(id)anObject forString:(CPString)aString errorDescription:(CPString)anError
-{
-    var value = [self dateFromString:aString];
-    @deref(anObject) = value;
-
-    if (!value)
-    {
-        @deref(anError) = @"The value \"" + aString + "\" is invalid.";
-        return NO;
-    }
-
-    return YES;
 }
 
 /*! Return a string representation of the given date and format
@@ -562,138 +637,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     }
 
     return result;
-}
-
-/*! Return a date representation of the given string and format
-    @patam aDate
-    @param aFormat
-    @return a string
-*/
-- (CPDate)_dateFromString:(CPString)aString format:(CPString)aFormat
-{
-    if (aString == nil || aFormat == nil)
-        return nil;
-
-    var currentToken = [CPString new],
-        isTextToken = NO,
-        tokens = [CPArray array],
-        dateComponents = [CPArray array],
-        patternTokens = [CPArray array];
-
-    for (var i = 0; i < [aFormat length]; i++)
-    {
-        var character = [aFormat characterAtIndex:i];
-
-        if (isTextToken)
-        {
-            if ([character isEqualToString:@"'"])
-                currentToken = [CPString new];
-
-            continue;
-        }
-
-        if ([character isEqualToString:@"'"])
-        {
-            if (!isTextToken)
-                isTextToken = YES;
-
-            continue;
-        }
-
-        if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
-        {
-            [tokens addObject:currentToken];
-
-            if ([patternStringTokens containsObject:currentToken])
-                [patternTokens addObject:[tokens count] - 1];
-
-            currentToken = [CPString new];
-        }
-        else
-        {
-            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:character])
-            {
-                [tokens addObject:currentToken];
-
-                if ([patternStringTokens containsObject:currentToken])
-                    [patternTokens addObject:[tokens count] - 1];
-
-                currentToken = [CPString new];
-            }
-
-            currentToken += character;
-
-            if (i == ([aFormat length] - 1))
-            {
-                [tokens addObject:currentToken];
-
-                if ([patternStringTokens containsObject:currentToken])
-                    [patternTokens addObject:[tokens count] - 1];
-            }
-        }
-    }
-
-    isTextToken = NO;
-    currentToken = [CPString new];
-
-    var currentIndexSpecialPattern = 0;
-
-    if ([patternTokens count] == 0)
-        [patternTokens addObject:CPNotFound];
-
-    for (var i = 0; i < [aString length]; i++)
-    {
-        var character = [aString characterAtIndex:i];
-
-        if (isTextToken)
-        {
-            if ([character isEqualToString:@"'"])
-                currentToken = [CPString new];
-
-            continue;
-        }
-
-        if ([character isEqualToString:@"'"])
-        {
-            if (!isTextToken)
-                isTextToken = YES;
-
-            continue;
-        }
-
-        // Need to do this to check if the word match with the token. We can get some words with space...
-        if ([dateComponents count] == [patternTokens objectAtIndex:currentIndexSpecialPattern])
-        {
-            var j = [self _lastIndexMatchedString:aString token:[tokens objectAtIndex:[dateComponents count]] index:i];
-
-            if (j == CPNotFound)
-                return nil;
-
-            currentIndexSpecialPattern++;
-            [dateComponents addObject:[aString substringWithRange:CPMakeRange(i, (j - i))]];
-            i = j;
-
-            continue;
-        }
-
-        if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
-        {
-            [dateComponents addObject:currentToken];
-            currentToken = [CPString new];
-        }
-        else
-        {
-            currentToken += character;
-
-            if (i == ([aString length] - 1))
-                [dateComponents addObject:currentToken];
-        }
-    }
-
-    if ([dateComponents count] != [tokens count])
-        return nil;
-
-    return [self _dateFromTokens:tokens dateComponents:dateComponents];
 }
 
 /*! Return a string representation of the given token and date
@@ -806,7 +749,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 return [[self standaloneMonthSymbols] objectAtIndex:aDate.getMonth()];
 
             if (length >= 5)
-                return [[self veryShortSandaloneMonthSymbols] objectAtIndex:aDate.getMonth()];
+                return [[self veryShortStandaloneMonthSymbols] objectAtIndex:aDate.getMonth()];
 
         case @"I":
             // Deprecated
@@ -1088,6 +1031,265 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
     return [CPString new];
 
+}
+
+
+#pragma mark -
+#pragma mark datefromString
+
+/*! Return a date of the given string
+    This method returns (if possible) a representation of the given string with the dateFormat of the CPDateFormatter, otherwise it takes the dateStyle and timeStyle
+    @param aString
+    @return CPDate the date
+*/
+- (CPDate)dateFromString:(CPString)aString
+{
+    if (aString == nil)
+        return nil;
+
+    var format;
+
+    if (_dateFormat != nil)
+        return [self _dateFromString:aString format:_dateFormat];
+
+    switch (_dateStyle)
+    {
+        case CPDateFormatterNoStyle:
+            format = @"";
+            break;
+
+        case CPDateFormatterShortStyle:
+
+            if ([self _isAmericanFormat])
+                format = @"M/d/yy";
+            else
+                format = @"dd/MM/yy";
+
+            break;
+
+        case CPDateFormatterMediumStyle:
+
+            if ([self _isAmericanFormat])
+                format = @"MMM d, Y";
+            else
+                format = @"d MMM Y";
+            break;
+
+        case CPDateFormatterLongStyle:
+
+            if ([self _isAmericanFormat])
+                format = @"MMMM d, Y";
+            else
+                format = @"d MMMM Y";
+            break;
+
+        case CPDateFormatterFullStyle:
+
+            if ([self _isAmericanFormat])
+                format = @"EEEE, MMMM d, Y";
+            else
+                format = @"EEEE d MMMM Y";
+            break;
+
+        default:
+            format = @"";
+    }
+
+    switch (_timeStyle)
+    {
+        case CPDateFormatterNoStyle:
+            format += @"";
+            break;
+
+        case CPDateFormatterShortStyle:
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm a";
+            else
+                format += @" H:mm";
+            break;
+
+        case CPDateFormatterMediumStyle:
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a";
+            else
+                format += @" H:mm:ss"
+            break;
+
+        case CPDateFormatterLongStyle:
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a z";
+            else
+                format += @" H:mm:ss z";
+            break;
+
+        case CPDateFormatterFullStyle:
+
+            if ([self _isEnglishFormat])
+                format += @" h:mm:ss a zzzz";
+            else
+                format += @" h:mm:ss zzzz";
+            break;
+
+        default:
+            format += @"";
+    }
+
+    return [self _dateFromString:aString format:format];
+}
+
+/*! Returns a boolean if the given object has been changed or not depending of the given string (use of ref)
+    @param anObject the given object
+    @param aString
+    @param anError, if it returns NO the describe error will be in anError (use of ref)
+    @return aBoolean for the success or fail of the method
+*/
+- (BOOL)getObjectValue:(id)anObject forString:(CPString)aString errorDescription:(CPString)anError
+{
+    var value = [self dateFromString:aString];
+    @deref(anObject) = value;
+
+    if (!value)
+    {
+        @deref(anError) = @"The value \"" + aString + "\" is invalid.";
+        return NO;
+    }
+
+    return YES;
+}
+
+/*! Return a date representation of the given string and format
+    @patam aDate
+    @param aFormat
+    @return a string
+*/
+- (CPDate)_dateFromString:(CPString)aString format:(CPString)aFormat
+{
+    if (aString == nil || aFormat == nil)
+        return nil;
+
+    var currentToken = [CPString new],
+        isTextToken = NO,
+        tokens = [CPArray array],
+        dateComponents = [CPArray array],
+        patternTokens = [CPArray array];
+
+    for (var i = 0; i < [aFormat length]; i++)
+    {
+        var character = [aFormat characterAtIndex:i];
+
+        if (isTextToken)
+        {
+            if ([character isEqualToString:@"'"])
+                currentToken = [CPString new];
+
+            continue;
+        }
+
+        if ([character isEqualToString:@"'"])
+        {
+            if (!isTextToken)
+                isTextToken = YES;
+
+            continue;
+        }
+
+        if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
+        {
+            [tokens addObject:currentToken];
+
+            if ([patternStringTokens containsObject:currentToken])
+                [patternTokens addObject:[tokens count] - 1];
+
+            currentToken = [CPString new];
+        }
+        else
+        {
+            if ([currentToken length] && ![[currentToken characterAtIndex:0] isEqualToString:character])
+            {
+                [tokens addObject:currentToken];
+
+                if ([patternStringTokens containsObject:currentToken])
+                    [patternTokens addObject:[tokens count] - 1];
+
+                currentToken = [CPString new];
+            }
+
+            currentToken += character;
+
+            if (i == ([aFormat length] - 1))
+            {
+                [tokens addObject:currentToken];
+
+                if ([patternStringTokens containsObject:currentToken])
+                    [patternTokens addObject:[tokens count] - 1];
+            }
+        }
+    }
+
+    isTextToken = NO;
+    currentToken = [CPString new];
+
+    var currentIndexSpecialPattern = 0;
+
+    if ([patternTokens count] == 0)
+        [patternTokens addObject:CPNotFound];
+
+    for (var i = 0; i < [aString length]; i++)
+    {
+        var character = [aString characterAtIndex:i];
+
+        if (isTextToken)
+        {
+            if ([character isEqualToString:@"'"])
+                currentToken = [CPString new];
+
+            continue;
+        }
+
+        if ([character isEqualToString:@"'"])
+        {
+            if (!isTextToken)
+                isTextToken = YES;
+
+            continue;
+        }
+
+        // Need to do this to check if the word match with the token. We can get some words with space...
+        if ([dateComponents count] == [patternTokens objectAtIndex:currentIndexSpecialPattern])
+        {
+            var j = [self _lastIndexMatchedString:aString token:[tokens objectAtIndex:[dateComponents count]] index:i];
+
+            if (j == CPNotFound)
+                return nil;
+
+            currentIndexSpecialPattern++;
+            [dateComponents addObject:[aString substringWithRange:CPMakeRange(i, (j - i))]];
+            i = j;
+
+            continue;
+        }
+
+        if ([character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "])
+        {
+            [dateComponents addObject:currentToken];
+            currentToken = [CPString new];
+        }
+        else
+        {
+            currentToken += character;
+
+            if (i == ([aString length] - 1))
+                [dateComponents addObject:currentToken];
+        }
+    }
+
+    if ([dateComponents count] != [tokens count])
+        return nil;
+
+    return [self _dateFromTokens:tokens dateComponents:dateComponents];
 }
 
 - (CPDate)_dateFromTokens:(CPArray)tokens dateComponents:(CPArray)dateComponents
@@ -1406,10 +1608,10 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             case @"a":
 
-                if (![dateComponent isEqualToString:_PMSymbol] && ![dateComponent isEqualToString:_AMSymbol])
+                if (![dateComponent isEqualToString:[self PMSymbol]] && ![dateComponent isEqualToString:[self AMSymbol]])
                     return nil;
 
-                if ([dateComponent isEqualToString:_PMSymbol])
+                if ([dateComponent isEqualToString:[self PMSymbol]])
                     isPM = YES;
 
                 break;
@@ -1633,6 +1835,10 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     return dateResult;
 }
 
+
+#pragma mark -
+#pragma mark Utils
+
 - (CPString)_stringValueForValue:(id)aValue length:(int)length
 {
     var string = [CPString stringWithFormat:@"%i", aValue];
@@ -1752,7 +1958,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 targetedArray = [self standaloneMonthSymbols];
 
             if (length >= 5)
-                targetedArray = [self veryShortSandaloneMonthSymbols];
+                targetedArray = [self veryShortStandaloneMonthSymbols];
 
             break;
 

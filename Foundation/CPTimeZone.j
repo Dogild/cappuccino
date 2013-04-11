@@ -273,7 +273,12 @@ var abbreviationDictionary,
     systemTimeZone = [self timeZoneWithAbbreviation:abbreviation];
     defaultTimeZone = [self timeZoneWithAbbreviation:abbreviation];
 
-    localizedName = @{@"en" : englishLocalizedName};
+    localizedName = @{
+        @"en" : englishLocalizedName,
+        @"fr" : @{},
+        @"de" : @{},
+        @"es" : @{}
+    };
 
     timeZoneDataVersion = nil;
 }
