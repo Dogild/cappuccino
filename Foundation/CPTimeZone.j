@@ -215,7 +215,7 @@ var abbreviationDictionary,
         @"WIT" :    540
     };
 
-    localizedName = @{
+    var englishLocalizedName = @{
         @"EDT" :    [@"Eastern Standard Time", @"EST", @"Eastern Daylight Time", @"EDT", @"Eastern Time", @"ET"],
         @"GMT" :    [@"GMT", @"GMT", @"GMT", @"GMT", @"GMT", @"GMT"],
         @"AST" :    [@"Atlantic Standard Time", @"AST", @"Atlantic Daylight Time", @"ADT", @"Atlantic Time", @"AT"],
@@ -272,6 +272,8 @@ var abbreviationDictionary,
     localTimeZone = [self timeZoneWithAbbreviation:abbreviation];
     systemTimeZone = [self timeZoneWithAbbreviation:abbreviation];
     defaultTimeZone = [self timeZoneWithAbbreviation:abbreviation];
+
+    localizedName = @{@"en" : englishLocalizedName};
 
     timeZoneDataVersion = nil;
 }
@@ -352,12 +354,13 @@ var abbreviationDictionary,
     if ([abbreviationDictionary containsKey:aTimeZoneString])
         return [self timeZoneWithAbbreviation:aTimeZoneString];
 
-    var keys = [localizedName keyEnumerator],
+    var dict = [localizedName valueForKey:[[CPLocale systemLocale] objectForKey:CPLocaleLanguageCode]];
+        keys = [dict keyEnumerator],
         key;
 
     while (key = [keys nextObject])
     {
-        var value = [[localizedName valueForKey:key] objectAtIndex:style];
+        var value = [[dict valueForKey:key] objectAtIndex:style];
 
         if ([value isEqualToString:aTimeZoneString])
             return [self timeZoneWithAbbreviation:key];
@@ -591,7 +594,7 @@ var abbreviationDictionary,
 #pragma mark -
 #pragma mark Localized methods
 
-/*! Return a localized string from the given style and locale (the locale is not implemented yet)
+/*! Return a localized string from the given style and locale
     @param style the style
     @param locale the locale
     @return a string
@@ -601,7 +604,7 @@ var abbreviationDictionary,
     if (style > 5)
         return nil;
 
-    return [[localizedName valueForKey:_abbreviation] objectAtIndex:style];
+    return [[[localizedName valueForKey:[locale objectForKey:CPLocaleLanguageCode]] valueForKey:_abbreviation] objectAtIndex:style];
 }
 
 @end
@@ -625,11 +628,12 @@ var abbreviationDictionary,
 + (CPArray)_namesForStyle:(NSTimeZoneNameStyle)style locale:(CPLocale)aLocale
 {
     var array = [CPArray array],
-        keys = [localizedName keyEnumerator],
+        dict = [localizedName valueForKey:[aLocale objectForKey:CPLocaleLanguageCode]];
+        keys = [dict keyEnumerator],
         key;
 
     while (key = [keys nextObject])
-        [array addObject:[[localizedName valueForKey:key] objectAtIndex:style]];
+        [array addObject:[[dict valueForKey:key] objectAtIndex:style]];
 
     return array;
 }
