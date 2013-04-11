@@ -349,12 +349,12 @@ var abbreviationDictionary,
 
 /*! @ignore
 */
-+ (id)_timeZoneFromString:(CPString)aTimeZoneString style:(NSTimeZoneNameStyle)style
++ (id)_timeZoneFromString:(CPString)aTimeZoneString style:(NSTimeZoneNameStyle)style locale:(CPLocale)_locale
 {
     if ([abbreviationDictionary containsKey:aTimeZoneString])
         return [self timeZoneWithAbbreviation:aTimeZoneString];
 
-    var dict = [localizedName valueForKey:[[CPLocale systemLocale] objectForKey:CPLocaleLanguageCode]];
+    var dict = [localizedName valueForKey:[_locale objectForKey:CPLocaleLanguageCode]];
         keys = [dict keyEnumerator],
         key;
 
@@ -367,6 +367,21 @@ var abbreviationDictionary,
     }
 
     return nil;
+}
+
+/*! @ignore
+*/
++ (CPArray)_namesForStyle:(NSTimeZoneNameStyle)style locale:(CPLocale)aLocale
+{
+    var array = [CPArray array],
+        dict = [localizedName valueForKey:[aLocale objectForKey:CPLocaleLanguageCode]];
+        keys = [dict keyEnumerator],
+        key;
+
+    while (key = [keys nextObject])
+        [array addObject:[[dict valueForKey:key] objectAtIndex:style]];
+
+    return array;
 }
 
 #pragma mark -
@@ -618,24 +633,6 @@ var abbreviationDictionary,
 {
     self.setSeconds(self.getSeconds() - [aTimeZone secondsFromGMTForDate:self]);
     self.setSeconds(self.getSeconds() + [aTimeZone secondsFromGMT]);
-}
-
-@end
-
-
-@implementation CPTimeZone (LocalizeName)
-
-+ (CPArray)_namesForStyle:(NSTimeZoneNameStyle)style locale:(CPLocale)aLocale
-{
-    var array = [CPArray array],
-        dict = [localizedName valueForKey:[aLocale objectForKey:CPLocaleLanguageCode]];
-        keys = [dict keyEnumerator],
-        key;
-
-    while (key = [keys nextObject])
-        [array addObject:[[dict valueForKey:key] objectAtIndex:style]];
-
-    return array;
 }
 
 @end

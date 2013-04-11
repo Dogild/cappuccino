@@ -1663,6 +1663,8 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     return [[_locale objectForKey:CPLocaleLanguageCode] isEqualToString:@"en"];
 }
 
+/*! Returns the number of second from a time zone (-8000 or HGP-8:35 or GMT-08:00)
+*/
 - (int)_secondsFromTimeZoneDefaultFormatString:(CPString)aTimeZoneFormatString
 {
     var format =  /\w*([HPG-GMT])?([+-])(\d{1,2})([:])?(\d{2})\w*/,
@@ -1680,9 +1682,11 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     return seconds;
 }
 
+/*! Return the number of seconds from a timeZoneString
+*/
 - (int)_secondsFromTimeZoneString:(CPString)aTimeZoneString style:(NSTimeZoneNameStyle)aStyle
 {
-    var timeZone = [CPTimeZone _timeZoneFromString:aTimeZoneString style:aStyle];
+    var timeZone = [CPTimeZone _timeZoneFromString:aTimeZoneString style:aStyle locale:_locale];
 
     if (!timeZone)
         return nil;
@@ -1690,6 +1694,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     return [timeZone secondsFromGMT];
 }
 
+/*! This method is used to know if the given string match with the token.
+    @param aString
+    @param aToken
+    @param anIndex the current index in the string
+    @return an index who describes the position of the end of the word for the token
+*/
 - (int)_lastIndexMatchedString:(CPString)aString token:(CPString)aToken index:anIndex
 {
     var character = [aToken characterAtIndex:0],
