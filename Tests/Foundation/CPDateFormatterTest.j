@@ -292,7 +292,7 @@
     [_dateFormatter setTimeStyle:CPDateFormatterShortStyle];
 
     var result = [_dateFormatter stringForObjectValue:@"Test String"];
-    [self assert:result equals:[CPNull null]];
+    [self assert:result equals:nil];
 }
 
 - (void)testEditingStringForObjectValueWithDate
