@@ -50,8 +50,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     @ingroup foundation
     @class CPDateFormatter
 
-    * Not yet implemented. This is a stub class. *
-
     CPDateFormatter takes a CPDate value and formats it as text for
     display. It also supports the converse, taking text and interpreting it as a
     CPDate by configurable formatting rules.
@@ -488,14 +486,14 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 */
 - (CPString)stringFromDate:(CPDate)aDate
 {
+    var format,
+        relativeWord,
+        result;
+
     if (!aDate)
         return;
 
     [aDate _dateWithTimeZone:_timeZone];
-
-    var format,
-        relativeWord,
-        result;
 
     if (_dateFormat)
         return [self _stringFromDate:aDate format:_dateFormat];
@@ -507,7 +505,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterShortStyle:
-
             if ([self _isAmericanFormat])
                 format = @"M/d/yy";
             else
@@ -516,27 +513,27 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterMediumStyle:
-
             if ([self _isAmericanFormat])
                 format = @"MMM d, Y";
             else
                 format = @"d MMM Y";
+
             break;
 
         case CPDateFormatterLongStyle:
-
             if ([self _isAmericanFormat])
                 format = @"MMMM d, Y";
             else
                 format = @"d MMMM Y";
+
             break;
 
         case CPDateFormatterFullStyle:
-
             if ([self _isAmericanFormat])
                 format = @"EEEE, MMMM d, Y";
             else
                 format = @"EEEE d MMMM Y";
+
             break;
 
         default:
@@ -577,35 +574,35 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterShortStyle:
-
             if ([self _isEnglishFormat])
                 format += @"h:mm a";
             else
                 format += @"H:mm";
+
             break;
 
         case CPDateFormatterMediumStyle:
-
             if ([self _isEnglishFormat])
                 format += @"h:mm:ss a";
             else
                 format += @"H:mm:ss"
+
             break;
 
         case CPDateFormatterLongStyle:
-
             if ([self _isEnglishFormat])
                 format += @"h:mm:ss a z";
             else
                 format += @"H:mm:ss z";
+
             break;
 
         case CPDateFormatterFullStyle:
-
             if ([self _isEnglishFormat])
                 format += @"h:mm:ss a zzzz";
             else
                 format += @"h:mm:ss zzzz";
+
             break;
 
         default:
@@ -630,7 +627,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     if ([anObject isKindOfClass:[CPDate class]])
         return [self stringFromDate:anObject];
     else
-        return [CPNull null];
+        return nil;
 }
 
 /*! Return a string
@@ -735,10 +732,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
         case @"y":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getFullYear()] length];
+
             return [self _stringValueForValue:aDate.getFullYear() length:(length == 2)?length:currentLength];
 
         case @"Y":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getFullYear()] length];
+
             return [self _stringValueForValue:aDate.getFullYear() length:(length == 2)?length:currentLength];
 
         case @"u":
@@ -829,9 +828,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             return [CPString new];
 
         case @"w":
+            var d = [aDate copy];
 
-            var d = new Date(aDate);
-            d.setHours(0,0,0);
+            d.setHours(0, 0, 0);
             d.setDate(d.getDate() + 4 - (d.getDay() || 7));
 
             var yearStart = new Date(d.getFullYear(), 0, 1),
@@ -840,7 +839,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             return [self _stringValueForValue:(weekOfYear + 1) length:MAX(2, length)];
 
         case @"W":
-
             var firstDay = new Date(aDate.getFullYear(), aDate.getMonth(), 1).getDay(),
                 weekOfMonth =  Math.ceil((aDate.getDate() + firstDay) / 7);
 
@@ -852,8 +850,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             return [self _stringValueForValue:aDate.getDate() length:MAX(length, currentLength)];
 
         case @"D":
-
-            var oneJan = new Date(aDate.getFullYear(),0,1),
+            var oneJan = new Date(aDate.getFullYear(), 0, 1),
                 dayOfYear = Math.ceil((aDate - oneJan) / 86400000),
                 currentLength = [[CPString stringWithFormat:@"%i", dayOfYear] length];
 
@@ -894,7 +891,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 return [[self veryShortWeekdaySymbols] objectAtIndex:day];
 
         case @"e":
-
             var day = aDate.getDay();
 
             if (length <= 2)
@@ -910,7 +906,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 return [[self veryShortWeekdaySymbols] objectAtIndex:day];
 
         case @"c":
-
             var day = aDate.getDay();
 
             if (length <= 2)
@@ -926,14 +921,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 return [[self veryShortStandaloneWeekdaySymbols] objectAtIndex:day];
 
         case @"a":
-
             if (aDate.getHours() > 11)
                 return [self PMSymbol];
             else
                 return [self AMSymbol];
 
         case @"h":
-
             var hours = aDate.getHours();
 
             if ([self _isAmericanFormat] || [self _isEnglishFormat])
@@ -951,10 +944,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         case @"H":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getHours()] length];
 
-            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength,MIN(2, length))];
+            return [self _stringValueForValue:aDate.getHours() length:MAX(currentLength, MIN(2, length))];
 
         case @"K":
-
             var hours = aDate.getHours();
 
             if (hours > 12)
@@ -962,10 +954,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
 
-            return [self _stringValueForValue:hours length:MAX(currentLength,MIN(2, length))];
+            return [self _stringValueForValue:hours length:MAX(currentLength, MIN(2, length))];
 
         case @"k":
-
             var hours = aDate.getHours();
 
             if (aDate.getHours() == 0)
@@ -973,7 +964,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
             var currentLength = [[CPString stringWithFormat:@"%i", hours] length];
 
-            return [self _stringValueForValue:hours length:MAX(currentLength,MIN(2, length))];
+            return [self _stringValueForValue:hours length:MAX(currentLength, MIN(2, length))];
 
         case @"j":
             CPLog.warn(@"Token not yet implemented " + aToken);
@@ -982,10 +973,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         case @"m":
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMinutes()] length];
 
-            return [self _stringValueForValue:aDate.getMinutes() length:MAX(currentLength,MIN(2, length))];
+            return [self _stringValueForValue:aDate.getMinutes() length:MAX(currentLength, MIN(2, length))];
 
         case @"s":
-
             var currentLength = [[CPString stringWithFormat:@"%i", aDate.getMinutes()] length];
 
             return [self _stringValueForValue:aDate.getSeconds() length:MIN(2, length)];
@@ -999,14 +989,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             return [self _stringValueForValue:value length:value.toString().length];
 
         case @"z":
-
             if (length <= 3)
                 return [timeZone localizedName:CPTimeZoneNameStyleShortDaylightSaving locale:_locale];
             else
                 return [timeZone localizedName:CPTimeZoneNameStyleDaylightSaving locale:_locale];
 
         case @"Z":
-
             var seconds = [timeZone secondsFromGMTForDate:aDate],
                 minutes = seconds / 60,
                 hours = minutes / 60,
@@ -1074,7 +1062,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             }
 
         case @"v":
-
             if (length == 1)
                 return [timeZone localizedName:CPTimeZoneNameStyleShortGeneric locale:_locale];
             else if (length == 4)
@@ -1083,7 +1070,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             return @" ";
 
         case @"V":
-
             if (length == 1)
             {
                 return [timeZone localizedName:CPTimeZoneNameStyleShortDaylightSaving locale:_locale];
@@ -1102,7 +1088,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     }
 
     return [CPString new];
-
 }
 
 
@@ -1131,7 +1116,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterShortStyle:
-
             if ([self _isAmericanFormat])
                 format = @"M/d/yy";
             else
@@ -1140,27 +1124,27 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterMediumStyle:
-
             if ([self _isAmericanFormat])
                 format = @"MMM d, Y";
             else
                 format = @"d MMM Y";
+
             break;
 
         case CPDateFormatterLongStyle:
-
             if ([self _isAmericanFormat])
                 format = @"MMMM d, Y";
             else
                 format = @"d MMMM Y";
+
             break;
 
         case CPDateFormatterFullStyle:
-
             if ([self _isAmericanFormat])
                 format = @"EEEE, MMMM d, Y";
             else
                 format = @"EEEE d MMMM Y";
+
             break;
 
         default:
@@ -1174,7 +1158,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterShortStyle:
-
             if ([self _isEnglishFormat])
                 format += @" h:mm a";
             else
@@ -1182,7 +1165,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterMediumStyle:
-
             if ([self _isEnglishFormat])
                 format += @" h:mm:ss a";
             else
@@ -1190,7 +1172,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterLongStyle:
-
             if ([self _isEnglishFormat])
                 format += @" h:mm:ss a z";
             else
@@ -1198,7 +1179,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case CPDateFormatterFullStyle:
-
             if ([self _isEnglishFormat])
                 format += @" h:mm:ss a zzzz";
             else
@@ -1372,8 +1352,7 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         dayOfYear,
         dayIndexInWeek,
         weekOfYear,
-        weekOfMonth,
-        milliseconds = 0;
+        weekOfMonth;
 
     for (var i = 0; i < [tokens count]; i++)
     {
@@ -1390,7 +1369,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"y":
-
                 var u = _twoDigitStartDate.getFullYear() % 10,
                     d = parseInt(_twoDigitStartDate.getFullYear() / 10) % 10,
                     c = parseInt(_twoDigitStartDate.getFullYear() / 100) % 10,
@@ -1411,7 +1389,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"Y":
-
                 var u = _twoDigitStartDate.getFullYear() % 10,
                     d = parseInt(_twoDigitStartDate.getFullYear() / 10) % 10,
                     c = parseInt(_twoDigitStartDate.getFullYear() / 100) % 10,
@@ -1442,7 +1419,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"Q":
-
                 var month;
 
                 if (length <= 2)
@@ -1468,11 +1444,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     return nil;
 
                 dateArray[1] = month + 1;
-
                 break;
 
             case @"q":
-
                 var month;
 
                 if (length <= 2)
@@ -1498,11 +1472,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     return nil;
 
                 dateArray[1] = month + 1;
-
                 break;
 
             case @"M":
-
                 var month;
 
                 if (length <= 2)
@@ -1528,11 +1500,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     return nil;
 
                 dateArray[1] = month;
-
                 break;
 
             case @"L":
-
                 var month;
 
                 if (length <= 2)
@@ -1558,7 +1528,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                     return nil;
 
                 dateArray[1] = month;
-
                 break;
 
             case @"I":
@@ -1567,39 +1536,31 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"w":
-
                 if (dateComponent > 52)
                     return nil;
 
                 weekOfYear = dateComponent;
-
                 break;
 
             case @"W":
-
                 if (dateComponent > 52)
                     return nil;
 
                 weekOfMonth = dateComponent;
-
                 break;
 
             case @"d":
-
                 dateArray[2] = parseInt(dateComponent);
                 break;
 
             case @"D":
-
                 if (isNaN(parseInt(dateComponent)) || parseInt(dateComponent) > 345)
                     return nil;
 
                 dayOfYear = parseInt(dateComponent);
-
                 break;
 
             case @"F":
-
                 if (isNaN(parseInt(dateComponent)) || parseInt(dateComponent) > 5 || parseInt(dateComponent) == 0)
                     return nil;
 
@@ -1625,7 +1586,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"E":
-
                 if (length <= 3)
                     dayIndexInWeek = [[self shortWeekdaySymbols] indexOfObject:dateComponent];
 
@@ -1638,7 +1598,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"e":
-
                 if (length <= 2 && isNaN(parseInt(dateComponent)))
                     return nil;
 
@@ -1657,7 +1616,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"c":
-
                 if (length <= 2 && isNaN(parseInt(dateComponent)))
                     return nil;
 
@@ -1679,7 +1637,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"a":
-
                 if (![dateComponent isEqualToString:[self PMSymbol]] && ![dateComponent isEqualToString:[self AMSymbol]])
                     return nil;
 
@@ -1689,39 +1646,31 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"h":
-
                 if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 12)
                     return nil;
 
                 dateArray[3] = parseInt(dateComponent);
-
                 break;
 
             case @"H":
-
                 if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 23)
                     return nil;
 
                 dateArray[3] = parseInt(dateComponent);
-
                 break;
 
             case @"K":
-
                 if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 11)
                     return nil;
 
                 dateArray[3] = parseInt(dateComponent);
-
                 break;
 
             case @"k":
-
                 if (parseInt(dateComponent) < 0 || parseInt(dateComponent) > 12)
                     return nil;
 
                 dateArray[3] = parseInt(dateComponent);
-
                 break;
 
             case @"j":
@@ -1729,36 +1678,30 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"m":
-
                 var minutes = parseInt(dateComponent);
 
                 if (minutes > 59)
                     return nil;
 
                 dateArray[4] = minutes;
-
                 break;
 
             case @"s":
-
                 var seconds = parseInt(dateComponent);
 
                 if (seconds > 59)
                     return nil;
 
                 dateArray[5] = seconds;
-
                 break;
 
             case @"S":
-
                 if (isNaN(parseInt(dateComponent)))
                     return nil;
 
                 break;
 
             case @"A":
-
                 if (isNaN(parseInt(dateComponent)))
                     return nil;
 
@@ -1775,13 +1718,9 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 dateArray[3] = tmpDate.getHours();
                 dateArray[4] = tmpDate.getMinutes();
                 dateArray[5] = tmpDate.getSeconds();
-
-                milliseconds = tmpDate.getMilliseconds()
-
                 break;
 
             case @"z":
-
                 if (length < 4)
                     var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleShortDaylightSaving];
                 else
@@ -1796,7 +1735,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"Z":
-
                 var seconds = [self _secondsFromTimeZoneDefaultFormatString:dateComponent];
 
                 if (!seconds)
@@ -1805,7 +1743,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"v":
-
                 if (length <= 3)
                     var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleShortGeneric];
                 else
@@ -1820,7 +1757,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
                 break;
 
             case @"V":
-
                 if (length <= 3)
                     var seconds = [self _secondsFromTimeZoneString:dateComponent style:CPTimeZoneNameStyleShortStandard];
                 else
@@ -1871,20 +1807,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
         dateArray[1] = tmpDate.getMonth() + 1;
         dateArray[2] = tmpDate.getDate() - 1;
     }
-
-    // if (dayIndexInWeek)
-    // {
-    //     var tmpDate = new Date();
-    //     tmpDate.setFullYear(dateArray[0]);
-    //     tmpDate.setMonth(dateArray[1] - 1);
-    //     tmpDate.setDate(dateArray[2]);
-    //
-    //     while (tmpDate.getDay() != dayIndexInWeek)
-    //         tmpDate.setDate(tmpDate.getDate() + 1);
-    //
-    //     dateArray[1] = tmpDate.getMonth() + 1;
-    //     dateArray[2] = tmpDate.getDate();
-    // }
 
     // Check if the day is possible in the current month
     var tmpDate = new Date();
@@ -1989,7 +1911,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
     switch (character)
     {
         case @"Q":
-
             if (length == 3)
                 targetedArray = [self shortQuarterSymbols];
 
@@ -1999,7 +1920,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"q":
-
             if (length == 3)
                 targetedArray = [self shortStandaloneQuarterSymbols];
 
@@ -2009,7 +1929,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"M":
-
             if (length == 3)
                 targetedArray = [self shortMonthSymbols];
 
@@ -2022,7 +1941,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"L":
-
             if (length == 3)
                 targetedArray = [self shortStandaloneMonthSymbols];
 
@@ -2035,7 +1953,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"E":
-
             if (length <= 3)
                 targetedArray = [self shortWeekdaySymbols];
 
@@ -2048,7 +1965,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"e":
-
             if (length == 3)
                 targetedArray = [self shortWeekdaySymbols];
 
@@ -2061,7 +1977,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"c":
-
             if (length == 3)
                 targetedArray = [self shortStandaloneWeekdaySymbols];
 
@@ -2074,13 +1989,10 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"a":
-
             targetedArray = [[self PMSymbol], [self AMSymbol]];
-
             break;
 
         case @"z":
-
             if (length <= 3)
                 targetedArray =  [CPTimeZone _namesForStyle:CPTimeZoneNameStyleShortDaylightSaving locale:_locale];
             else
@@ -2092,14 +2004,12 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"Z":
-
             if (result)
                 return anIndex + [result objectAtIndex:0].length;
 
             return CPNotFound;
 
         case @"v":
-
             if (length == 1)
                 targetedArray =  [CPTimeZone _namesForStyle:CPTimeZoneNameStyleShortGeneric locale:_locale];
             else if (length == 4)
@@ -2111,7 +2021,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
             break;
 
         case @"V":
-
             if (length == 1)
                 targetedArray = [CPTimeZone _namesForStyle:CPTimeZoneNameStyleShortStandard locale:_locale];
 
@@ -2137,8 +2046,6 @@ var defaultDateFormatterBehavior = CPDateFormatterBehavior10_4,
 
         if ([character isEqualToString:@"'"] || [character isEqualToString:@","] || [character isEqualToString:@":"] || [character isEqualToString:@"/"] || [character isEqualToString:@"-"] || [character isEqualToString:@" "] || [character isEqualToString:@""])
             return anIndex + range.length;
-
-        return CPNotFound;
     }
 
     return CPNotFound;
