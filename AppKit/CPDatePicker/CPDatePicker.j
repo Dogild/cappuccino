@@ -333,6 +333,8 @@ CPEraDatePickerElementFlag              = 0x0100;
     _timeInterval = (_datePickerMode == CPSingleDateMode)? 0 : aTimeInterval;
     [self didChangeValueForKey:@"timeInterval"];
 
+    [self sendAction:[self action] to:[self target]];
+
     if (_datePickerStyle == CPTextFieldAndStepperDatePickerStyle || _datePickerStyle == CPTextFieldDatePickerStyle)
         [_datePickerTextfield setDateValue:_dateValue];
     else
