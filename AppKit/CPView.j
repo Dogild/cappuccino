@@ -199,6 +199,11 @@ var CPViewFlags                     = { },
 
     _CPViewFullScreenModeState  _fullScreenModeState;
 
+    // Zoom Support
+    BOOL                _isScaled;
+    CGSize              _sizeZoom;
+    CGSize              _scale;
+
     // Layout Support
     BOOL                _needsLayout;
     JSObject            _ephemeralSubviews;
@@ -333,6 +338,10 @@ var CPViewFlags                     = { },
         _opacity = 1.0;
         _isHidden = NO;
         _hitTests = YES;
+
+        _sizeZoom = CGSizeMake(1.0 , 1.0);
+        _scale = CGSizeMake(1.0, 1.0);
+        _isScaled = NO;
 
 #if PLATFORM(DOM)
         _DOMElement = DOMElementPrototype.cloneNode(false);
@@ -974,7 +983,8 @@ var CPViewFlags                     = { },
     [self setNeedsDisplay:YES];
 
 #if PLATFORM(DOM)
-    CPDOMDisplayServerSetStyleSize(_DOMElement, size.width, size.height);
+    [self _setDisplayServerSetStyleSize:size];
+    //CPDOMDisplayServerSetStyleSize(_DOMElement, size.width, size.height);
 
     if (_DOMContentsElement)
     {
@@ -1081,6 +1091,14 @@ var CPViewFlags                     = { },
 
     if (_postsFrameChangedNotifications && !_inhibitFrameAndBoundsChangedNotifications)
         [CachedNotificationCenter postNotificationName:CPViewFrameDidChangeNotification object:self];
+}
+
+- (void)_setDisplayServerSetStyleSize:(CGSize)aSize
+{
+#if PLATFORM(DOM)
+    var scale = [self scale];
+    CPDOMDisplayServerSetStyleSize(_DOMElement, aSize.width * 1 / scale.width, aSize.height * 1 / scale.height);
+#endif
 }
 
 /*!
@@ -1580,12 +1598,20 @@ var CPViewFlags                     = { },
 */
 - (CPView)hitTest:(CGPoint)aPoint
 {
-    if (_isHidden || !_hitTests || !CGRectContainsPoint(_frame, aPoint))
+    var frame = _frame,
+        sizeZoom = [self _sizeZoom];
+
+    if (_isScaled)
+        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale([_superview _sizeZoom].width, [_superview _sizeZoom].height));
+    else
+        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale(sizeZoom.width, sizeZoom.height));
+
+    if (_isHidden || !_hitTests || !CGRectContainsPoint(frame, aPoint))
         return nil;
 
     var view = nil,
         i = _subviews.length,
-        adjustedPoint = CGPointMake(aPoint.x - CGRectGetMinX(_frame), aPoint.y - CGRectGetMinY(_frame));
+        adjustedPoint = CGPointMake(aPoint.x - CGRectGetMinX(frame), aPoint.y - CGRectGetMinY(frame));
 
     if (_inverseBoundsTransform)
         adjustedPoint = CGPointApplyAffineTransform(adjustedPoint, _inverseBoundsTransform);
@@ -1909,6 +1935,9 @@ var CPViewFlags                     = { },
 */
 - (CGPoint)convertPoint:(CGPoint)aPoint fromView:(CPView)aView
 {
+    if (aView == self)
+        return aPoint;
+
     return CGPointApplyAffineTransform(aPoint, _CPViewGetTransform(aView, self));
 }
 
@@ -1919,7 +1948,7 @@ var CPViewFlags                     = { },
 */
 - (CGPoint)convertPointFromBase:(CGPoint)aPoint
 {
-    return CGPointApplyAffineTransform(aPoint, _CPViewGetTransform(nil, self));
+    return [self convertPoint:aPoint fromView:nil];
 }
 
 /*!
@@ -1930,8 +1959,12 @@ var CPViewFlags                     = { },
 */
 - (CGPoint)convertPoint:(CGPoint)aPoint toView:(CPView)aView
 {
+    if (aView == self)
+        return aPoint;
+
     return CGPointApplyAffineTransform(aPoint, _CPViewGetTransform(self, aView));
 }
+
 
 /*!
     Converts the point from the receiver’s coordinate system to the base coordinate system.
@@ -1940,7 +1973,7 @@ var CPViewFlags                     = { },
 */
 - (CGPoint)convertPointToBase:(CGPoint)aPoint
 {
-    return CGPointApplyAffineTransform(aPoint, _CPViewGetTransform(self, nil));
+    return [self convertPoint:aPoint toView:nil];
 }
 
 /*!
@@ -1951,6 +1984,9 @@ var CPViewFlags                     = { },
 */
 - (CGSize)convertSize:(CGSize)aSize fromView:(CPView)aView
 {
+    if (aView == self)
+        return aSize;
+
     return CGSizeApplyAffineTransform(aSize, _CPViewGetTransform(aView, self));
 }
 
@@ -1962,6 +1998,9 @@ var CPViewFlags                     = { },
 */
 - (CGSize)convertSize:(CGSize)aSize toView:(CPView)aView
 {
+    if (aView == self)
+        return aSize;
+
     return CGSizeApplyAffineTransform(aSize, _CPViewGetTransform(self, aView));
 }
 
@@ -1973,6 +2012,9 @@ var CPViewFlags                     = { },
 */
 - (CGRect)convertRect:(CGRect)aRect fromView:(CPView)aView
 {
+    if (self == aView)
+        return aRect;
+
     return CGRectApplyAffineTransform(aRect, _CPViewGetTransform(aView, self));
 }
 
@@ -1983,7 +2025,7 @@ var CPViewFlags                     = { },
 */
 - (CGRect)convertRectFromBase:(CGRect)aRect
 {
-    return CGRectApplyAffineTransform(aRect, _CPViewGetTransform(nil, self));
+    return [self convertRect:aRect fromView:nil];
 }
 
 /*!
@@ -1994,6 +2036,9 @@ var CPViewFlags                     = { },
 */
 - (CGRect)convertRect:(CGRect)aRect toView:(CPView)aView
 {
+    if (self == aView)
+        return aRect;
+
     return CGRectApplyAffineTransform(aRect, _CPViewGetTransform(self, aView));
 }
 
@@ -2004,7 +2049,7 @@ var CPViewFlags                     = { },
 */
 - (CGRect)convertRectToBase:(CGRect)aRect
 {
-    return CGRectApplyAffineTransform(aRect, _CPViewGetTransform(self, nil));
+    return [self convertRect:aRect toView:nil];
 }
 
 /*!
@@ -2149,6 +2194,95 @@ setBoundsOrigin:
 
 }
 
+// Scaling
+
+/*! Set the zoom of the view. This will can scaleUnitSquareToSize: and setNeedsDisplay:
+    This method don't care about the last zoom you set in the view
+    @param aSize, the size corresponding the new unit scales
+*/
+- (void)setScale:(CGSize)aSize
+{
+    var size = CGSizeMakeZero(),
+        scale = CGSizeMakeCopy([self scale]);
+
+    size.height = aSize.height / scale.height;
+    size.width = aSize.width / scale.width;
+
+    [self scaleUnitSquareToSize:size];
+    [self setNeedsDisplay:YES];
+}
+
+/*!
+    Scales the receiver’s coordinate system so that the unit square scales to the specified dimensions.
+    The bounds of the receiver will change, for instance if the given size is (0.5, 0.5) the width and height of the bounds will be multiply by 2.
+    You must call setNeedsDisplay: to redraw the view.
+    @param aSize, the size corresponding the new unit scales
+*/
+- (void)scaleUnitSquareToSize:(CGSize)aSize
+{
+    if (!aSize)
+        return;
+
+    [self willChangeValueForKey:@"zoom"];
+    _scale = CGSizeMakeCopy([self scale]);
+    _scale.height *= aSize.height;
+    _scale.width *= aSize.width;
+    [self didChangeValueForKey:@"zoom"];
+    _isScaled = YES;
+
+    [self _scaleUnitSquareToSize:aSize];
+}
+
+/*! Set the _sizeZoom and call all of the subviews to set their _sizeZoom
+*/
+- (void)_scaleUnitSquareToSize:(CGSize)aSize
+{
+    var scale = [self scale],
+        newBounds = CGRectMakeCopy([self bounds]);
+
+    _sizeZoom = CGSizeMakeCopy([self _sizeZoom]);
+    _sizeZoom.height *= aSize.height;
+    _sizeZoom.width *= aSize.width;
+
+    newBounds.origin.x *= 1.0 / scale.width;
+    newBounds.origin.y *= 1.0 / scale.height;
+    newBounds.size.width *= 1.0 / scale.width;
+    newBounds.size.height *= 1.0 / scale.height;
+    [self setBounds:newBounds];
+
+    [_subviews makeObjectsPerformSelector:@selector(_scaleUnitSquareToSize:) withObject:aSize];
+}
+
+/*! Return a _zoom, this _zoom is used to scale in css
+*/
+- (CGSize)scale
+{
+    return _scale ? _scale : CGSizeMake(1.0, 1.0);
+}
+
+/*! Return the _sizeZoom, this is a CGSize with the real zoom of the view (depending with his parents)
+*/
+- (CGSize)_sizeZoom
+{
+    return  _sizeZoom ? _sizeZoom : CGSizeMake(1.0, 1.0);
+}
+
+/*! Make a zoom in css
+*/
+- (void)_zoomCSS
+{
+#if PLATFORM(DOM)
+    if (_isScaled)
+    {
+        var scale = [self scale];
+
+        self._DOMElement.style.WebkitTransform = 'scale('+ scale.width +', '+ scale.height +')';
+        self._DOMElement.style.WebkitTransformOrigin = '0 0';
+        [self _setDisplayServerSetStyleSize:[self frameSize]];
+    }
+#endif
+}
+
 // Displaying
 
 /*!
@@ -2157,7 +2291,10 @@ setBoundsOrigin:
 - (void)setNeedsDisplay:(BOOL)aFlag
 {
     if (aFlag)
+    {
+        [self _zoomCSS];
         [self setNeedsDisplayInRect:[self bounds]];
+    }
 }
 
 /*!
@@ -3069,7 +3206,10 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
     CPViewWindowKey                 = @"CPViewWindowKey",
     CPViewNextKeyViewKey            = @"CPViewNextKeyViewKey",
     CPViewPreviousKeyViewKey        = @"CPViewPreviousKeyViewKey",
-    CPReuseIdentifierKey            = @"CPReuseIdentifierKey";
+    CPReuseIdentifierKey            = @"CPReuseIdentifierKey",
+    CPViewScaleXKey                 = @"CPViewScaleXKey",
+    CPViewScaleYKey                 = @"CPViewScaleYKey",
+    CPViewIsParentZoomKey           = @"CPViewIsParentZoomKey";
 
 @implementation CPView (CPCoding)
 
@@ -3135,6 +3275,10 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
 
         if (_toolTip)
             [self _installToolTipEventHandlers];
+
+        // _scaleY = [aCoder decodeFloatForKey:CPViewScaleYKey];
+        // _scaleX = [aCoder decodeFloatForKey:CPViewScaleXKey];
+        _isScaled = [aCoder decodeBoolForKey:CPViewIsParentZoomKey];
 
         // DOM SETUP
 #if PLATFORM(DOM)
@@ -3265,6 +3409,10 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
 
     if (_identifier)
         [aCoder encodeObject:_identifier forKey:CPReuseIdentifierKey];
+
+    // [aCoder encodeFloat:_scaleY forKey:CPViewScaleYKey];
+    // [aCoder encodeFloat:_scaleX forKey:CPViewScaleXKey];
+    [aCoder encodeBool:_isScaled forKey:CPViewIsParentZoomKey];
 }
 
 @end
@@ -3294,6 +3442,12 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
         {
             var frame = view._frame;
 
+            if (view._isScaled && view._sizeZoom)
+            {
+                var affineZoom = CGAffineTransformMakeScale(view._sizeZoom.width, view._sizeZoom.height);
+                CGAffineTransformConcatTo(transform, affineZoom, transform);
+            }
+
             transform.tx += CGRectGetMinX(frame);
             transform.ty += CGRectGetMinY(frame);
 
@@ -3303,12 +3457,14 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
             }
 
             view = view._superview;
+
         }
 
         // If we hit toView, then we're done.
         if (view === toView)
+        {
             return transform;
-
+        }
         else if (fromView && toView)
         {
             fromWindow = [fromView window];
@@ -3327,22 +3483,36 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
     }
 
     // FIXME: For now we can do things this way, but eventually we need to do them the "hard" way.
-    var view = toView;
+    var view = toView,
+        transform2 = CGAffineTransformMakeIdentity();
 
-    while (view)
+    while (view && view != fromView)
     {
-        var frame = view._frame;
+        var frame = CGRectMakeCopy(view._frame);
 
-        transform.tx -= CGRectGetMinX(frame);
-        transform.ty -= CGRectGetMinY(frame);
+        if (view._isScaled)
+        {
+            transform2.a *= 1 / view._scale.width;
+            transform2.d *= 1 / view._scale.height;
+        }
+
+        transform2.tx += CGRectGetMinX(frame) * transform2.a;
+        transform2.ty += CGRectGetMinY(frame) * transform2.d;
 
         if (view._boundsTransform)
         {
-            CGAffineTransformConcatTo(transform, view._inverseBoundsTransform, transform);
+            _CGAffineTransformConcatTo(transform2, view._inverseBoundsTransform, transform2);
         }
 
         view = view._superview;
     }
+
+    transform.tx = -transform2.tx;
+    transform.ty = -transform2.ty;
+    transform.a = transform2.a;
+    transform.d = transform2.d;
+    transform.c = transform2.c;
+    transform.b = transform2.b;
 
     if (!sameWindow)
     {
@@ -3351,6 +3521,7 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
         transform.tx -= CGRectGetMinX(frame);
         transform.ty -= CGRectGetMinY(frame);
     }
+
 /*    var views = [],
         view = toView;
 
