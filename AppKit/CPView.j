@@ -201,7 +201,7 @@ var CPViewFlags                     = { },
 
     // Zoom Support
     BOOL                _isScaled;
-    CGSize              _sizeZoom;
+    CGSize              _sizeScale;
     CGSize              _scale;
 
     // Layout Support
@@ -339,7 +339,7 @@ var CPViewFlags                     = { },
         _isHidden = NO;
         _hitTests = YES;
 
-        _sizeZoom = CGSizeMake(1.0 , 1.0);
+        _sizeScale = CGSizeMake(1.0 , 1.0);
         _scale = CGSizeMake(1.0, 1.0);
         _isScaled = NO;
 
@@ -1599,12 +1599,12 @@ var CPViewFlags                     = { },
 - (CPView)hitTest:(CGPoint)aPoint
 {
     var frame = _frame,
-        sizeZoom = [self _sizeZoom];
+        sizeScale = [self _sizeScale];
 
     if (_isScaled)
-        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale([_superview _sizeZoom].width, [_superview _sizeZoom].height));
+        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale([_superview _sizeScale].width, [_superview _sizeScale].height));
     else
-        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale(sizeZoom.width, sizeZoom.height));
+        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale(sizeScale.width, sizeScale.height));
 
     if (_isHidden || !_hitTests || !CGRectContainsPoint(frame, aPoint))
         return nil;
@@ -2233,16 +2233,16 @@ setBoundsOrigin:
     [self _scaleUnitSquareToSize:aSize];
 }
 
-/*! Set the _sizeZoom and call all of the subviews to set their _sizeZoom
+/*! Set the _sizeScale and call all of the subviews to set their _sizeScale
 */
 - (void)_scaleUnitSquareToSize:(CGSize)aSize
 {
     var scale = [self scale],
         newBounds = CGRectMakeCopy([self bounds]);
 
-    _sizeZoom = CGSizeMakeCopy([self _sizeZoom]);
-    _sizeZoom.height *= aSize.height;
-    _sizeZoom.width *= aSize.width;
+    _sizeScale = CGSizeMakeCopy([self _sizeScale]);
+    _sizeScale.height *= aSize.height;
+    _sizeScale.width *= aSize.width;
 
     newBounds.origin.x *= 1.0 / scale.width;
     newBounds.origin.y *= 1.0 / scale.height;
@@ -2260,11 +2260,11 @@ setBoundsOrigin:
     return _scale ? _scale : CGSizeMake(1.0, 1.0);
 }
 
-/*! Return the _sizeZoom, this is a CGSize with the real zoom of the view (depending with his parents)
+/*! Return the _sizeScale, this is a CGSize with the real zoom of the view (depending with his parents)
 */
-- (CGSize)_sizeZoom
+- (CGSize)_sizeScale
 {
-    return  _sizeZoom ? _sizeZoom : CGSizeMake(1.0, 1.0);
+    return  _sizeScale ? _sizeScale : CGSizeMake(1.0, 1.0);
 }
 
 /*! Make a zoom in css
@@ -2276,7 +2276,7 @@ setBoundsOrigin:
     {
         var scale = [self scale];
 
-        self._DOMElement.style.WebkitTransform = 'scale('+ scale.width +', '+ scale.height +')';
+        self._DOMElement.style.WebkitTransform = 'scale(' + scale.width + ', ' + scale.height + ')';
         self._DOMElement.style.WebkitTransformOrigin = '0 0';
         [self _setDisplayServerSetStyleSize:[self frameSize]];
     }
@@ -3207,9 +3207,9 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
     CPViewNextKeyViewKey            = @"CPViewNextKeyViewKey",
     CPViewPreviousKeyViewKey        = @"CPViewPreviousKeyViewKey",
     CPReuseIdentifierKey            = @"CPReuseIdentifierKey",
-    CPViewScaleXKey                 = @"CPViewScaleXKey",
-    CPViewScaleYKey                 = @"CPViewScaleYKey",
-    CPViewIsParentZoomKey           = @"CPViewIsParentZoomKey";
+    CPViewScaleKey                  = @"CPViewScaleKey",
+    CPViewSizeScaleKey              = @"CPViewSizeScaleKey",
+    CPViewIsScaledKey               = @"CPViewIsScaledKey";
 
 @implementation CPView (CPCoding)
 
@@ -3276,9 +3276,9 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
         if (_toolTip)
             [self _installToolTipEventHandlers];
 
-        // _scaleY = [aCoder decodeFloatForKey:CPViewScaleYKey];
-        // _scaleX = [aCoder decodeFloatForKey:CPViewScaleXKey];
-        _isScaled = [aCoder decodeBoolForKey:CPViewIsParentZoomKey];
+        // _scale = [aCoder decodeSizeForKey:CPViewScaleKey];
+        // _sizeScale = [aCoder decodeSizeForKey:CPViewSizeScaleKey];
+        // _isScaled = [aCoder decodeBoolForKey:CPViewIsScaledKey];
 
         // DOM SETUP
 #if PLATFORM(DOM)
@@ -3410,9 +3410,9 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
     if (_identifier)
         [aCoder encodeObject:_identifier forKey:CPReuseIdentifierKey];
 
-    // [aCoder encodeFloat:_scaleY forKey:CPViewScaleYKey];
-    // [aCoder encodeFloat:_scaleX forKey:CPViewScaleXKey];
-    [aCoder encodeBool:_isScaled forKey:CPViewIsParentZoomKey];
+    // [aCoder encodeSize:[self scale] forKey:CPViewScaleKey];
+    // [aCoder encodeSize:[self _sizeScale] forKey:CPViewSizeScaleKey];
+    // [aCoder encodeBool:_isScaled forKey:CPViewIsScaledKey];
 }
 
 @end
@@ -3442,9 +3442,9 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
         {
             var frame = view._frame;
 
-            if (view._isScaled && view._sizeZoom)
+            if (view._isScaled)
             {
-                var affineZoom = CGAffineTransformMakeScale(view._sizeZoom.width, view._sizeZoom.height);
+                var affineZoom = CGAffineTransformMakeScale(view._scale.width, view._scale.height);
                 CGAffineTransformConcatTo(transform, affineZoom, transform);
             }
 
