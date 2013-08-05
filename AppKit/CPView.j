@@ -3276,9 +3276,9 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
         if (_toolTip)
             [self _installToolTipEventHandlers];
 
-        // _scale = [aCoder decodeSizeForKey:CPViewScaleKey];
-        // _sizeScale = [aCoder decodeSizeForKey:CPViewSizeScaleKey];
-        // _isScaled = [aCoder decodeBoolForKey:CPViewIsScaledKey];
+        _scale = [aCoder containsValueForKey:CPViewScaleKey] ? [aCoder decodeSizeForKey:CPViewScaleKey] : CGSizeMake(1.0, 1.0);
+        _sizeScale = [aCoder containsValueForKey:CPViewSizeScaleKey] ? [aCoder decodeSizeForKey:CPViewSizeScaleKey] : CGSizeMake(1.0, 1.0);
+        _isScaled = [aCoder containsValueForKey:CPViewIsScaledKey] ? [aCoder decodeBoolForKey:CPViewIsScaledKey] : NO;
 
         // DOM SETUP
 #if PLATFORM(DOM)
@@ -3286,7 +3286,7 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
         _DOMImageSizes = [];
 
         CPDOMDisplayServerSetStyleLeftTop(_DOMElement, NULL, CGRectGetMinX(_frame), CGRectGetMinY(_frame));
-        CPDOMDisplayServerSetStyleSize(_DOMElement, CGRectGetWidth(_frame), CGRectGetHeight(_frame));
+        [self _setDisplayServerSetStyleSize:_frame.size]
 
         var index = 0,
             count = _subviews.length;
@@ -3410,9 +3410,9 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
     if (_identifier)
         [aCoder encodeObject:_identifier forKey:CPReuseIdentifierKey];
 
-    // [aCoder encodeSize:[self scale] forKey:CPViewScaleKey];
-    // [aCoder encodeSize:[self _sizeScale] forKey:CPViewSizeScaleKey];
-    // [aCoder encodeBool:_isScaled forKey:CPViewIsScaledKey];
+    [aCoder encodeSize:[self scale] forKey:CPViewScaleKey];
+    [aCoder encodeSize:[self _sizeScale] forKey:CPViewSizeScaleKey];
+    [aCoder encodeBool:_isScaled forKey:CPViewIsScaledKey];
 }
 
 @end
@@ -3471,14 +3471,7 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
             toWindow = [toView window];
 
             if (fromWindow && toWindow && fromWindow !== toWindow)
-            {
                 sameWindow = NO;
-
-                var frame = [fromWindow frame];
-
-                transform.tx += CGRectGetMinX(frame);
-                transform.ty += CGRectGetMinY(frame);
-            }
         }
     }
 
@@ -3490,6 +3483,7 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
     {
         var frame = CGRectMakeCopy(view._frame);
 
+        // FIXME : For now we don't care about rotate transform and so on
         if (view._isScaled)
         {
             transform2.a *= 1 / view._scale.width;
@@ -3507,19 +3501,24 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
         view = view._superview;
     }
 
-    transform.tx = -transform2.tx;
-    transform.ty = -transform2.ty;
-    transform.a = transform2.a;
-    transform.d = transform2.d;
-    transform.c = transform2.c;
-    transform.b = transform2.b;
-
-    if (!sameWindow)
+    if (sameWindow)
     {
-        var frame = [toWindow frame];
-
-        transform.tx -= CGRectGetMinX(frame);
-        transform.ty -= CGRectGetMinY(frame);
+        transform.tx = -transform2.tx;
+        transform.ty = -transform2.ty;
+        transform.a = transform2.a;
+        transform.d = transform2.d;
+        transform.c = transform2.c;
+        transform.b = transform2.b;
+    }
+    else
+    {
+        // FIXME : For now we don't care about rotate transform and so on
+        transform.tx = transform.tx * transform2.a - transform2.tx;
+        transform.ty = transform.ty * transform2.d - transform2.ty;
+        transform.a *= transform2.a;
+        transform.d *= transform2.d;
+        transform.c *= transform2.c;
+        transform.b *= transform2.b;
     }
 
 /*    var views = [],
