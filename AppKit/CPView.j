@@ -570,6 +570,7 @@ var CPViewFlags                     = { },
     }
 
     [aSubview setNextResponder:self];
+    [aSubview _scaleUnitSquareToSize:[self _sizeScale]];
 
     // If the subview is not hidden and one of its ancestors is hidden,
     // notify the subview that it is now hidden.
