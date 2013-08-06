@@ -3496,7 +3496,11 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
 
         if (view._boundsTransform)
         {
-            _CGAffineTransformConcatTo(transform2, view._inverseBoundsTransform, transform2);
+            var inverseBoundsTransform = CGAffineTransformMakeIdentity();
+            inverseBoundsTransform.tx -=  view._inverseBoundsTransform.tx;
+            inverseBoundsTransform.ty -=  view._inverseBoundsTransform.ty;
+
+            CGAffineTransformConcatTo(transform2, inverseBoundsTransform, transform2);
         }
 
         view = view._superview;
