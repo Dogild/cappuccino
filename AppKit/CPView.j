@@ -985,7 +985,6 @@ var CPViewFlags                     = { },
 
 #if PLATFORM(DOM)
     [self _setDisplayServerSetStyleSize:size];
-    //CPDOMDisplayServerSetStyleSize(_DOMElement, size.width, size.height);
 
     if (_DOMContentsElement)
     {
@@ -1094,6 +1093,11 @@ var CPViewFlags                     = { },
         [CachedNotificationCenter postNotificationName:CPViewFrameDidChangeNotification object:self];
 }
 
+/*!
+    This method is used to set the width and height of the _DOMElement. It cares about the scale of the view.
+    When scaling, for instance with a size (0.5, 0.5), the bounds of the view will be multiply by 2. It's why we multiply by the inverse of the scaling.
+    The view will finally keep the same proportion for the user on the screen.
+*/
 - (void)_setDisplayServerSetStyleSize:(CGSize)aSize
 {
 #if PLATFORM(DOM)
@@ -1599,6 +1603,9 @@ var CPViewFlags                     = { },
 */
 - (CPView)hitTest:(CGPoint)aPoint
 {
+    if (_isHidden || !_hitTests)
+        return nil;
+
     var frame = _frame,
         sizeScale = [self _hierarchyScaleSize];
 
@@ -1607,7 +1614,7 @@ var CPViewFlags                     = { },
     else
         frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale(sizeScale.width, sizeScale.height));
 
-    if (_isHidden || !_hitTests || !CGRectContainsPoint(frame, aPoint))
+    if (!CGRectContainsPoint(frame, aPoint))
         return nil;
 
     var view = nil,
@@ -1952,7 +1959,7 @@ var CPViewFlags                     = { },
 */
 - (CGPoint)convertPoint:(CGPoint)aPoint fromView:(CPView)aView
 {
-    if (aView == self)
+    if (aView === self)
         return aPoint;
 
     return CGPointApplyAffineTransform(aPoint, _CPViewGetTransform(aView, self));
@@ -1976,7 +1983,7 @@ var CPViewFlags                     = { },
 */
 - (CGPoint)convertPoint:(CGPoint)aPoint toView:(CPView)aView
 {
-    if (aView == self)
+    if (aView === self)
         return aPoint;
 
     return CGPointApplyAffineTransform(aPoint, _CPViewGetTransform(self, aView));
@@ -2001,7 +2008,7 @@ var CPViewFlags                     = { },
 */
 - (CGSize)convertSize:(CGSize)aSize fromView:(CPView)aView
 {
-    if (aView == self)
+    if (aView === self)
         return aSize;
 
     return CGSizeApplyAffineTransform(aSize, _CPViewGetTransform(aView, self));
@@ -2015,7 +2022,7 @@ var CPViewFlags                     = { },
 */
 - (CGSize)convertSize:(CGSize)aSize toView:(CPView)aView
 {
-    if (aView == self)
+    if (aView === self)
         return aSize;
 
     return CGSizeApplyAffineTransform(aSize, _CPViewGetTransform(self, aView));
@@ -2029,7 +2036,7 @@ var CPViewFlags                     = { },
 */
 - (CGRect)convertRect:(CGRect)aRect fromView:(CPView)aView
 {
-    if (self == aView)
+    if (self === aView)
         return aRect;
 
     return CGRectApplyAffineTransform(aRect, _CPViewGetTransform(aView, self));
@@ -2053,7 +2060,7 @@ var CPViewFlags                     = { },
 */
 - (CGRect)convertRect:(CGRect)aRect toView:(CPView)aView
 {
-    if (self == aView)
+    if (self === aView)
         return aRect;
 
     return CGRectApplyAffineTransform(aRect, _CPViewGetTransform(self, aView));
@@ -2214,26 +2221,6 @@ setBoundsOrigin:
 // Scaling
 
 /*!
-    Set the zoom of the view. This will can scaleUnitSquareToSize: and setNeedsDisplay:
-    This method don't care about the last zoom you set in the view
-    @param aSize, the size corresponding the new unit scales
-*/
-- (void)setScaleSize:(CGSize)aSize
-{
-    if (CGSizeEqualToSize(_scaleSize, aSize))
-        return;
-
-    var size = CGSizeMakeZero(),
-        scale = CGSizeMakeCopy([self scaleSize]);
-
-    size.height = aSize.height / scale.height;
-    size.width = aSize.width / scale.width;
-
-    [self scaleUnitSquareToSize:size];
-    [self setNeedsDisplay:YES];
-}
-
-/*!
     Scales the receiver’s coordinate system so that the unit square scales to the specified dimensions.
     The bounds of the receiver will change, for instance if the given size is (0.5, 0.5) the width and height of the bounds will be multiply by 2.
     You must call setNeedsDisplay: to redraw the view.
@@ -2244,7 +2231,7 @@ setBoundsOrigin:
     if (!aSize)
         return;
 
-    // Reset eh bounds
+    // Reset the bounds
     var bounds = CGRectMakeCopy([self bounds]);
     bounds.size.width *= _scaleSize.width;
     bounds.size.height *= _scaleSize.height;
@@ -2269,6 +2256,7 @@ setBoundsOrigin:
 }
 
 /*!
+    @ignore
     Set the _hierarchyScaleSize and call all of the subviews to set their _hierarchyScaleSize
 */
 - (void)_scaleSizeUnitSquareToSize:(CGSize)aSize
@@ -2289,7 +2277,7 @@ setBoundsOrigin:
 */
 - (CGSize)scaleSize
 {
-    return _scaleSize ? _scaleSize : CGSizeMake(1.0, 1.0);
+    return _scaleSize || CGSizeMake(1.0, 1.0);
 }
 
 /*!
@@ -2297,24 +2285,24 @@ setBoundsOrigin:
 */
 - (CGSize)_hierarchyScaleSize
 {
-    return _hierarchyScaleSize ? _hierarchyScaleSize : CGSizeMake(1.0, 1.0);
+    return _hierarchyScaleSize || CGSizeMake(1.0, 1.0);
 }
 
 /*!
     Make a zoom in css
 */
-- (void)_zoomCSS
+- (void)_applyCSSScalingTranformations
 {
 #if PLATFORM(DOM)
     if (_isScaled)
     {
-        var scale = [self scaleSize];
+        var scale = [self scaleSize],
+            browserPropertyTransform = CPBrowserStyleProperty(@"transform"),
+            browserPropertyTransformOrigin = CPBrowserStyleProperty(@"transformOrigin");
 
-        self._DOMElement.style.MozTransform = 'scale(' + scale.width + ', ' + scale.height + ')';
-        self._DOMElement.style.MozTransformOrigin = '0 0';
+        self._DOMElement.style[browserPropertyTransform] = 'scale(' + scale.width + ', ' + scale.height + ')';
+        self._DOMElement.style[browserPropertyTransformOrigin] = '0 0';
 
-        self._DOMElement.style.WebkitTransform = 'scale(' + scale.width + ', ' + scale.height + ')';
-        self._DOMElement.style.WebkitTransformOrigin = '0 0';
         [self _setDisplayServerSetStyleSize:[self frameSize]];
     }
 #endif
@@ -2329,7 +2317,7 @@ setBoundsOrigin:
 {
     if (aFlag)
     {
-        [self _zoomCSS];
+        [self _applyCSSScalingTranformations];
         [self setNeedsDisplayInRect:[self bounds]];
     }
 }
@@ -2865,6 +2853,31 @@ setBoundsOrigin:
 
 @end
 
+
+@implementation CPView (Scaling)
+
+/*!
+    Set the zoom of the view. This will call scaleUnitSquareToSize: and setNeedsDisplay:
+    This method doesn't care about the last zoom you set in the view
+    @param aSize, the size corresponding the new unit scales
+*/
+- (void)setScaleSize:(CGSize)aSize
+{
+    if (CGSizeEqualToSize(_scaleSize, aSize))
+        return;
+
+    var size = CGSizeMakeZero(),
+        scale = CGSizeMakeCopy([self scaleSize]);
+
+    size.height = aSize.height / scale.height;
+    size.width = aSize.width / scale.width;
+
+    [self scaleUnitSquareToSize:size];
+    [self setNeedsDisplay:YES];
+}
+
+@end
+
 @implementation CPView (Theming)
 #pragma mark Theme States
 
@@ -3323,7 +3336,7 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
         _DOMImageSizes = [];
 
         CPDOMDisplayServerSetStyleLeftTop(_DOMElement, NULL, CGRectGetMinX(_frame), CGRectGetMinY(_frame));
-        [self _setDisplayServerSetStyleSize:_frame.size]
+        [self _setDisplayServerSetStyleSize:_frame.size];
 
         var index = 0,
             count = _subviews.length;
