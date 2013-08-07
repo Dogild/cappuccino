@@ -201,8 +201,8 @@ var CPViewFlags                     = { },
 
     // Zoom Support
     BOOL                _isScaled;
-    CGSize              _sizeScale;
-    CGSize              _scale;
+    CGSize              _hierarchyScaleSize;
+    CGSize              _scaleSize;
 
     // Layout Support
     BOOL                _needsLayout;
@@ -339,8 +339,8 @@ var CPViewFlags                     = { },
         _isHidden = NO;
         _hitTests = YES;
 
-        _sizeScale = CGSizeMake(1.0 , 1.0);
-        _scale = CGSizeMake(1.0, 1.0);
+        _hierarchyScaleSize = CGSizeMake(1.0 , 1.0);
+        _scaleSize = CGSizeMake(1.0, 1.0);
         _isScaled = NO;
 
 #if PLATFORM(DOM)
@@ -570,7 +570,7 @@ var CPViewFlags                     = { },
     }
 
     [aSubview setNextResponder:self];
-    [aSubview _scaleUnitSquareToSize:[self _sizeScale]];
+    [aSubview _scaleSizeUnitSquareToSize:[self _hierarchyScaleSize]];
 
     // If the subview is not hidden and one of its ancestors is hidden,
     // notify the subview that it is now hidden.
@@ -1097,7 +1097,7 @@ var CPViewFlags                     = { },
 - (void)_setDisplayServerSetStyleSize:(CGSize)aSize
 {
 #if PLATFORM(DOM)
-    var scale = [self scale];
+    var scale = [self scaleSize];
     CPDOMDisplayServerSetStyleSize(_DOMElement, aSize.width * 1 / scale.width, aSize.height * 1 / scale.height);
 #endif
 }
@@ -1600,10 +1600,10 @@ var CPViewFlags                     = { },
 - (CPView)hitTest:(CGPoint)aPoint
 {
     var frame = _frame,
-        sizeScale = [self _sizeScale];
+        sizeScale = [self _hierarchyScaleSize];
 
     if (_isScaled)
-        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale([_superview _sizeScale].width, [_superview _sizeScale].height));
+        frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale([_superview _hierarchyScaleSize].width, [_superview _hierarchyScaleSize].height));
     else
         frame = CGRectApplyAffineTransform(_frame, CGAffineTransformMakeScale(sizeScale.width, sizeScale.height));
 
@@ -1615,7 +1615,23 @@ var CPViewFlags                     = { },
         adjustedPoint = CGPointMake(aPoint.x - CGRectGetMinX(frame), aPoint.y - CGRectGetMinY(frame));
 
     if (_inverseBoundsTransform)
-        adjustedPoint = CGPointApplyAffineTransform(adjustedPoint, _inverseBoundsTransform);
+    {
+        var affineTransform = CGAffineTransformMakeCopy(_inverseBoundsTransform);
+
+        if (_isScaled)
+        {
+            affineTransform.tx *= [_superview _hierarchyScaleSize].width;
+            affineTransform.ty *= [_superview _hierarchyScaleSize].height;
+        }
+        else
+        {
+            affineTransform.tx *= sizeScale.width;
+            affineTransform.ty *= sizeScale.height;
+        }
+
+        adjustedPoint = CGPointApplyAffineTransform(adjustedPoint, affineTransform);
+    }
+
 
     while (i--)
         if (view = [_subviews[i] hitTest:adjustedPoint])
@@ -2197,14 +2213,18 @@ setBoundsOrigin:
 
 // Scaling
 
-/*! Set the zoom of the view. This will can scaleUnitSquareToSize: and setNeedsDisplay:
+/*!
+    Set the zoom of the view. This will can scaleUnitSquareToSize: and setNeedsDisplay:
     This method don't care about the last zoom you set in the view
     @param aSize, the size corresponding the new unit scales
 */
-- (void)setScale:(CGSize)aSize
+- (void)setScaleSize:(CGSize)aSize
 {
+    if (CGSizeEqualToSize(_scaleSize, aSize))
+        return;
+
     var size = CGSizeMakeZero(),
-        scale = CGSizeMakeCopy([self scale]);
+        scale = CGSizeMakeCopy([self scaleSize]);
 
     size.height = aSize.height / scale.height;
     size.width = aSize.width / scale.width;
@@ -2224,58 +2244,66 @@ setBoundsOrigin:
     if (!aSize)
         return;
 
-    [self willChangeValueForKey:@"zoom"];
-    _scale = CGSizeMakeCopy([self scale]);
-    _scale.height *= aSize.height;
-    _scale.width *= aSize.width;
-    [self didChangeValueForKey:@"zoom"];
+    [self willChangeValueForKey:@"scaleSize"];
+    _scaleSize = CGSizeMakeCopy([self scaleSize]);
+    _scaleSize.height *= aSize.height;
+    _scaleSize.width *= aSize.width;
+    [self didChangeValueForKey:@"scaleSize"];
     _isScaled = YES;
 
-    [self _scaleUnitSquareToSize:aSize];
-}
+    _hierarchyScaleSize = CGSizeMakeCopy([self _hierarchyScaleSize]);
+    _hierarchyScaleSize.height *= aSize.height;
+    _hierarchyScaleSize.width *= aSize.width;
 
-/*! Set the _sizeScale and call all of the subviews to set their _sizeScale
-*/
-- (void)_scaleUnitSquareToSize:(CGSize)aSize
-{
-    var scale = [self scale],
-        newBounds = CGRectMakeCopy([self bounds]);
+    var scaleAffine = CGAffineTransformMakeScale(1.0 / _scaleSize.width, 1.0 / _scaleSize.height),
+        newBounds = CGRectApplyAffineTransform(CGRectMakeCopy([self bounds]), scaleAffine);
 
-    _sizeScale = CGSizeMakeCopy([self _sizeScale]);
-    _sizeScale.height *= aSize.height;
-    _sizeScale.width *= aSize.width;
-
-    newBounds.origin.x *= 1.0 / scale.width;
-    newBounds.origin.y *= 1.0 / scale.height;
-    newBounds.size.width *= 1.0 / scale.width;
-    newBounds.size.height *= 1.0 / scale.height;
     [self setBounds:newBounds];
 
-    [_subviews makeObjectsPerformSelector:@selector(_scaleUnitSquareToSize:) withObject:aSize];
+    [_subviews makeObjectsPerformSelector:@selector(_scaleSizeUnitSquareToSize:) withObject:aSize];
 }
 
-/*! Return a _zoom, this _zoom is used to scale in css
+/*!
+    Set the _hierarchyScaleSize and call all of the subviews to set their _hierarchyScaleSize
 */
-- (CGSize)scale
+- (void)_scaleSizeUnitSquareToSize:(CGSize)aSize
 {
-    return _scale ? _scale : CGSizeMake(1.0, 1.0);
+    _hierarchyScaleSize = CGSizeMakeCopy([_superview _hierarchyScaleSize]);
+
+    if (_isScaled)
+    {
+         _hierarchyScaleSize.width *= _scaleSize.width;
+         _hierarchyScaleSize.height *= _scaleSize.height;
+    }
+
+    [_subviews makeObjectsPerformSelector:@selector(_scaleSizeUnitSquareToSize:) withObject:aSize];
 }
 
-/*! Return the _sizeScale, this is a CGSize with the real zoom of the view (depending with his parents)
+/*!
+    Return a _zoom, this _zoom is used to scale in css
 */
-- (CGSize)_sizeScale
+- (CGSize)scaleSize
 {
-    return  _sizeScale ? _sizeScale : CGSizeMake(1.0, 1.0);
+    return _scaleSize ? _scaleSize : CGSizeMake(1.0, 1.0);
 }
 
-/*! Make a zoom in css
+/*!
+    Return the _hierarchyScaleSize, this is a CGSize with the real zoom of the view (depending with his parents)
+*/
+- (CGSize)_hierarchyScaleSize
+{
+    return _hierarchyScaleSize ? _hierarchyScaleSize : CGSizeMake(1.0, 1.0);
+}
+
+/*!
+    Make a zoom in css
 */
 - (void)_zoomCSS
 {
 #if PLATFORM(DOM)
     if (_isScaled)
     {
-        var scale = [self scale];
+        var scale = [self scaleSize];
 
         self._DOMElement.style.WebkitTransform = 'scale(' + scale.width + ', ' + scale.height + ')';
         self._DOMElement.style.WebkitTransformOrigin = '0 0';
@@ -3277,8 +3305,8 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
         if (_toolTip)
             [self _installToolTipEventHandlers];
 
-        _scale = [aCoder containsValueForKey:CPViewScaleKey] ? [aCoder decodeSizeForKey:CPViewScaleKey] : CGSizeMake(1.0, 1.0);
-        _sizeScale = [aCoder containsValueForKey:CPViewSizeScaleKey] ? [aCoder decodeSizeForKey:CPViewSizeScaleKey] : CGSizeMake(1.0, 1.0);
+        _scaleSize = [aCoder containsValueForKey:CPViewScaleKey] ? [aCoder decodeSizeForKey:CPViewScaleKey] : CGSizeMake(1.0, 1.0);
+        _hierarchyScaleSize = [aCoder containsValueForKey:CPViewSizeScaleKey] ? [aCoder decodeSizeForKey:CPViewSizeScaleKey] : CGSizeMake(1.0, 1.0);
         _isScaled = [aCoder containsValueForKey:CPViewIsScaledKey] ? [aCoder decodeBoolForKey:CPViewIsScaledKey] : NO;
 
         // DOM SETUP
@@ -3411,8 +3439,8 @@ var CPViewAutoresizingMaskKey       = @"CPViewAutoresizingMask",
     if (_identifier)
         [aCoder encodeObject:_identifier forKey:CPReuseIdentifierKey];
 
-    [aCoder encodeSize:[self scale] forKey:CPViewScaleKey];
-    [aCoder encodeSize:[self _sizeScale] forKey:CPViewSizeScaleKey];
+    [aCoder encodeSize:[self scaleSize] forKey:CPViewScaleKey];
+    [aCoder encodeSize:[self _hierarchyScaleSize] forKey:CPViewSizeScaleKey];
     [aCoder encodeBool:_isScaled forKey:CPViewIsScaledKey];
 }
 
@@ -3445,7 +3473,7 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
 
             if (view._isScaled)
             {
-                var affineZoom = CGAffineTransformMakeScale(view._scale.width, view._scale.height);
+                var affineZoom = CGAffineTransformMakeScale(view._scaleSize.width, view._scaleSize.height);
                 CGAffineTransformConcatTo(transform, affineZoom, transform);
             }
 
@@ -3454,7 +3482,15 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
 
             if (view._boundsTransform)
             {
-                CGAffineTransformConcatTo(transform, view._boundsTransform, transform);
+                var inverseBoundsTransform = CGAffineTransformMakeCopy(view._boundsTransform);
+
+                if (view._isScaled)
+                {
+                    var affineZoom = CGAffineTransformMakeScale(view._scaleSize.width, view._scaleSize.height);
+                    CGAffineTransformConcatTo(inverseBoundsTransform, affineZoom, inverseBoundsTransform);
+                }
+
+                CGAffineTransformConcatTo(transform, inverseBoundsTransform, transform);
             }
 
             view = view._superview;
@@ -3487,8 +3523,8 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
         // FIXME : For now we don't care about rotate transform and so on
         if (view._isScaled)
         {
-            transform2.a *= 1 / view._scale.width;
-            transform2.d *= 1 / view._scale.height;
+            transform2.a *= 1 / view._scaleSize.width;
+            transform2.d *= 1 / view._scaleSize.height;
         }
 
         transform2.tx += CGRectGetMinX(frame) * transform2.a;
@@ -3497,8 +3533,8 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
         if (view._boundsTransform)
         {
             var inverseBoundsTransform = CGAffineTransformMakeIdentity();
-            inverseBoundsTransform.tx -=  view._inverseBoundsTransform.tx;
-            inverseBoundsTransform.ty -=  view._inverseBoundsTransform.ty;
+            inverseBoundsTransform.tx -=  view._inverseBoundsTransform.tx * transform2.a;
+            inverseBoundsTransform.ty -=  view._inverseBoundsTransform.ty * transform2.d;
 
             CGAffineTransformConcatTo(transform2, inverseBoundsTransform, transform2);
         }
@@ -3506,25 +3542,13 @@ var _CPViewGetTransform = function(/*CPView*/ fromView, /*CPView */ toView)
         view = view._superview;
     }
 
+    transform2.tx = -transform2.tx;
+    transform2.ty = -transform2.ty;
+
     if (sameWindow)
-    {
-        transform.tx = -transform2.tx;
-        transform.ty = -transform2.ty;
-        transform.a = transform2.a;
-        transform.d = transform2.d;
-        transform.c = transform2.c;
-        transform.b = transform2.b;
-    }
+        transform = transform2;
     else
-    {
-        // FIXME : For now we don't care about rotate transform and so on
-        transform.tx = transform.tx * transform2.a - transform2.tx;
-        transform.ty = transform.ty * transform2.d - transform2.ty;
-        transform.a *= transform2.a;
-        transform.d *= transform2.d;
-        transform.c *= transform2.c;
-        transform.b *= transform2.b;
-    }
+        CGAffineTransformConcatTo(transform, transform2, transform);
 
 /*    var views = [],
         view = toView;
