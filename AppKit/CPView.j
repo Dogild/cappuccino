@@ -2244,6 +2244,11 @@ setBoundsOrigin:
     if (!aSize)
         return;
 
+    // Reset eh bounds
+    var bounds = CGRectMakeCopy([self bounds]);
+    bounds.size.width *= _scaleSize.width;
+    bounds.size.height *= _scaleSize.height;
+
     [self willChangeValueForKey:@"scaleSize"];
     _scaleSize = CGSizeMakeCopy([self scaleSize]);
     _scaleSize.height *= aSize.height;
@@ -2256,7 +2261,7 @@ setBoundsOrigin:
     _hierarchyScaleSize.width *= aSize.width;
 
     var scaleAffine = CGAffineTransformMakeScale(1.0 / _scaleSize.width, 1.0 / _scaleSize.height),
-        newBounds = CGRectApplyAffineTransform(CGRectMakeCopy([self bounds]), scaleAffine);
+        newBounds = CGRectApplyAffineTransform(CGRectMakeCopy(bounds), scaleAffine);
 
     [self setBounds:newBounds];
 
