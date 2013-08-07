@@ -2310,6 +2310,9 @@ setBoundsOrigin:
     {
         var scale = [self scaleSize];
 
+        self._DOMElement.style.MozTransform = 'scale(' + scale.width + ', ' + scale.height + ')';
+        self._DOMElement.style.MozTransformOrigin = '0 0';
+
         self._DOMElement.style.WebkitTransform = 'scale(' + scale.width + ', ' + scale.height + ')';
         self._DOMElement.style.WebkitTransformOrigin = '0 0';
         [self _setDisplayServerSetStyleSize:[self frameSize]];
