@@ -2273,14 +2273,6 @@ setBoundsOrigin:
 }
 
 /*!
-    Return a _zoom, this _zoom is used to scale in css
-*/
-- (CGSize)scaleSize
-{
-    return _scaleSize || CGSizeMake(1.0, 1.0);
-}
-
-/*!
     Return the _hierarchyScaleSize, this is a CGSize with the real zoom of the view (depending with his parents)
 */
 - (CGSize)_hierarchyScaleSize
@@ -2874,6 +2866,15 @@ setBoundsOrigin:
 
     [self scaleUnitSquareToSize:size];
     [self setNeedsDisplay:YES];
+}
+
+
+/*!
+    Return the scaleSize of the view, this scaleSize is used to scale in css
+*/
+- (CGSize)scaleSize
+{
+    return _scaleSize || CGSizeMake(1.0, 1.0);
 }
 
 @end
