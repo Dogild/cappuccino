@@ -970,8 +970,8 @@ var CPViewFlags                     = { },
 
     if (YES)
     {
-        _bounds.size.width = aSize.width;
-        _bounds.size.height = aSize.height;
+        _bounds.size.width = aSize.width * 1 / _scaleSize.width;
+        _bounds.size.height = aSize.height * 1 / _scaleSize.height;
     }
 
     if (_layer)
