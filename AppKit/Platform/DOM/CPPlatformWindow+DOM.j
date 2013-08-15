@@ -112,6 +112,7 @@
 @import <Foundation/CPSet.j>
 @import <Foundation/CPTimer.j>
 
+@import "CPApplication_Constants.j"
 @import "CPCompatibility.j"
 @import "CPCursor.j"
 @import "CPDOMWindowLayer.j"
@@ -128,7 +129,6 @@
 @class CPDragServer
 @class _CPToolTip
 
-@global CPApp
 @global _CPRunModalLoop
 
 // List of all open native windows
@@ -994,6 +994,10 @@ var resizeTimer = nil;
             [windows[windowCount] resizeWithOldPlatformWindowSize:oldSize];
     }
 
+    [[CPNotificationCenter defaultCenter] postNotificationName:CPApplicationDidChangeScreenParametersNotification
+                                                        object:CPApp
+                                                      userInfo:nil];
+
     //window.liveResize = NO;
 
     [[CPRunLoop currentRunLoop] limitDateForMode:CPDefaultRunLoopMode];
@@ -1496,6 +1500,44 @@ var resizeTimer = nil;
     }
 
     return theWindow;
+}
+
+/*! @ignore Return the selected text in the DOM window if known. */
+- (CPString)_selectedText
+{
+    if (_DOMWindow.getSelection)
+        return "" + _DOMWindow.getSelection();
+    else if (_DOMWindow.document.getSelection)
+        return "" + _DOMWindow.document.getSelection();
+    else if (_DOMWindow.selection)
+        return "" + _DOMWindow.selection.createRange().text;
+    else
+        return nil;
+}
+
+/*!
+    Set the text selection range to the given range within the given element, which must be a child of
+    this DOM window.
+*/
+- (void)setSelectedRange:(CPRange)aRange inElement:(DOMElement)anElement
+{
+    if (_DOMWindow.getSelection())
+    {
+        var domRange = _DOMWindow.document.createRange();
+        domRange.setStart(anElement.childNodes[0], aRange.location);
+        domRange.setEnd(anElement.childNodes[0], CPMaxRange(aRange));
+        _DOMWindow.getSelection().removeAllRanges();
+        _DOMWindow.getSelection().addRange(domRange);
+    }
+    else if (_DOMWindow.document.selection)
+    {
+        var domRange = _DOMWindow.document.body.createTextRange();
+        domRange.moveToElementText(anElement);
+        domRange.collapse(true);
+        domRange.moveStart('character', aRange.location);
+        domRange.moveEnd('character', aRange.length);
+        domRange.select();
+    }
 }
 
 /*!
