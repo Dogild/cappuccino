@@ -161,7 +161,7 @@ var DOMFixedWidthSpanElement    = nil,
 
     DOMMetricsDivElement.style.font = [(aFont || DefaultFont) cssString];
 
-    var lineHeight = DOMMetricsDivElement.offsetHeight,
+    var lineHeight = DOMMetricsDivElement.offsetHeight + 1,
         baseline = DOMMetricsImgElement.offsetTop + DOMMetricsImgElement.offsetHeight,
         descender = baseline - lineHeight;
 
