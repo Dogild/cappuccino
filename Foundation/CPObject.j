@@ -67,6 +67,16 @@ CPLog(@"Got some class: %@", inst);
 
 @global CPInvalidArgumentException
 
+
+@protocol CPCoding
+
+@required
+- (void)encodeWithCoder:(CPCoder)encoder;
+- (id)initWithCoder:(CPCoder)decoder;
+
+@end
+
+
 @implementation CPObject
 {
     Class   isa;

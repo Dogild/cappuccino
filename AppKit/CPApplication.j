@@ -41,6 +41,20 @@ var CPMainCibFile               = @"CPMainCibFile",
     CPMainCibFileHumanFriendly  = @"Main cib file base name",
     CPEventModifierFlags = 0;
 
+@protocol CPApplicationDelegate
+
+@optional
+- (void)applicationDidBecomeActive:(CPNotification)aNotification;
+- (void)applicationDidChangeScreenParameters:(CPNotification)aNotification;
+- (void)applicationDidFinishLaunching:(CPNotification)aNotification;
+- (void)applicationDidResignActive:(CPNotification)aNotification;
+- (void)applicationWillBecomeActive:(CPNotification)aNotification;
+- (void)applicationWillFinishLaunching:(CPNotification)aNotification;
+- (void)applicationWillResignActive:(CPNotification)aNotification;
+- (void)applicationWillTerminate:(CPNotification)aNotification;
+
+@end
+
 /*!
     @ingroup appkit
     @class CPApplication

@@ -32,6 +32,34 @@
 @import "CPPasteboard.j"
 @import "CPView.j"
 
+var CPCollectionViewDelegate_collectionView_acceptDrop_index_dropOperation_                 = 1 << 0,
+    CPCollectionViewDelegate_collectionView_canDragItemsAtIndexes_withEvent_                = 1 << 1,
+    CPCollectionViewDelegate_collectionView_writeItemsAtIndexes_toPasteboard_               = 1 << 2,
+    CPCollectionViewDelegate_collectionView_dragTypesForItemsAtIndexes_                     = 1 << 3,
+    CPCollectionViewDelegate_collectionView_dataForItemsAtIndexes_forType_                  = 1 << 4,
+    CPCollectionViewDelegate_collectionView_validateDrop_proposedIndex_dropOperation_       = 1 << 5,
+    CPCollectionViewDelegate_collectionView_didDoubleClickOnItemAtIndex_                    = 1 << 6,
+    CPCollectionViewDelegate_collectionViewDidChangeSelection_                              = 1 << 7,
+    CPCollectionViewDelegate_collectionView_menuForItemAtIndex_                             = 1 << 8,
+    CPCollectionViewDelegate_collectionView_draggingViewForItemsAtIndexes_withEvent_offset  = 1 << 9;
+
+
+@protocol CPCollectionViewDelegate
+
+@optional
+- (BOOL)collectionView:(CPCollectionView)collectionView acceptDrop:(id <NSDraggingInfo>)draggingInfo index:(CPInteger)index dropOperation:(CPCollectionViewDropOperation)dropOperation;
+- (BOOL)collectionView:(CPCollectionView)collectionView canDragItemsAtIndexes:(CPIndexSet)indexes withEvent:(CPEvent)event;
+- (BOOL)collectionView:(CPCollectionView)collectionView writeItemsAtIndexes:(CPIndexSet)indexes toPasteboard:(CPPasteboard)pasteboard;
+- (CPArray)collectionView:(CPCollectionView)collectionView dragTypesForItemsAtIndexes:(CPIndexSet)indexes;
+- (CPData)collectionView:(CPCollectionView)collectionView dataForItemsAtIndexes:(CPIndexSet)indices forType:(CPString)aType;
+- (CPDragOperation)collectionView:(CPCollectionView)collectionView validateDrop:(id <NSDraggingInfo>)draggingInfo proposedIndex:(CPInteger)proposedDropIndex dropOperation:(CPCollectionViewDropOperation)proposedDropOperation;
+- (CPMenu)collectionView:(CPCollectionView)collectionView menuForItemAtIndex:(CPInteger)anIndex;
+- (CPView)collectionView:(CPCollectionView)collectionView dragginViewForItemsAtIndexes:(CPIndexSet)indexes withEvent:(CPEvent)event offset:(CGPoint)dragImageOffset;
+- (void)collectionView:(CPCollectionView)collectionView didDoubleClickOnItemAtIndex:(int)index;
+- (void)collectionViewDidChangeSelection:(CPCollectionView)collectionView;
+
+@end
+
 /*!
     @ingroup appkit
     @class CPCollectionView
@@ -101,6 +129,7 @@ var HORIZONTAL_MARGIN = 2;
     unsigned                _numberOfColumns;
 
     id                      _delegate;
+    unsigned                _implementedDelegateMethods;
 
     CPEvent                 _mouseDownEvent;
 
@@ -166,6 +195,53 @@ var HORIZONTAL_MARGIN = 2;
 
     [self setAutoresizesSubviews:NO];
     [self setAutoresizingMask:0];
+}
+
+
+#pragma mark -
+#pragma mark Delegate
+
+/*!
+    Set the delegate of the receiver
+    @param aDelegate the delegate object for the alert.
+*/
+- (void)setDelegate:(id <CPCollectionViewDelegate>)aDelegate
+{
+    if (_delegate === aDelegate)
+        return;
+
+    _delegate = aDelegate;
+    _implementedDelegateMethods = 0;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:acceptDrop:index:dropOperation:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_acceptDrop_index_dropOperation_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:canDragItemsAtIndexes:withEvent:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_canDragItemsAtIndexes_withEvent_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:writeItemsAtIndexes:toPasteboard:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_writeItemsAtIndexes_toPasteboard_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:dragTypesForItemsAtIndexes:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_dragTypesForItemsAtIndexes_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:dataForItemsAtIndexes:forType:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_dataForItemsAtIndexes_forType_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:validateDrop:proposedIndex:dropOperation:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_validateDrop_proposedIndex_dropOperation_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:didDoubleClickOnItemAtIndex:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_didDoubleClickOnItemAtIndex_;
+
+    if ([_delegate respondsToSelector:@selector(collectionViewDidChangeSelection:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionViewDidChangeSelection_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:menuForItemAtIndex:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_menuForItemAtIndex_;
+
+    if ([_delegate respondsToSelector:@selector(collectionView:draggingViewForItemsAtIndexes:withEvent:offset:)])
+        _implementedDelegateMethods |= CPCollectionViewDelegate_collectionView_draggingViewForItemsAtIndexes_withEvent_offset;
 }
 
 /*!
@@ -755,8 +831,8 @@ var HORIZONTAL_MARGIN = 2;
 
 - (void)mouseUp:(CPEvent)anEvent
 {
-    if ([_selectionIndexes count] && [anEvent clickCount] == 2 && [_delegate respondsToSelector:@selector(collectionView:didDoubleClickOnItemAtIndex:)])
-        [_delegate collectionView:self didDoubleClickOnItemAtIndex:[_selectionIndexes firstIndex]];
+    if ([_selectionIndexes count] && [anEvent clickCount] == 2)
+        [self _sendDelegateDidDoubleClickOnItemAtIndex:[_selectionIndexes firstIndex]]:
 }
 
 - (void)mouseDown:(CPEvent)anEvent
@@ -868,13 +944,13 @@ var HORIZONTAL_MARGIN = 2;
 */
 - (CPMenu)menuForEvent:(CPEvent)theEvent
 {
-    if (![[self delegate] respondsToSelector:@selector(collectionView:menuForItemAtIndex:)])
+    if (![self _delegateRespondsToCollectionViewMenuForItemAtIndex])
         return [super menuForEvent:theEvent];
 
     var location = [self convertPoint:[theEvent locationInWindow] fromView:nil],
         index = [self _indexAtPoint:location];
 
-    return [_delegate collectionView:self menuForItemAtIndex:index];
+    return [self _sendDelegateMenuForItemAtIndex:index];
 }
 
 - (int)_indexAtPoint:(CGPoint)thePoint
@@ -932,7 +1008,7 @@ var HORIZONTAL_MARGIN = 2;
 */
 - (void)pasteboard:(CPPasteboard)aPasteboard provideDataForType:(CPString)aType
 {
-    [aPasteboard setData:[_delegate collectionView:self dataForItemsAtIndexes:_selectionIndexes forType:aType] forType:aType];
+    [aPasteboard setData:[self _sendDelegateDataForItemsAtIndexes:_selectionIndexes forType:aType] forType:aType];
 }
 
 - (void)_createDropIndicatorIfNeeded
@@ -962,24 +1038,23 @@ var HORIZONTAL_MARGIN = 2;
         (ABS(locationInWindow.y - mouseDownLocationInWindow.y) < 3))
         return;
 
-    if (![_delegate respondsToSelector:@selector(collectionView:dragTypesForItemsAtIndexes:)])
+    if (![self _delegateRespondsToCollectionViewDragTypesForItemsAtIndexes])
         return;
 
     // If we don't have any selected items, we've clicked away, and thus the drag is meaningless.
     if (![_selectionIndexes count])
         return;
 
-    if ([_delegate respondsToSelector:@selector(collectionView:canDragItemsAtIndexes:withEvent:)] &&
-        ![_delegate collectionView:self canDragItemsAtIndexes:_selectionIndexes withEvent:_mouseDownEvent])
+    if (![self _sendDelegateCanDragItemsAtIndexes:_selectionIndexes withEvent:_mouseDownEvent])
         return;
 
     // Set up the pasteboard
-    var dragTypes = [_delegate collectionView:self dragTypesForItemsAtIndexes:_selectionIndexes];
+    var dragTypes = [self _sendDelegateDragTypesForItemsAtIndexes:_selectionIndexes];
 
     [[CPPasteboard pasteboardWithName:CPDragPboard] declareTypes:dragTypes owner:self];
 
     var dragImageOffset = CGSizeMakeZero(),
-        view = [self _draggingViewForItemsAtIndexes:_selectionIndexes withEvent:_mouseDownEvent offset:dragImageOffset];
+        view = [self _sendDelegateDraggingViewForItemsAtIndexes:_selectionIndexes withEvent:_mouseDownEvent offset:dragImageOffset];
 
     [view setFrameSize:_itemSize];
     [view setAlphaValue:0.7];
@@ -996,14 +1071,6 @@ var HORIZONTAL_MARGIN = 2;
         slideBack:YES];
 }
 
-- (CPView)_draggingViewForItemsAtIndexes:(CPIndexSet)indexes withEvent:(CPEvent)anEvent offset:(CGPoint)offset
-{
-    if ([_delegate respondsToSelector:@selector(collectionView:draggingViewForItemsAtIndexes:withEvent:offset:)])
-        return [_delegate collectionView:self draggingViewForItemsAtIndexes:indexes withEvent:anEvent offset:offset];
-
-    return [self draggingViewForItemsAtIndexes:indexes withEvent:anEvent offset:offset];
-}
-
 - (CPView)draggingViewForItemsAtIndexes:(CPIndexSet)indexes withEvent:(CPEvent)event offset:(CGPoint)dragImageOffset
 {
     var idx = _content[[indexes firstIndex]];
@@ -1014,14 +1081,6 @@ var HORIZONTAL_MARGIN = 2;
         [_itemForDragging setRepresentedObject:idx];
 
     return [_itemForDragging view];
-}
-
-- (BOOL)_canDragItemsAtIndexes:(CPIndexSet)indexes withEvent:(CPEvent)anEvent
-{
-    if ([self respondsToSelector:@selector(collectionView:canDragItemsAtIndexes:withEvent:)])
-        return [_delegate collectionView:self canDragItemsAtIndexes:indexes withEvent:anEvent];
-
-  return YES;
 }
 
 - (CPDragOperation)draggingEntered:(id)draggingInfo
@@ -1061,16 +1120,14 @@ var HORIZONTAL_MARGIN = 2;
     var result = CPDragOperationMove,
         dropIndex = [self _dropIndexForDraggingInfo:draggingInfo proposedDropOperation:dropOperation];
 
-    if ([_delegate respondsToSelector:@selector(collectionView:validateDrop:proposedIndex:dropOperation:)])
+    if ([self _delegateRespondsToCollectionViewValidateDropProposedIndexDropOperation]))
     {
         var dropIndexRef2 = @ref(dropIndex);
 
-        result = [_delegate collectionView:self validateDrop:draggingInfo proposedIndex:dropIndexRef2  dropOperation:dropOperation];
+        result = [self _sendDelegateValidateDrop:draggingInfo proposedIndex:dropIndexRef2  dropOperation:dropOperation];
 
         if (result !== CPDragOperationNone)
-        {
             dropIndex = dropIndexRef2();
-        }
     }
 
     dropIndexRef(dropIndex);
@@ -1104,7 +1161,7 @@ Not supported. Use -collectionView:dataForItemsAtIndexes:fortype:
     var result = NO;
 
     if (_currentDragOperation && _currentDropIndex !== -1)
-        result = [_delegate collectionView:self acceptDrop:draggingInfo index:_currentDropIndex dropOperation:1];
+        result = [self _sendDelegateAcceptDrop:draggingInfo index:_currentDropIndex dropOperation:1];
 
     [self draggingEnded:draggingInfo]; // Is this correct ?
 
@@ -1348,6 +1405,159 @@ Not supported. Use -collectionView:dataForItemsAtIndexes:fortype:
 }
 
 @end
+
+
+@implementation CPCollectionView (CPCollectionViewDelegate)
+
+/*
+    @ignore
+    Return YES if the delegate implements collectionView:validateDrop:proposedIndex:dropOperation:
+*/
+- (BOOL)_delegateRespondsToCollectionViewValidateDropProposedIndexDropOperation
+{
+    return _implementedDelegateMethods & CPCollectionViewDelegate_collectionView_validateDrop_proposedIndex_dropOperation_;
+}
+
+/*
+    @ignore
+    Return YES if the delegate implements collectionView:menuForItemAtIndex:
+*/
+- (BOOL)_delegateRespondsToCollectionViewMenuForItemAtIndex
+{
+    return _implementedDelegateMethods & CPCollectionViewDelegate_collectionView_menuForItemAtIndex_;
+}
+
+/*
+    @ignore
+    Return YES if the delegate implements collectionView:dragTypesForItemsAtIndexes:
+*/
+- (BOOL)_delegateRespondsToCollectionViewDragTypesForItemsAtIndexes
+{
+    return _implementedDelegateMethods & CPCollectionViewDelegate_collectionView_dragTypesForItemsAtIndexes_;
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:acceptDrop:index:dropOperation:
+*/
+- (BOOL)_sendDelegateAcceptDrop:(id <NSDraggingInfo>)draggingInfo index:(CPInteger)index dropOperation:(CPCollectionViewDropOperation)dropOperation
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_acceptDrop_index_dropOperation_))
+        return NO;
+
+    return [_delegate collectionView:self acceptDrop:draggingInfo index:index dropOperation:dropOperation];
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:canDragItemsAtIndexes:withEvent:
+*/
+- (BOOL)_sendDelegateCanDragItemsAtIndexes:(CPIndexSet)indexes withEvent:(CPEvent)anEvent
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_canDragItemsAtIndexes_withEvent_))
+        return YES;
+
+    return [_delegate collectionView:self canDragItemsAtIndexes:indexes withEvent:anEvent];
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:writeItemsAtIndexes:toPasteboard:
+*/
+- (BOOL)_sendDelegateWriteItemsAtIndexes:(CPIndexSet)indexes toPasteboard:(CPPasteboard)pasteboard
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_writeItemsAtIndexes_toPasteboard_))
+        return NO;
+
+    return [_delegate collectionView:self writeItemsAtIndexes:indexes toPasteboard:pasteboard];
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:dragTypesForItemsAtIndexes:
+*/
+- (CPArray)_sendDelegateDragTypesForItemsAtIndexes:(CPIndexSet)indexes
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_dragTypesForItemsAtIndexes_))
+        return [];
+
+    return [_delegate collectionView:self dragTypesForItemsAtIndexes:indexes];
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:dataForItemsAtIndexes:forType:
+*/
+- (CPData)_sendDelegateDataForItemsAtIndexes:(CPIndexSet)indexes forType:(CPString)aType
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_dataForItemsAtIndexes_forType_))
+        return nil;
+
+    return [_delegate collectionView:self dataForItemsAtIndexes:indexes forType:aType];
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:validateDrop:proposedIndex:dropOperation:
+*/
+- (CPDragOperation)_sendDelegateValidateDrop:(id <NSDraggingInfo>)draggingInfo proposedIndex:(CPInteger)proposedDropIndex dropOperation:(CPCollectionViewDropOperation)proposedDropOperation
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_validateDrop_proposedIndex_dropOperation_))
+        return NSDragOperationNone;
+
+    return [_delegate collectionView:self validateDrop:draggingInfo proposedIndex:proposedDropIndex dropOperation:proposedDropOperation];
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:didDoubleClickOnItemAtIndex:
+*/
+- (void)_sendDelegateDidDoubleClickOnItemAtIndex:(int)index
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_didDoubleClickOnItemAtIndex_))
+        return;
+
+    return [_delegate collectionView:self didDoubleClickOnItemAtIndex:index];
+}
+
+/*!
+    @ignore
+    Call delegate collectionViewDidChangeSelection
+*/
+- (void)_sendDelegateCollectionViewDidChangeSelection:(CPCollectionView)collectionView
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionViewDidChangeSelection_))
+        return;
+
+    return [_delegate collectionViewDidChangeSelection:self];
+}
+
+/*!
+    @ignore
+    Call delegate collectionView:menuForItemAtIndex:
+*/
+- (void)_sendDelegateMenuForItemAtIndex:(CPInteger)anIndex
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_menuForItemAtIndex_))
+        return nil;
+
+    return [_delegate collectionView:self menuForItemAtIndex:anIndex];
+}
+
+/*!
+    @ignore
+    Call delegate draggingViewForItemsAtIndexes:withEvent:offset:
+*/
+- (CPView)_sendDelegateDraggingViewForItemsAtIndexes:(CPIndexSet)indexes withEvent:(CPEvent)anEvent offset:(CGPoint)dragImageOffset
+{
+    if (!(_implementedDelegateMethods & CPCollectionViewDelegate_collectionView_draggingViewForItemsAtIndexes_withEvent_offset))
+        return [self draggingViewForItemsAtIndexes:indexes withEvent:anEvent offset:offset];
+
+    return [_delegate collectionView:self draggingViewForItemsAtIndexes:indexes withEvent:anEvent offset:dragImageOffset];
+}
+
+@end
+
 
 var CPCollectionViewMinItemSizeKey              = @"CPCollectionViewMinItemSizeKey",
     CPCollectionViewMaxItemSizeKey              = @"CPCollectionViewMaxItemSizeKey",

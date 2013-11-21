@@ -46,7 +46,7 @@ CPDeleteForwardKeyCode  = 46;
 
     Subclasses of CPResonder can be part of the responder chain.
 */
-@implementation CPResponder : CPObject
+@implementation CPResponder : CPObject <CPCoding>
 {
     CPMenu      _menu;
     CPResponder _nextResponder;

@@ -88,6 +88,57 @@ var CPOutlineViewCoalesceSelectionNotificationStateOff  = 0,
 
 #define SHOULD_SELECT_ITEM(anOutlineView, anItem) (!((anOutlineView)._implementedOutlineViewDelegateMethods & CPOutlineViewDelegate_outlineView_shouldSelectItem_) || [(anOutlineView)._outlineViewDelegate outlineView:(anOutlineView) shouldSelectItem:(anItem)])
 
+
+@protocol CPOutlineViewDelegate
+
+@optional
+- (BOOL)outlineView:(CPOutlineView)anOutlineView isGroupItem:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldCollapseItem:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldEditTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldExpandItem:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldReorderColumn:(CPInteger)columnIndex toColumn:(CPInteger)newColumnIndex;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldSelectItem:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldSelectTableColumn:(CPTableColumn)aTableColumn;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldShowOutlineDisclosureControlForItem:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldShowViewExpansionForTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldTrackView:(CPView)aView forTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldTypeSelectForEvent:(CPEvent)anEvent withCurrentSearchString:(CPString)searchString;
+- (BOOL)selectionShouldChangeInOutlineView:(CPOutlineView)anOutlineView;
+- (CPIndexSet)outlineView:(CPOutlineView)anOutlineView selectionIndexesForProposedSelection:(CPIndexSet)proposedSelectionIndexes;
+- (CPMenu)outlineView:(CPOutlineView)anOutlineView menuForTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (CPString)outlineView:(CPOutlineView)anOutlineView toolTipForView:(CPView)aView rect:(CGRect)aRect tableColumn:(CPTableColumn)aTableColumn item:(id)anItem mouseLocation:(CGPoint)mouseLocation;
+- (CPString)outlineView:(CPOutlineView)anOutlineView typeSelectStringForTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (CPView)outlineView:(CPOutlineView)anOutlineView dataViewForTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (CPView)outlineView:(CPOutlineView)anOutlineView viewForTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (float)outlineView:(CPOutlineView)anOutlineView heightOfRowByItem:(id)anItem;
+- (float)outlineView:(CPOutlineView)anOutlineView sizeToFitWidthOfColumn:(CPTableColumn)aTableColumn;
+- (id)outlineView:(CPOutlineView)anOutlineView nextTypeSelectMatchFromItem:(id)startItem toItem:(id)endItem forString:(CPString)searchString;
+- (void)outlineView:(CPOutlineView)anOutlineView didClickTableColumn:(CPTableColumn)aTableColumn;
+- (void)outlineView:(CPOutlineView)anOutlineView didDragTableColumn:(CPTableColumn)aTableColumn;
+- (void)outlineView:(CPOutlineView)anOutlineView mouseDownInHeaderOfTableColumn:(CPTableColumn)aTableColumn;
+- (void)outlineView:(CPOutlineView)anOutlineView willDisplayOutlineView:(CPView)aView forTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+- (void)outlineView:(CPOutlineView)anOutlineView willDisplayView:(CPView)aView forTableColumn:(CPTableColumn)aTableColumn item:(id)anItem;
+
+@end
+
+
+@protocol CPOutlineViewDataSource
+
+@optional
+- (BOOL)outlineView:(CPOutlineView)anOutlineView acceptDrop:(id <CPDraggingInfo>)info item:(id)anItem childIndex:(CPInteger)anIndex;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView shouldDeferDisplayingChildrenOfItem:(id)anItem;
+- (BOOL)outlineView:(CPOutlineView)anOutlineView writeItems:(CPArray)items toPasteboard:(CPPasteboard)pboard;
+- (CPArray)outlineView:(CPOutlineView)anOutlineView namesOfPromisedFilesDroppedAtDestination:(CPURL)dropDestination forDraggedItems:(CPArray)items;
+- (CPDragOperation)outlineView:(CPOutlineView)anOutlineView validateDrop:(id <CPDraggingInfo>)info proposedItem:(id)anItem proposedChildIndex:(CPInteger)anIndex;
+- (CPDragOperation)outlineView:(CPOutlineView)anOutlineView validateDrop:(id <CPDraggingInfo>)info proposedRow:(int)theRow proposedDropOperation:(CPTableViewDropOperation)theOperation;
+- (id)outlineView:(CPOutlineView)anOutlineView itemForPersistentObject:(id)anObject;
+- (id)outlineView:(CPOutlineView)anOutlineView objectValueforTableColumn:(CPTableColumn)aTableColumn byItem:(id)anItem;
+- (id)outlineView:(CPOutlineView)anOutlineView persistentObjectForItem:(id)anItem;
+- (void)outlineView:(CPOutlineView)anOutlineView setObjectValue:(id)anObject forTableColumn:(CPTableColumn)aTableColumn byItem:(id)anItem;
+- (void)outlineView:(CPOutlineView)anOutlineView sortDescriptorsDidChange:(CPArray)oldDescriptors;
+
+@end
+
 /*!
     @ingroup appkit
     @class CPOutlineView
