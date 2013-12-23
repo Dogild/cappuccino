@@ -129,6 +129,10 @@ var CPZeroKeyCode = 48,
     return YES;
 }
 
+- (BOOL)canBecomeKeyView
+{
+    return NO;
+}
 
 #pragma mark -
 #pragma mark Setter Getter methods
@@ -299,8 +303,10 @@ var CPZeroKeyCode = 48,
     {
         if (_currentTextField == _firstTextField && [anEvent keyCode] == CPTabKeyCode)
         {
-            if ([_datePicker previousKeyView])
-                [[self window] makeFirstResponder:[_datePicker previousKeyView]];
+            var previousValidKeyView = [_datePicker previousValidKeyView];
+
+            if (previousValidKeyView)
+                [[self window] makeFirstResponder:previousValidKeyView];
 
             return YES;
         }
@@ -311,15 +317,20 @@ var CPZeroKeyCode = 48,
 
     if (key == CPRightArrowFunctionKey || [anEvent keyCode] == CPTabKeyCode)
     {
-
         if (_currentTextField == _lastTextField && [anEvent keyCode] == CPTabKeyCode)
         {
-            if ([_datePicker nextKeyView])
-                [[self window] makeFirstResponder:[_datePicker nextKeyView]];
+            var nextValidKeyView = [_datePicker nextValidKeyView];
+
+            if (nextValidKeyView)
+                [[self window] makeFirstResponder:nextValidKeyView];
 
             return YES;
 
-        } [self _selectTextField:[_currentTextField nextTextField]]; return YES; }
+        }
+
+        [self _selectTextField:[_currentTextField nextTextField]];
+        return YES;
+    }
 
     if ([anEvent keyCode] == CPReturnKeyCode && _timerEdition)
     {
