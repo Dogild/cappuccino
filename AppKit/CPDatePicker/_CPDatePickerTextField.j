@@ -325,7 +325,6 @@ var CPZeroKeyCode = 48,
                 [[self window] makeFirstResponder:nextValidKeyView];
 
             return YES;
-
         }
 
         [self _selectTextField:[_currentTextField nextTextField]];
@@ -369,11 +368,11 @@ var CPZeroKeyCode = 48,
     {
          _timerEdition = [CPTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(_timerKeyEvent:) userInfo:nil repeats:NO];
 
-         // Take care about the delete key
-         if ([anEvent keyCode] == CPDeleteKeyCode || [anEvent keyCode] == CPDeleteForwardKeyCode)
-             [_currentTextField setStringKeyValue:@""];
-         else
-             [_currentTextField setStringKeyValue:[anEvent characters]];
+         // // Take care about the delete key
+         // if ([anEvent keyCode] == CPDeleteKeyCode || [anEvent keyCode] == CPDeleteForwardKeyCode)
+         //     [_currentTextField setStringKeyValue:@""];
+         // else
+         //     [_currentTextField setStringKeyValue:[anEvent characters]];
     }
     else
     {
@@ -384,14 +383,16 @@ var CPZeroKeyCode = 48,
 
         [_timerEdition setFireDate:newFireDate];
 
-        // Take care about the delete key
-        if ([anEvent keyCode] == CPDeleteKeyCode || [anEvent keyCode] == CPDeleteForwardKeyCode)
-            key = [[_currentTextField stringValue] substringToIndex:[[_currentTextField stringValue] length] - 1];
-        else
-            key = [CPString stringWithFormat:@"%i%i",parseInt([_currentTextField stringValue]), parseInt([anEvent characters])];
-
-        [_currentTextField setStringKeyValue:key];
+        // // Take care about the delete key
+        // if ([anEvent keyCode] == CPDeleteKeyCode || [anEvent keyCode] == CPDeleteForwardKeyCode)
+        //     key = [[_currentTextField stringValue] substringToIndex:[[_currentTextField stringValue] length] - 1];
+        // else
+        //     key = [CPString stringWithFormat:@"%i%i",parseInt([_currentTextField stringValue]), parseInt([anEvent characters])];
+        //
+        // [_currentTextField setStringKeyValue:key];
     }
+
+    [_currentTextField setValueForKeyEvent:anEvent];
 }
 
 
@@ -1336,32 +1337,41 @@ var CPMonthDateType = 0,
     It's called when the user is editing with the keyboard
     @param aStringValue a CPString
 */
-- (void)setStringKeyValue:(id)anObjectValue
+- (void)setValueForKeyEvent:(CPEvent)anEvent
 {
+    var oldValue = [self stringValue],
+        newValue = [self stringValue];
+
+    if ([anEvent keyCode] == CPDeleteKeyCode || [anEvent keyCode] == CPDeleteForwardKeyCode)
+        newValue = [newValue substringToIndex:([newValue length] - 1)];
+    else
+        newValue += parseInt([anEvent characters]);
+
+
     if (_dateType == CPYearDateType)
     {
-        if ([anObjectValue length] > 4)
+        if ([newValue length] > 4)
             return
 
-        while ([anObjectValue length] < 4)
-            anObjectValue = " " + anObjectValue;
+        while ([newValue length] < 4)
+            newValue = " " + newValue;
     }
     else
     {
-        if ([anObjectValue length] > 2)
+        if ([newValue length] > 2)
             return
 
-        while ([anObjectValue length] < 2)
-            anObjectValue = " " + anObjectValue;
+        while ([newValue length] < 2)
+            newValue = " " + newValue;
     }
 
-    if (parseInt(anObjectValue) > [self _maxNumberWithMaxDate])
+    if (parseInt(newValue) > [self _maxNumberWithMaxDate])
         return;
 
-    if ([_datePicker _isEnglishFormat] && _dateType == CPHourDateType && parseInt(anObjectValue) > 12)
+    if ([_datePicker _isEnglishFormat] && _dateType == CPHourDateType && parseInt(newValue) > 12)
         return;
 
-    [super setObjectValue:anObjectValue];
+    [super setObjectValue:newValue];
 }
 
 /*! Set the stringValue of the TextField. Add some zeros of there isn't 2/4 letters in the value. It's called at the end of the editing process
