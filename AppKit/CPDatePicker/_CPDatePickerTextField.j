@@ -100,7 +100,7 @@ var CPZeroKeyCode = 48,
 
 
 #pragma mark -
-#pragma mark Responder methods
+#pragma mark Override responder methods
 
 - (BOOL)becomeFirstResponder
 {
@@ -1304,6 +1304,9 @@ var CPMonthDateType = 0,
     [super setObjectValue:newValue];
 }
 
+/*!
+    End of the timer
+*/
 - (void)_timerKeyEvent:(id)sender
 {
     var stringValue = [self stringValue];
@@ -1329,7 +1332,8 @@ var CPMonthDateType = 0,
     }
 }
 
-/*! We force to end the timer
+/*!
+    We force to end the timer
 */
 - (void)_invalidTimer
 {
@@ -1340,6 +1344,9 @@ var CPMonthDateType = 0,
     }
 }
 
+/*!
+    We force to end the timer and to update the objectValue of the datePicker
+*/
 - (void)_endEditing
 {
     if (_timerEdition)
@@ -1532,6 +1539,7 @@ var CPMonthDateType = 0,
 
     return [super objectValue];
 }
+
 
 #pragma mark -
 #pragma mark Mouse event
