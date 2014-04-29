@@ -245,7 +245,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     // Make sure we are using jsc as the narwhal engine!
     self.environment[@"NARWHAL_ENGINE"] = @"jsc";
 
-    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"git"];
+    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake"];
 
     // This is used to get the env var of $CAPP_BUILD
     NSDictionary *processEnvironment = [[NSProcessInfo processInfo] environment];
