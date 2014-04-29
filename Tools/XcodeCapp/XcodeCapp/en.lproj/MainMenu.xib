@@ -158,6 +158,24 @@
 						<reference key="NSOnImage" ref="251085437"/>
 						<reference key="NSMixedImage" ref="317740181"/>
 					</object>
+					<object class="NSMenuItem" id="118802711">
+						<reference key="NSMenu" ref="763458174"/>
+						<string key="NSTitle">Update Cappuccino</string>
+						<string key="NSKeyEquiv"/>
+						<int key="NSMnemonicLoc">2147483647</int>
+						<reference key="NSOnImage" ref="251085437"/>
+						<reference key="NSMixedImage" ref="317740181"/>
+					</object>
+					<object class="NSMenuItem" id="312079230">
+						<reference key="NSMenu" ref="763458174"/>
+						<bool key="NSIsDisabled">YES</bool>
+						<bool key="NSIsSeparator">YES</bool>
+						<string key="NSTitle"/>
+						<string key="NSKeyEquiv"/>
+						<int key="NSMnemonicLoc">2147483647</int>
+						<reference key="NSOnImage" ref="251085437"/>
+						<reference key="NSMixedImage" ref="317740181"/>
+					</object>
 					<object class="NSMenuItem" id="621759105">
 						<reference key="NSMenu" ref="763458174"/>
 						<string key="NSTitle">About XcodeCapp...</string>
@@ -579,7 +597,7 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 			<object class="NSWindowTemplate" id="484209508">
 				<int key="NSWindowStyleMask">3</int>
 				<int key="NSWindowBacking">2</int>
-				<string key="NSWindowRect">{{1964, 505}, {393, 357}}</string>
+				<string key="NSWindowRect">{{1964, 505}, {479, 415}}</string>
 				<int key="NSWTFlags">1618478080</int>
 				<string key="NSWindowTitle">Preferences</string>
 				<string key="NSWindowClass">NSWindow</string>
@@ -779,13 +797,13 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 										</object>
 									</array>
-									<string key="NSFrame">{{1, 1}, {357, 139}}</string>
+									<string key="NSFrame">{{1, 1}, {443, 139}}</string>
 									<reference key="NSSuperview" ref="359969914"/>
 									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="497174199"/>
 								</object>
 							</array>
-							<string key="NSFrame">{{17, 187}, {359, 155}}</string>
+							<string key="NSFrame">{{17, 245}, {445, 155}}</string>
 							<reference key="NSSuperview" ref="853177344"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="881981747"/>
@@ -890,13 +908,13 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
 										</object>
 									</array>
-									<string key="NSFrame">{{1, 1}, {357, 66}}</string>
+									<string key="NSFrame">{{1, 1}, {443, 66}}</string>
 									<reference key="NSSuperview" ref="913026852"/>
 									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="387661514"/>
 								</object>
 							</array>
-							<string key="NSFrame">{{17, 101}, {359, 82}}</string>
+							<string key="NSFrame">{{17, 159}, {445, 82}}</string>
 							<reference key="NSSuperview" ref="853177344"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="224066843"/>
@@ -932,7 +950,7 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 											<string key="NSFrame">{{146, 12}, {171, 18}}</string>
 											<reference key="NSSuperview" ref="122117781"/>
 											<reference key="NSWindow"/>
-											<reference key="NSNextKeyView"/>
+											<reference key="NSNextKeyView" ref="929990427"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSButtonCell" key="NSCell" id="763278609">
 												<int key="NSCellFlags">-2080374784</int>
@@ -997,14 +1015,14 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 											<int key="NSTextFieldAlignmentRectInsetsVersion">1</int>
 										</object>
 									</array>
-									<string key="NSFrame">{{1, 1}, {357, 65}}</string>
+									<string key="NSFrame">{{1, 1}, {443, 65}}</string>
 									<reference key="NSSuperview" ref="185960776"/>
 									<reference key="NSWindow"/>
 									<reference key="NSNextKeyView" ref="36622245"/>
 									<string key="NSReuseIdentifierKey">_NS:11</string>
 								</object>
 							</array>
-							<string key="NSFrame">{{17, 16}, {359, 81}}</string>
+							<string key="NSFrame">{{17, 74}, {445, 81}}</string>
 							<reference key="NSSuperview" ref="853177344"/>
 							<reference key="NSWindow"/>
 							<reference key="NSNextKeyView" ref="122117781"/>
@@ -1027,8 +1045,70 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 							<int key="NSTitlePosition">2</int>
 							<bool key="NSTransparent">NO</bool>
 						</object>
+						<object class="NSBox" id="929990427">
+							<reference key="NSNextResponder" ref="853177344"/>
+							<int key="NSvFlags">12</int>
+							<array class="NSMutableArray" key="NSSubviews">
+								<object class="NSView" id="435554705">
+									<reference key="NSNextResponder" ref="929990427"/>
+									<int key="NSvFlags">274</int>
+									<array class="NSMutableArray" key="NSSubviews">
+										<object class="NSButton" id="660812811">
+											<reference key="NSNextResponder" ref="435554705"/>
+											<int key="NSvFlags">268</int>
+											<string key="NSFrame">{{16, 12}, {411, 18}}</string>
+											<reference key="NSSuperview" ref="435554705"/>
+											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView"/>
+											<bool key="NSEnabled">YES</bool>
+											<object class="NSButtonCell" key="NSCell" id="640546388">
+												<int key="NSCellFlags">-2080374784</int>
+												<int key="NSCellFlags2">0</int>
+												<string key="NSContents">Update Cappuccino with the last version of the master branch</string>
+												<reference key="NSSupport" ref="986470281"/>
+												<reference key="NSControlView" ref="660812811"/>
+												<int key="NSButtonFlags">1211912448</int>
+												<int key="NSButtonFlags2">2</int>
+												<reference key="NSNormalImage" ref="795665759"/>
+												<reference key="NSAlternateImage" ref="989917290"/>
+												<string key="NSAlternateContents"/>
+												<string key="NSKeyEquivalent"/>
+												<int key="NSPeriodicDelay">400</int>
+												<int key="NSPeriodicInterval">75</int>
+											</object>
+											<bool key="NSAllowsLogicalLayoutDirection">NO</bool>
+										</object>
+									</array>
+									<string key="NSFrame">{{1, 1}, {443, 38}}</string>
+									<reference key="NSSuperview" ref="929990427"/>
+									<reference key="NSWindow"/>
+									<reference key="NSNextKeyView" ref="660812811"/>
+								</object>
+							</array>
+							<string key="NSFrame">{{17, 16}, {445, 54}}</string>
+							<reference key="NSSuperview" ref="853177344"/>
+							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView" ref="435554705"/>
+							<string key="NSOffsets">{0, 0}</string>
+							<object class="NSTextFieldCell" key="NSTitleCell">
+								<int key="NSCellFlags">67108864</int>
+								<int key="NSCellFlags2">134217728</int>
+								<string key="NSContents">Develop</string>
+								<reference key="NSSupport" ref="355655841"/>
+								<reference key="NSBackgroundColor" ref="819245234"/>
+								<object class="NSColor" key="NSTextColor">
+									<int key="NSColorSpace">3</int>
+									<bytes key="NSWhite">MCAwLjgAA</bytes>
+								</object>
+							</object>
+							<reference key="NSContentView" ref="435554705"/>
+							<int key="NSBorderType">1</int>
+							<int key="NSBoxType">0</int>
+							<int key="NSTitlePosition">2</int>
+							<bool key="NSTransparent">NO</bool>
+						</object>
 					</array>
-					<string key="NSFrameSize">{393, 357}</string>
+					<string key="NSFrameSize">{479, 415}</string>
 					<reference key="NSSuperview"/>
 					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="359969914"/>
@@ -1261,6 +1341,14 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
+						<string key="label">updateCappuccino:</string>
+						<reference key="source" ref="709365361"/>
+						<reference key="destination" ref="118802711"/>
+					</object>
+					<string key="id">M7T-qw-MgB</string>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
 						<string key="label">performClose:</string>
 						<reference key="source" ref="717487982"/>
 						<reference key="destination" ref="504749152"/>
@@ -1330,6 +1418,14 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 						<reference key="destination" ref="188125885"/>
 					</object>
 					<string key="id">6Xe-Bt-eXK</string>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBActionConnection" key="connection">
+						<string key="label">save:</string>
+						<reference key="source" ref="246574361"/>
+						<reference key="destination" ref="660812811"/>
+					</object>
+					<string key="id">30N-ga-LBo</string>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBActionConnection" key="connection">
@@ -1775,6 +1871,58 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
+						<string key="label">value: values.updateCappuccinoWithLastVersionOfMasterBranch</string>
+						<reference key="source" ref="660812811"/>
+						<reference key="destination" ref="246574361"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="660812811"/>
+							<reference key="NSDestination" ref="246574361"/>
+							<string key="NSLabel">value: values.updateCappuccinoWithLastVersionOfMasterBranch</string>
+							<string key="NSBinding">value</string>
+							<string key="NSKeyPath">values.updateCappuccinoWithLastVersionOfMasterBranch</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValidatesImmediately</string>
+								<boolean value="YES" key="NS.object.0"/>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<string key="id">1fo-ym-Q0u</string>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: isGitInstalled</string>
+						<reference key="source" ref="660812811"/>
+						<reference key="destination" ref="699246115"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="660812811"/>
+							<reference key="NSDestination" ref="699246115"/>
+							<string key="NSLabel">enabled: isGitInstalled</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">isGitInstalled</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<string key="id">hCP-G4-tKV</string>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">toolTip: toolTipUpdateCappuccino</string>
+						<reference key="source" ref="660812811"/>
+						<reference key="destination" ref="699246115"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="660812811"/>
+							<reference key="NSDestination" ref="699246115"/>
+							<string key="NSLabel">toolTip: toolTipUpdateCappuccino</string>
+							<string key="NSBinding">toolTip</string>
+							<string key="NSKeyPath">toolTipUpdateCappuccino</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<string key="id">Zqe-7a-MuW</string>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
 						<string key="label">projectPath.length</string>
 						<reference key="source" ref="941553825"/>
 						<reference key="destination" ref="699246115"/>
@@ -1897,6 +2045,8 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 							<reference ref="344530029"/>
 							<reference ref="941553825"/>
 							<reference ref="208060395"/>
+							<reference ref="312079230"/>
+							<reference ref="118802711"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -2135,6 +2285,7 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 							<reference ref="359969914"/>
 							<reference ref="913026852"/>
 							<reference ref="185960776"/>
+							<reference ref="929990427"/>
 						</array>
 						<reference key="parent" ref="484209508"/>
 					</object>
@@ -2400,6 +2551,37 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 						<reference key="object" ref="304760948"/>
 						<reference key="parent" ref="36622245"/>
 					</object>
+					<object class="IBObjectRecord">
+						<string key="id">M7S-MC-N7d</string>
+						<reference key="object" ref="929990427"/>
+						<array class="NSMutableArray" key="children">
+							<reference ref="660812811"/>
+						</array>
+						<reference key="parent" ref="853177344"/>
+					</object>
+					<object class="IBObjectRecord">
+						<string key="id">GR3-Dn-qSe</string>
+						<reference key="object" ref="660812811"/>
+						<array class="NSMutableArray" key="children">
+							<reference ref="640546388"/>
+						</array>
+						<reference key="parent" ref="929990427"/>
+					</object>
+					<object class="IBObjectRecord">
+						<string key="id">LOW-1X-7ih</string>
+						<reference key="object" ref="640546388"/>
+						<reference key="parent" ref="660812811"/>
+					</object>
+					<object class="IBObjectRecord">
+						<string key="id">om5-3M-ZoK</string>
+						<reference key="object" ref="312079230"/>
+						<reference key="parent" ref="763458174"/>
+					</object>
+					<object class="IBObjectRecord">
+						<string key="id">ubl-jf-ybu</string>
+						<reference key="object" ref="118802711"/>
+						<reference key="parent" ref="763458174"/>
+					</object>
 				</array>
 			</object>
 			<dictionary class="NSMutableDictionary" key="flattenedProperties">
@@ -2621,6 +2803,23 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 				<boolean value="NO" key="860.showNotes"/>
 				<string key="BYW-Rk-rZ4.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="NO" key="BYW-Rk-rZ4.showNotes"/>
+				<object class="NSMutableDictionary" key="GR3-Dn-qSe.IBAttributePlaceholdersKey">
+					<string key="NS.key.0">ToolTip</string>
+					<object class="IBToolTipAttribute" key="NS.object.0">
+						<string key="name">ToolTip</string>
+						<reference key="object" ref="660812811"/>
+						<string key="toolTip">If this is checked, xCodeCapp will take the last version of Cappuccino on the master branch to install Cappuccino</string>
+					</object>
+				</object>
+				<boolean value="NO" key="GR3-Dn-qSe.IBNSControlSetsMaxLayoutWidthAtFirstLayoutMetadataKey"/>
+				<string key="GR3-Dn-qSe.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<reference key="GR3-Dn-qSe.IBUserGuides" ref="0"/>
+				<boolean value="NO" key="GR3-Dn-qSe.showNotes"/>
+				<string key="LOW-1X-7ih.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<boolean value="NO" key="LOW-1X-7ih.showNotes"/>
+				<string key="M7S-MC-N7d.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<reference key="M7S-MC-N7d.IBUserGuides" ref="0"/>
+				<boolean value="NO" key="M7S-MC-N7d.showNotes"/>
 				<string key="PcB-xW-jUW.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="NO" key="PcB-xW-jUW.showNotes"/>
 				<object class="NSMutableDictionary" key="QAd-SJ-XIV.IBAttributePlaceholdersKey">
@@ -2655,11 +2854,13 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 				<boolean value="NO" key="iiD-Nj-M6o.showNotes"/>
 				<string key="itE-v1-Sv4.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="NO" key="itE-v1-Sv4.showNotes"/>
+				<string key="om5-3M-ZoK.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="ptR-WM-qet.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="NO" key="ptR-WM-qet.showNotes"/>
 				<string key="qFm-3c-NH7.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="sZm-jR-Tet.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<boolean value="NO" key="sZm-jR-Tet.showNotes"/>
+				<string key="ubl-jf-ybu.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 			</dictionary>
 			<dictionary class="NSMutableDictionary" key="unlocalizedProperties"/>
 			<nil key="activeLocalization"/>
@@ -2678,6 +2879,7 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 						<string key="openHelp:">id</string>
 						<string key="openPreferences:">id</string>
 						<string key="showInFinder:">id</string>
+						<string key="updateCappuccino:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
 						<object class="IBActionInfo" key="createProject:">
@@ -2702,6 +2904,10 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 						</object>
 						<object class="IBActionInfo" key="showInFinder:">
 							<string key="name">showInFinder:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="updateCappuccino:">
+							<string key="name">updateCappuccino:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 					</dictionary>

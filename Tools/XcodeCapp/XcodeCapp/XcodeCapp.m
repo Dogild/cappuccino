@@ -191,6 +191,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         self.projectPathFileDescriptor = -1;
         self.isCappBuildDefined = YES;
         self.toolTipSymlinkRadioButton = @"If this is checked, when a Cappuccino project is created, the frameworks of the new project will be symlinked from the $CAPP_BUILD";
+        self.toolTipUpdateCappuccino = @"If this is checked, xCodeCapp will take the last version of Cappuccino on the master branch to install Cappuccino";
 
         [self initTaskEnvironment];
 
@@ -230,7 +231,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
             @"/usr/local/bin",
             @"/usr/local/narwhal/bin",
             @"~/narwhal/bin",
-            @"~/bin"
+            @"~/bin",
+            @"/usr/bin"
         ];
 
     NSMutableArray *paths = [self.environmentPaths mutableCopy];
@@ -243,7 +245,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     // Make sure we are using jsc as the narwhal engine!
     self.environment[@"NARWHAL_ENGINE"] = @"jsc";
 
-    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint"];
+    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"git"];
 
     // This is used to get the env var of $CAPP_BUILD
     NSDictionary *processEnvironment = [[NSProcessInfo processInfo] environment];
@@ -1336,6 +1338,33 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return YES;
 }
 
+- (BOOL)gitIsAccessible
+{
+    //This is used to know if get is installed or not
+    //This is optional, it's why it's not with the other commands
+    NSString *gitCommand = @"git";
+    NSDictionary *gitResponse = [self runTaskWithLaunchPath:@"/usr/bin/which"
+                                                  arguments:@[gitCommand]
+                                                 returnType:kTaskReturnTypeStdOut];
+    
+    NSString *path = [gitResponse[@"response"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if (path.length)
+    {
+        self.executablePaths[gitCommand] = path;
+        self.isGitInstalled = YES;
+        return YES;
+    }
+    else
+    {
+        self.toolTipUpdateCappuccino = @"To use this option you need to install git on your computer";
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults setObject:@NO forKey:kDefaultUpdateCappuccinoWithLastVersionOfMasterBranch];
+        self.isGitInstalled = NO;
+        return NO;
+    }
+}
+
 #pragma mark - Source Files Management
 
 - (BOOL)isObjjFile:(NSString *)path
@@ -1842,6 +1871,16 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     [self.errorListController addObjects:errors];
 }
+
+#pragma mark - Cappuccino update
+
+- (void)updateCappuccino
+{
+    self.isProcessing = YES;
+    [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidStartNotification object:self];
+    [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+}
+
 
 #pragma mark - User notifications
 
