@@ -243,6 +243,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
     // Make sure we are using jsc as the narwhal engine!
     self.environment[@"NARWHAL_ENGINE"] = @"jsc";
+    
+    // Make sure to not do something in sudo
+    self.environment[@"CAPP_NOSUDO"] = @"1";
 
     self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"curl", @"unzip"];
 
