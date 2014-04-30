@@ -1915,7 +1915,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSDictionary *jakeCleanTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
                                                             arguments:jakeCleanArguments
                                                            returnType:kTaskReturnTypeStdOut
-                                                 currentDirectoryPath:temporaryFolder];
+                                                 currentDirectoryPath:unzipDestination];
     
     NSInteger jakeCleanStatus = [jakeCleanTaskResult[@"status"] intValue];
     
@@ -1930,7 +1930,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSDictionary *jakeInstallTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
                                                             arguments:jakeInstallArguments
                                                             returnType:kTaskReturnTypeStdOut
-                                                            currentDirectoryPath:temporaryFolder];
+                                                            currentDirectoryPath:unzipDestination];
     
     NSInteger jakeInstallStatus = [jakeInstallTaskResult[@"status"] intValue];
     
@@ -1946,7 +1946,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSDictionary *jakeReleaseTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
                                                                 arguments:jakeReleaseArguments
                                                                 returnType:kTaskReturnTypeStdOut
-                                                                currentDirectoryPath:temporaryFolder];
+                                                                currentDirectoryPath:unzipDestination];
     
     NSInteger jakeReleaseStatus = [jakeReleaseTaskResult[@"status"] intValue];
     
@@ -1962,7 +1962,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSDictionary *jakeDebugTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
                                                             arguments:jakeDebugArguments
                                                             returnType:kTaskReturnTypeStdOut
-                                                            currentDirectoryPath:temporaryFolder];
+                                                            currentDirectoryPath:unzipDestination];
     
     NSInteger jakeDebugStatus = [jakeDebugTaskResult[@"status"] intValue];
     
