@@ -245,7 +245,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     // Make sure we are using jsc as the narwhal engine!
     self.environment[@"NARWHAL_ENGINE"] = @"jsc";
 
-    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake"];
+    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"curl"];
 
     // This is used to get the env var of $CAPP_BUILD
     NSDictionary *processEnvironment = [[NSProcessInfo processInfo] environment];
@@ -1338,32 +1338,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     return YES;
 }
 
-- (BOOL)gitIsAccessible
-{
-    //This is used to know if get is installed or not
-    //This is optional, it's why it's not with the other commands
-    NSString *gitCommand = @"git";
-    NSDictionary *gitResponse = [self runTaskWithLaunchPath:@"/usr/bin/which"
-                                                  arguments:@[gitCommand]
-                                                 returnType:kTaskReturnTypeStdOut];
-    
-    NSString *path = [gitResponse[@"response"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    
-    if (path.length)
-    {
-        self.executablePaths[gitCommand] = path;
-        self.isGitInstalled = YES;
-        return YES;
-    }
-    else
-    {
-        self.toolTipUpdateCappuccino = @"To use this option you need to install git on your computer";
-        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-        [defaults setObject:@NO forKey:kDefaultUpdateCappuccinoWithLastVersionOfMasterBranch];
-        self.isGitInstalled = NO;
-        return NO;
-    }
-}
 
 #pragma mark - Source Files Management
 
@@ -1878,6 +1852,32 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     self.isProcessing = YES;
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidStartNotification object:self];
+    
+    // Download the file
+    NSString *temporaryFolder = NSTemporaryDirectory();
+    NSString *cappuccinoURL;
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kDefaultUpdateCappuccinoWithLastVersionOfMasterBranch])
+        cappuccinoURL = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"XCCLastCappuccinoMasterBranchURL"];
+    else
+        cappuccinoURL = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"XCCLastCappuccinoReleaseURL"];
+    
+    NSString *destination = [NSString stringWithFormat:@"%@cappuccino.zip", temporaryFolder];
+    NSMutableArray *arguments = [NSMutableArray arrayWithObjects:@"-Lk", cappuccinoURL, @"-o", destination, nil];
+    NSDictionary *taskResult = [self runTaskWithLaunchPath:self.executablePaths[@"curl"]
+                                                 arguments:arguments
+                                                returnType:kTaskReturnTypeStdOut];
+    
+    NSInteger status = [taskResult[@"status"] intValue];
+    
+    if (status == 1)
+    {
+        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Unable to download Cappuccino"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+        return;
+    }
+    
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
 }
 

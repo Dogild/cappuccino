@@ -107,9 +107,6 @@ extern NSString * const XCCCappLintDidEndNotification;
 // Whether $CAPP_BUILD is defined or not
 @property BOOL isCappBuildDefined;
 
-// Whether igt is installed or not
-@property BOOL isGitInstalled;
-
 // A mapping from full paths to project-relative paths
 @property NSMutableDictionary *projectPathsForSourcePaths;
 
@@ -132,7 +129,6 @@ extern NSString * const XCCCappLintDidEndNotification;
 - (IBAction)checkProjectWithCappLint:(id)aSender;
 
 - (BOOL)executablesAreAccessible;
-- (BOOL)gitIsAccessible;
 - (void)stop;
 - (void)loadProjectAtPath:(NSString *)path;
 - (BOOL)pathMatchesIgnoredPaths:(NSString*)aPath;

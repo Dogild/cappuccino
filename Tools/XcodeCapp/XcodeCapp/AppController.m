@@ -112,8 +112,6 @@ AppController *SharedAppControllerInstance = nil;
         return;
     }
     
-    [self.xcc gitIsAccessible];
-    
     // If we were opened from the command line, self.pathToOpenAtLaunch will be set.
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
