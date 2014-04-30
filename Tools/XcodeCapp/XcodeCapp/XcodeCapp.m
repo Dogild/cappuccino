@@ -244,7 +244,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     // Make sure we are using jsc as the narwhal engine!
     self.environment[@"NARWHAL_ENGINE"] = @"jsc";
 
-    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"curl"];
+    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"curl", @"unzip"];
 
     // This is used to get the env var of $CAPP_BUILD
     NSDictionary *processEnvironment = [[NSProcessInfo processInfo] environment];
@@ -1872,6 +1872,23 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     if (status == 1)
     {
         [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Unable to download Cappuccino"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+        return;
+    }
+    
+    
+    //Unzip the file
+    NSString *unzipDestination = [NSString stringWithFormat:@"%@cappuccino", temporaryFolder];
+    NSMutableArray *unzipArguments = [NSMutableArray arrayWithObjects:@"-u", @"-q", @"-d", unzipDestination, destination, nil];
+    NSDictionary *unzipTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"unzip"]
+                                                 arguments:unzipArguments
+                                                     returnType:kTaskReturnTypeAny];
+    
+    NSInteger unzipStatus = [unzipTaskResult[@"status"] intValue];
+    
+    if (unzipStatus >= 1)
+    {
+        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Unable to unzip Cappuccino"];
         [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
         return;
     }
