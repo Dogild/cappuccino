@@ -1914,8 +1914,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     //Jake install
     NSMutableArray *jakeInstallArguments = [NSMutableArray arrayWithObjects:@"install", nil];
     NSDictionary *jakeInstallTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
-                                                        arguments:jakeInstallArguments
-                                                       returnType:kTaskReturnTypeStdOut];
+                                                            arguments:jakeInstallArguments
+                                                            returnType:kTaskReturnTypeStdOut
+                                                            currentDirectoryPath:temporaryFolder];
     
     NSInteger jakeInstallStatus = [jakeInstallTaskResult[@"status"] intValue];
     
@@ -1929,8 +1930,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     //Jake release
     NSMutableArray *jakeReleaseArguments = [NSMutableArray arrayWithObjects:@"release", nil];
     NSDictionary *jakeReleaseTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
-                                                 arguments:jakeReleaseArguments
-                                                returnType:kTaskReturnTypeStdOut];
+                                                                arguments:jakeReleaseArguments
+                                                                returnType:kTaskReturnTypeStdOut
+                                                                currentDirectoryPath:temporaryFolder];
     
     NSInteger jakeReleaseStatus = [jakeReleaseTaskResult[@"status"] intValue];
     
@@ -1945,7 +1947,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSMutableArray *jakeDebugArguments = [NSMutableArray arrayWithObjects:@"release", nil];
     NSDictionary *jakeDebugTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
                                                             arguments:jakeDebugArguments
-                                                           returnType:kTaskReturnTypeStdOut];
+                                                            returnType:kTaskReturnTypeStdOut
+                                                            currentDirectoryPath:temporaryFolder];
     
     NSInteger jakeDebugStatus = [jakeDebugTaskResult[@"status"] intValue];
     
