@@ -191,7 +191,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         self.projectPathFileDescriptor = -1;
         self.isCappBuildDefined = YES;
         self.toolTipSymlinkRadioButton = @"If this is checked, when a Cappuccino project is created, the frameworks of the new project will be symlinked from the $CAPP_BUILD";
-        self.toolTipUpdateCappuccino = @"If this is checked, xCodeCapp will take the last version of Cappuccino on the master branch to install Cappuccino";
 
         [self initTaskEnvironment];
 
@@ -1877,6 +1876,50 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         return;
     }
     
+    
+    //Jake install
+    NSMutableArray *jakeInstallArguments = [NSMutableArray arrayWithObjects:@"install", nil];
+    NSDictionary *jakeInstallTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
+                                                        arguments:jakeInstallArguments
+                                                       returnType:kTaskReturnTypeStdOut];
+    
+    NSInteger jakeInstallStatus = [jakeInstallTaskResult[@"status"] intValue];
+    
+    if (jakeInstallStatus == 1)
+    {
+        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake install failed"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+    }
+    
+    
+    //Jake release
+    NSMutableArray *jakeReleaseArguments = [NSMutableArray arrayWithObjects:@"release", nil];
+    NSDictionary *jakeReleaseTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
+                                                 arguments:jakeReleaseArguments
+                                                returnType:kTaskReturnTypeStdOut];
+    
+    NSInteger jakeReleaseStatus = [jakeReleaseTaskResult[@"status"] intValue];
+    
+    if (jakeReleaseStatus == 1)
+    {
+        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake release failed"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+    }
+    
+    
+    //Jake debug
+    NSMutableArray *jakeDebugArguments = [NSMutableArray arrayWithObjects:@"release", nil];
+    NSDictionary *jakeDebugTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
+                                                            arguments:jakeDebugArguments
+                                                           returnType:kTaskReturnTypeStdOut];
+    
+    NSInteger jakeDebugStatus = [jakeDebugTaskResult[@"status"] intValue];
+    
+    if (jakeDebugStatus == 1)
+    {
+        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake debug failed"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+    }
     
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
 }

@@ -83,9 +83,6 @@ extern NSString * const XCCCappLintDidEndNotification;
 // Tooltip for the radio button symlink
 @property NSString *toolTipSymlinkRadioButton;
 
-// Tooltip for the radio button symlink
-@property NSString *toolTipUpdateCappuccino;
-
 // Full paths to the executables we rely on: jsc, objj, nib2cib, python
 @property NSMutableDictionary *executablePaths;
 
