@@ -1910,6 +1910,20 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         return;
     }
     
+    //Jake clean
+    NSMutableArray *jakeCleanArguments = [NSMutableArray arrayWithObjects:@"clean", nil];
+    NSDictionary *jakeCleanTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
+                                                            arguments:jakeCleanArguments
+                                                           returnType:kTaskReturnTypeStdOut
+                                                 currentDirectoryPath:temporaryFolder];
+    
+    NSInteger jakeCleanStatus = [jakeCleanTaskResult[@"status"] intValue];
+    
+    if (jakeCleanStatus == 1)
+    {
+        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake clean failed"];
+        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+    }
     
     //Jake install
     NSMutableArray *jakeInstallArguments = [NSMutableArray arrayWithObjects:@"install", nil];
