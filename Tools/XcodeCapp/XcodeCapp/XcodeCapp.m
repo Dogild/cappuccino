@@ -1267,14 +1267,28 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 #pragma mark - Shell Helpers
 
 /*!
+ Run an NSTask with the given arguments
+ 
+ @param launchPath The executable to launch
+ @param arguments NSArray containing the NSTask arguments
+ @param returnType Determines whether to return stdout, stderr, either, or nothing in the response
+ @return NSDictionary containing the return status (NSNumber) and the response (NSString)
+ */
+- (NSDictionary *)runTaskWithLaunchPath:(NSString *)launchPath arguments:(NSArray *)arguments returnType:(XCCTaskReturnType)returnType
+{
+    return [self runTaskWithLaunchPath:launchPath arguments:arguments returnType:returnType currentDirectoryPath:nil];
+}
+
+/*!
     Run an NSTask with the given arguments
  
      @param launchPath The executable to launch
      @param arguments NSArray containing the NSTask arguments
      @param returnType Determines whether to return stdout, stderr, either, or nothing in the response
+     @param the currentDirectoryPath for the task
      @return NSDictionary containing the return status (NSNumber) and the response (NSString)
  */
-- (NSDictionary *)runTaskWithLaunchPath:(NSString *)launchPath arguments:(NSArray *)arguments returnType:(XCCTaskReturnType)returnType
+- (NSDictionary *)runTaskWithLaunchPath:(NSString *)launchPath arguments:(NSArray *)arguments returnType:(XCCTaskReturnType)returnType currentDirectoryPath:(NSString*)aCurrentDirectoryPath
 {
     NSTask *task = [NSTask new];
     
@@ -1283,7 +1297,10 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     task.environment = self.environment;
     task.standardOutput = [NSPipe pipe];
     task.standardError = [NSPipe pipe];
-
+    
+    if (aCurrentDirectoryPath)
+        task.currentDirectoryPath = aCurrentDirectoryPath;
+    
     [task launch];
 
     DDLogVerbose(@"Task launched: %@\n%@", launchPath, arguments);
