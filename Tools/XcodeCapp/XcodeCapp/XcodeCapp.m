@@ -1896,7 +1896,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     //Unzip the file
     NSString *unzipDestination = [NSString stringWithFormat:@"%@cappuccino", temporaryFolder];
-    NSMutableArray *unzipArguments = [NSMutableArray arrayWithObjects:@"-u", @"-q", @"-d", unzipDestination, destination, nil];
+    NSMutableArray *unzipArguments = [NSMutableArray arrayWithObjects:@"-u", @"-o", @"-q", @"-d", unzipDestination, destination, nil];
     NSDictionary *unzipTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"unzip"]
                                                  arguments:unzipArguments
                                                      returnType:kTaskReturnTypeAny];
