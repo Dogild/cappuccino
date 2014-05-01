@@ -1913,6 +1913,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         return;
     }
     
+    
     //Jake clean
     NSMutableArray *jakeCleanArguments = [NSMutableArray arrayWithObjects:@"clean", nil];
     NSDictionary *jakeCleanTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
@@ -1926,7 +1927,9 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     {
         [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake clean failed"];
         [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+        return;
     }
+    
     
     //Jake install
     NSMutableArray *jakeInstallArguments = [NSMutableArray arrayWithObjects:@"install", nil];
@@ -1941,40 +1944,46 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     {
         [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake install failed"];
         [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+        return;
     }
     
     
-    //Jake release
-    NSMutableArray *jakeReleaseArguments = [NSMutableArray arrayWithObjects:@"release", nil];
-    NSDictionary *jakeReleaseTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
+    if (self.isCappBuildDefined)
+    {
+        //Jake release
+        NSMutableArray *jakeReleaseArguments = [NSMutableArray arrayWithObjects:@"release", nil];
+        NSDictionary *jakeReleaseTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
                                                                 arguments:jakeReleaseArguments
-                                                                returnType:kTaskReturnTypeStdOut
-                                                                currentDirectoryPath:unzipDestination];
-    
-    NSInteger jakeReleaseStatus = [jakeReleaseTaskResult[@"status"] intValue];
-    
-    if (jakeReleaseStatus == 1)
-    {
-        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake release failed"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+                                                               returnType:kTaskReturnTypeStdOut
+                                                     currentDirectoryPath:unzipDestination];
+        
+        NSInteger jakeReleaseStatus = [jakeReleaseTaskResult[@"status"] intValue];
+        
+        if (jakeReleaseStatus == 1)
+        {
+            [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake release failed"];
+            [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+            return;
+        }
+        
+        
+        //Jake debug
+        NSMutableArray *jakeDebugArguments = [NSMutableArray arrayWithObjects:@"release", nil];
+        NSDictionary *jakeDebugTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
+                                                              arguments:jakeDebugArguments
+                                                             returnType:kTaskReturnTypeStdOut
+                                                   currentDirectoryPath:unzipDestination];
+        
+        NSInteger jakeDebugStatus = [jakeDebugTaskResult[@"status"] intValue];
+        
+        if (jakeDebugStatus == 1)
+        {
+            [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake debug failed"];
+            [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
+            return;
+        }
     }
-    
-    
-    //Jake debug
-    NSMutableArray *jakeDebugArguments = [NSMutableArray arrayWithObjects:@"release", nil];
-    NSDictionary *jakeDebugTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
-                                                            arguments:jakeDebugArguments
-                                                            returnType:kTaskReturnTypeStdOut
-                                                            currentDirectoryPath:unzipDestination];
-    
-    NSInteger jakeDebugStatus = [jakeDebugTaskResult[@"status"] intValue];
-    
-    if (jakeDebugStatus == 1)
-    {
-        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake debug failed"];
-        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
-    }
-    
+
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
 }
 
