@@ -247,7 +247,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     // Make sure to not do something in sudo
     self.environment[@"CAPP_NOSUDO"] = @"1";
 
-    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"curl", @"unzip"];
+    self.executables = @[@"python", @"narwhal-jsc", @"objj", @"nib2cib", @"capp", @"capp_lint", @"jake", @"curl", @"unzip", @"rm"];
 
     // This is used to get the env var of $CAPP_BUILD
     NSDictionary *processEnvironment = [[NSProcessInfo processInfo] environment];
@@ -1896,13 +1896,23 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         return;
     }
     
+    NSString *unzipDestination = [NSString stringWithFormat:@"%@cappuccino", temporaryFolder];
+    
+    
+    //Be sure to remove an old install
+    NSMutableArray *rmArguments = [NSMutableArray arrayWithObjects:@"-r", unzipDestination, nil];
+    [self runTaskWithLaunchPath:self.executablePaths[@"rm"]
+                        arguments:rmArguments
+                        returnType:kTaskReturnTypeAny
+                        currentDirectoryPath:temporaryFolder];
+    
     
     //Unzip the file
-    NSString *unzipDestination = [NSString stringWithFormat:@"%@cappuccino", temporaryFolder];
-    NSMutableArray *unzipArguments = [NSMutableArray arrayWithObjects:@"-u", @"-o", @"-q", @"-d", unzipDestination, destination, nil];
+    NSMutableArray *unzipArguments = [NSMutableArray arrayWithObjects:@"-u", @"-o", @"-q", @"-d", @"cappuccino", @"cappuccino.zip", nil];
     NSDictionary *unzipTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"unzip"]
-                                                 arguments:unzipArguments
-                                                     returnType:kTaskReturnTypeAny];
+                                                        arguments:unzipArguments
+                                                        returnType:kTaskReturnTypeAny
+                                                        currentDirectoryPath:temporaryFolder];
     
     NSInteger unzipStatus = [unzipTaskResult[@"status"] intValue];
     
@@ -1912,7 +1922,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
         return;
     }
-    
     
     //Jake clean
     NSMutableArray *jakeCleanArguments = [NSMutableArray arrayWithObjects:@"clean", nil];
