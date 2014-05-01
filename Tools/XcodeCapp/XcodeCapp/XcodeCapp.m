@@ -1948,15 +1948,13 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     //Jake clean
     NSMutableArray *jakeCleanArguments = [NSMutableArray arrayWithObjects:@"clean", nil];
-    NSDictionary *jakeCleanTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
-                                                                arguments:jakeCleanArguments
-                                                                returnType:kTaskReturnTypeStdOut
-                                                                currentDirectoryPath:path];
+    NSDictionary *jakeCleanTaskResult = [self runJakeTaskWithArguments:jakeCleanArguments currentDirectoryPath:path];
     
     NSInteger jakeInstallStatus = [jakeCleanTaskResult[@"status"] intValue];
     
     if (jakeInstallStatus == 1)
     {
+        DDLogVerbose(@"Jake clean failed: %@", jakeCleanTaskResult[@"response"]);
         [self notifyUserWithTitle:@"Error cleaning Cappuccino" message:@"Jake clean failed"];
         return NO;
     }
@@ -1970,15 +1968,13 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     //Jake install
     NSMutableArray *jakeInstallArguments = [NSMutableArray arrayWithObjects:@"install", nil];
-    NSDictionary *jakeInstallTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
-                                                            arguments:jakeInstallArguments
-                                                            returnType:kTaskReturnTypeStdOut
-                                                            currentDirectoryPath:path];
+    NSDictionary *jakeInstallTaskResult = [self runJakeTaskWithArguments:jakeInstallArguments currentDirectoryPath:path];
     
     NSInteger jakeInstallStatus = [jakeInstallTaskResult[@"status"] intValue];
     
     if (jakeInstallStatus == 1)
     {
+        DDLogVerbose(@"Jake install failed: %@", jakeInstallTaskResult[@"response"]);
         [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake install failed"];
         return;
     }
@@ -1987,35 +1983,89 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     {
         //Jake release
         NSMutableArray *jakeReleaseArguments = [NSMutableArray arrayWithObjects:@"release", nil];
-        NSDictionary *jakeReleaseTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
-                                                               arguments:jakeReleaseArguments
-                                                              returnType:kTaskReturnTypeStdOut
-                                                    currentDirectoryPath:path];
+        NSDictionary *jakeReleaseTaskResult = [self runJakeTaskWithArguments:jakeReleaseArguments currentDirectoryPath:path];
         
         NSInteger jakeReleaseStatus = [jakeReleaseTaskResult[@"status"] intValue];
    
         if (jakeReleaseStatus == 1)
         {
+            DDLogVerbose(@"Jake release failed: %@", jakeReleaseTaskResult[@"response"]);
             [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake release failed"];
             return;
         }
    
    
         //Jake debug
-        NSMutableArray *jakeDebugArguments = [NSMutableArray arrayWithObjects:@"release", nil];
-        NSDictionary *jakeDebugTaskResult = [self runTaskWithLaunchPath:self.executablePaths[@"jake"]
-                                                             arguments:jakeDebugArguments
-                                                            returnType:kTaskReturnTypeStdOut
-                                                  currentDirectoryPath:path];
+        NSMutableArray *jakeDebugArguments = [NSMutableArray arrayWithObjects:@"debug", nil];
+        NSDictionary *jakeDebugTaskResult = [self runJakeTaskWithArguments:jakeDebugArguments currentDirectoryPath:path];
    
         NSInteger jakeDebugStatus = [jakeDebugTaskResult[@"status"] intValue];
    
         if (jakeDebugStatus == 1)
         {
+            DDLogVerbose(@"Jake debug failed: %@", jakeDebugTaskResult[@"response"]);
             [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake debug failed"];
             return;
         }
     }
+    
+    [self notifyUserWithTitle:@"Update Cappuccino" message:@"Cappuccino is now well installed"];
+}
+
+- (NSDictionary*)runJakeTaskWithArguments:(NSMutableArray*)arguments currentDirectoryPath:(NSString*)aCurrentDirectoryPath
+{
+    NSString *launchPath = self.executablePaths[@"jake"];
+    
+    NSTask *task = [NSTask new];
+    
+    task.launchPath = launchPath;
+    task.arguments = arguments;
+    task.environment = self.environment;
+    task.standardOutput = [NSPipe new];
+    task.standardError = [NSPipe new];
+    
+    if (aCurrentDirectoryPath)
+        task.currentDirectoryPath = aCurrentDirectoryPath;
+    
+    NSFileHandle* fhOut = [task.standardOutput fileHandleForReading];
+    [fhOut readInBackgroundAndNotify];
+    NSFileHandle* fhErr = [task.standardError fileHandleForReading];
+    [fhErr readInBackgroundAndNotify];
+
+     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jakeReceivedData:) name:NSFileHandleReadCompletionNotification object:fhOut];
+    
+    [task launch];
+    
+    DDLogVerbose(@"Task launched: %@\n%@", launchPath, arguments);
+    
+    [task waitUntilExit];
+    
+    DDLogVerbose(@"Task exited: %@:%d", launchPath, task.terminationStatus);
+    
+    NSNumber *status = [NSNumber numberWithInt:task.terminationStatus];
+    NSData *data = nil;
+    
+    if ([status intValue] == 0)
+        data = [[task.standardOutput fileHandleForReading] availableData];
+    else
+        data = [[task.standardError fileHandleForReading] availableData];
+    
+    NSString *response = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSFileHandleReadCompletionNotification object:fhOut];
+    
+    return @{@"status" : status, @"response" : response};
+}
+
+-(void)jakeReceivedData:(NSNotification*)notification
+{
+    NSData *data     = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
+    NSString *string = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+    
+    NSLog(@"%@", string);
+    
+    if([notification object] != nil)
+        [[notification object] readInBackgroundAndNotify];
 }
 
 - (NSString*)_cappuccinoPathForFolder:(NSString*)aFolder
@@ -2025,6 +2075,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     return [NSString stringWithFormat:@"%@cappuccino/%@", aFolder, contentOfCappuccinoFolder];
 }
+
 
 #pragma mark - User notifications
 
