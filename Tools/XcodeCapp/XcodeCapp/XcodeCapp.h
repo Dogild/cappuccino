@@ -121,6 +121,10 @@ extern NSString * const XCCCappLintDidEndNotification;
 @property (unsafe_unretained) IBOutlet NSTableView *errorTable;
 @property (strong) IBOutlet NSArrayController *errorListController;
 
+@property (strong) IBOutlet NSProgressIndicator *progressIndicator;
+@property (strong) IBOutlet NSTextField *fieldCurrentTask;
+@property (strong) IBOutlet NSPanel *updatingCappuccinoPanel;
+
 - (IBAction)openErrorsPanel:(id)sender;
 - (IBAction)clearErrors:(id)sender;
 - (IBAction)openErrorInEditor:(id)sender;

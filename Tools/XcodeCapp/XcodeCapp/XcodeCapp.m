@@ -1869,7 +1869,19 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void)updateCappuccino
 {
+    [[NSApplication sharedApplication] activateIgnoringOtherApps:YES];
+    [self.updatingCappuccinoPanel makeKeyAndOrderFront:self];
+    
     self.isCappuccinoUpdating = YES;
+    
+    double numberOfStep = 3;
+    
+    if (self.isCappBuildDefined)
+        numberOfStep = 5;
+    
+    [self.progressIndicator startAnimation:self];
+    [self.progressIndicator setMaxValue:numberOfStep];
+    [self.progressIndicator setDoubleValue:0];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidStartNotification object:self];
     
@@ -1878,6 +1890,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     if([self _initUpdateCappuccinoInFolder:temporaryFolder] && [self _cleanInstallOfCappuccinoInFolder:temporaryFolder])
         [self _installCappuccinoInFolder:temporaryFolder];
     
+    [self _incrementeProgressBarAndUpdateInformationFieldForStep:@"Updating completed"];
+    [self.progressIndicator stopAnimation:self];
     self.isCappuccinoUpdating = NO;
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
 }
@@ -1891,6 +1905,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
                      returnType:kTaskReturnTypeAny
            currentDirectoryPath:aFolder];
     
+    
+    [self _incrementeProgressBarAndUpdateInformationFieldForStep:@"Downloading Cappuccino"];
     
     // Download the file
     NSString *cappuccinoURL;
@@ -1908,12 +1924,11 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     
     NSInteger status = [taskResult[@"status"] intValue];
     
-    if (status == 1)
+    if (status > 1)
     {
         [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Unable to download Cappuccino"];
         return NO;
     }
-    
     
     //Unzip the file
     NSMutableArray *unzipArguments = [NSMutableArray arrayWithObjects:@"-u", @"-o", @"-q", @"-d", @"cappuccino", @"cappuccino.zip", nil];
@@ -1937,6 +1952,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     NSString* path = [self _cappuccinoPathForFolder:aFolder];
     
+    [self _incrementeProgressBarAndUpdateInformationFieldForStep:@"Jake clean"];
+    
     //Jake clean
     NSMutableArray *jakeCleanArguments = [NSMutableArray arrayWithObjects:@"clean", nil];
     NSDictionary *jakeCleanTaskResult = [self runJakeTaskWithArguments:jakeCleanArguments currentDirectoryPath:path];
@@ -1957,6 +1974,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 {
     NSString* path = [self _cappuccinoPathForFolder:aFolder];
     
+    [self _incrementeProgressBarAndUpdateInformationFieldForStep:@"Jake install"];
+    
     //Jake install
     NSMutableArray *jakeInstallArguments = [NSMutableArray arrayWithObjects:@"install", nil];
     NSDictionary *jakeInstallTaskResult = [self runJakeTaskWithArguments:jakeInstallArguments currentDirectoryPath:path];
@@ -1969,9 +1988,12 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake install failed"];
         return;
     }
+
     
     if (self.isCappBuildDefined)
     {
+        [self _incrementeProgressBarAndUpdateInformationFieldForStep:@"Jake release"];
+        
         //Jake release
         NSMutableArray *jakeReleaseArguments = [NSMutableArray arrayWithObjects:@"release", nil];
         NSDictionary *jakeReleaseTaskResult = [self runJakeTaskWithArguments:jakeReleaseArguments currentDirectoryPath:path];
@@ -1985,7 +2007,8 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
             return;
         }
    
-   
+        [self _incrementeProgressBarAndUpdateInformationFieldForStep:@"Jake debug"];
+        
         //Jake debug
         NSMutableArray *jakeDebugArguments = [NSMutableArray arrayWithObjects:@"debug", nil];
         NSDictionary *jakeDebugTaskResult = [self runJakeTaskWithArguments:jakeDebugArguments currentDirectoryPath:path];
@@ -2000,7 +2023,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
         }
     }
     
-    [self notifyUserWithTitle:@"Update Cappuccino" message:@"Cappuccino is now well installed"];
+    [self notifyUserWithTitle:@"Update Cappuccino" message:@"Updating of Cappuccino completed"];
 }
 
 - (NSDictionary*)runJakeTaskWithArguments:(NSMutableArray*)arguments currentDirectoryPath:(NSString*)aCurrentDirectoryPath
@@ -2060,6 +2083,14 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSString *contentOfCappuccinoFolder = [[fileManger contentsOfDirectoryAtPath:[NSString stringWithFormat:@"%@cappuccino", aFolder] error:nil] firstObject];
     
     return [NSString stringWithFormat:@"%@cappuccino/%@", aFolder, contentOfCappuccinoFolder];
+}
+
+- (void)_incrementeProgressBarAndUpdateInformationFieldForStep:(NSString*)aString
+{
+    double currentValue = [self.progressIndicator doubleValue];
+    [self.progressIndicator setDoubleValue:++currentValue];
+    
+    [self.fieldCurrentTask setStringValue:[NSString stringWithFormat:@"Step %.0f/%.0f : %@", [self.progressIndicator doubleValue], [self.progressIndicator maxValue], aString]];
 }
 
 
