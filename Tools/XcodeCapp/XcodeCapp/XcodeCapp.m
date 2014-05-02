@@ -1869,25 +1869,16 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 - (void)updateCappuccino
 {
-    self.isProcessing = YES;
+    self.isCappuccinoUpdating = YES;
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidStartNotification object:self];
     
     NSString *temporaryFolder = NSTemporaryDirectory();
     
-    if(![self _initUpdateCappuccinoInFolder:temporaryFolder])
-    {
-        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
-        return;
-    }
-
-    if (![self _cleanInstallOfCappuccinoInFolder:temporaryFolder])
-    {
-        [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
-        return;
-    }
+    if([self _initUpdateCappuccinoInFolder:temporaryFolder] && [self _cleanInstallOfCappuccinoInFolder:temporaryFolder])
+        [self _installCappuccinoInFolder:temporaryFolder];
     
-    [self _installCappuccinoInFolder:temporaryFolder];
-
+    self.isCappuccinoUpdating = NO;
     [[NSNotificationCenter defaultCenter] postNotificationName:XCCBatchDidEndNotification object:self];
 }
 
@@ -1955,7 +1946,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     if (jakeInstallStatus == 1)
     {
         DDLogVerbose(@"Jake clean failed: %@", jakeCleanTaskResult[@"response"]);
-        [self notifyUserWithTitle:@"Error cleaning Cappuccino" message:@"Jake clean failed"];
+        [self notifyUserWithTitle:@"Error updating Cappuccino" message:@"Jake clean failed"];
         return NO;
     }
     
@@ -2032,7 +2023,7 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
     NSFileHandle* fhErr = [task.standardError fileHandleForReading];
     [fhErr readInBackgroundAndNotify];
 
-     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jakeReceivedData:) name:NSFileHandleReadCompletionNotification object:fhOut];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(jakeReceivedData:) name:NSFileHandleReadCompletionNotification object:fhOut];
     
     [task launch];
     
@@ -2059,11 +2050,6 @@ void fsevents_callback(ConstFSEventStreamRef streamRef,
 
 -(void)jakeReceivedData:(NSNotification*)notification
 {
-    NSData *data     = [[notification userInfo] objectForKey:NSFileHandleNotificationDataItem];
-    NSString *string = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
-    
-    NSLog(@"%@", string);
-    
     if([notification object] != nil)
         [[notification object] readInBackgroundAndNotify];
 }

@@ -101,6 +101,9 @@ extern NSString * const XCCCappLintDidEndNotification;
 // Whether we are currently processing source files
 @property BOOL isProcessing;
 
+// Whether we are currently processing source files
+@property BOOL isCappuccinoUpdating;
+
 // Whether $CAPP_BUILD is defined or not
 @property BOOL isCappBuildDefined;
 

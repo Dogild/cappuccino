@@ -243,6 +243,7 @@
 							<string key="NSFrame">{{164, 20}, {203, 143}}</string>
 							<reference key="NSSuperview" ref="930594929"/>
 							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView"/>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSTextFieldCell" key="NSCell" id="488063721">
 								<int key="NSCellFlags">68157504</int>
@@ -562,6 +563,7 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 							<string key="NSFrame">{{445, 8}, {85, 19}}</string>
 							<reference key="NSSuperview" ref="938592555"/>
 							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView"/>
 							<string key="NSHuggingPriority">{250, 750}</string>
 							<bool key="NSEnabled">YES</bool>
 							<object class="NSButtonCell" key="NSCell" id="454979058">
@@ -1057,6 +1059,7 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 											<string key="NSFrame">{{16, 12}, {411, 18}}</string>
 											<reference key="NSSuperview" ref="435554705"/>
 											<reference key="NSWindow"/>
+											<reference key="NSNextKeyView"/>
 											<bool key="NSEnabled">YES</bool>
 											<object class="NSButtonCell" key="NSCell" id="640546388">
 												<int key="NSCellFlags">-2080374784</int>
@@ -1125,7 +1128,7 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 				<nil key="NSViewClass"/>
 				<nil key="NSUserInterfaceItemIdentifier"/>
 				<object class="NSView" key="NSWindowView" id="993549244">
-					<nil key="NSNextResponder"/>
+					<reference key="NSNextResponder"/>
 					<int key="NSvFlags">256</int>
 					<array class="NSMutableArray" key="NSSubviews">
 						<object class="PDFView" id="921834304">
@@ -1137,6 +1140,8 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 							</set>
 							<string key="NSFrame">{{0, 8}, {716, 654}}</string>
 							<reference key="NSSuperview" ref="993549244"/>
+							<reference key="NSWindow"/>
+							<reference key="NSNextKeyView"/>
 							<bool key="NSViewIsLayerTreeHost">YES</bool>
 							<int key="DisplayMode">1</int>
 							<bool key="PageBreaks">NO</bool>
@@ -1145,6 +1150,8 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 						</object>
 					</array>
 					<string key="NSFrameSize">{716, 662}</string>
+					<reference key="NSSuperview"/>
+					<reference key="NSWindow"/>
 					<reference key="NSNextKeyView" ref="921834304"/>
 				</object>
 				<string key="NSScreenRect">{{0, 0}, {1440, 878}}</string>
@@ -1953,6 +1960,26 @@ bnRvaW5lIE1lcmNhZGFsCiAgICBhbnRvaW5lLm1lcmNhZGFsQGdtYWlsLmNvbQ</string>
 						</object>
 					</object>
 					<string key="id">j0c-o6-KBW</string>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: isCappuccinoUpdating</string>
+						<reference key="source" ref="118802711"/>
+						<reference key="destination" ref="699246115"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="118802711"/>
+							<reference key="NSDestination" ref="699246115"/>
+							<string key="NSLabel">enabled: isCappuccinoUpdating</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">isCappuccinoUpdating</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">NSNegateBoolean</string>
+							</object>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<string key="id">aof-Pn-nzf</string>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
