@@ -64,5 +64,20 @@ aDOMElement.style.bottom = ROUND(____p.y) + "px";
 #define CPDOMDisplayServerRemoveChild(aParentElement, aChildElement) \
     aParentElement.removeChild(aChildElement);
 
+/*
+    Sets a border radius using pixel units.
+ */
+#define CPDOMDisplayServerSetStylePixelBorderRadius(aDOMElement, aRadius) \
+    aDOMElement.style.borderRadius = MAX(0.0, ROUND(aRadius)) + "px";
+
+/*
+    Sets a border radius using percentages
+ */
+#define CPDOMDisplayServerSetStylePercentBorderRadius(aDOMElement, aRadius) \
+    aDOMElement.style.borderRadius = MAX(0.0, ROUND(aRadius)) + "%";
+
+#define CPDOMDisplayServerSetStyleBorderWidth(aDOMElement, aBorderWidth) \
+    aDOMElement.style.borderWidth = MAX(0.0, ROUND(aBorderWidth)) + "px";
+
 #define PREPARE_DOM_OPTIMIZATION()
 #define EXECUTE_DOM_INSTRUCTIONS()

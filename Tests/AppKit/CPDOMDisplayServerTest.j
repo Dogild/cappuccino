@@ -95,4 +95,31 @@
     [self assert:DOMElement.height equals:10];
 }
 
+- (void)testPixelBorderRadius
+{
+    var radius = 10;
+
+    CPDOMDisplayServerSetStylePixelBorderRadius(DOMElement, radius);
+
+    [self assert:DOMElement.style.borderRadius equals:"10px"];
+}
+
+- (void)testPercentBorderRadius
+{
+    var radius = 50;
+
+    CPDOMDisplayServerSetStylePercentBorderRadius(DOMElement, radius);
+
+    [self assert:DOMElement.style.borderRadius equals:"50%"];
+}
+
+- (void)testBorderWidth
+{
+    var width = 1;
+
+    CPDOMDisplayServerSetStyleBorderWidth(DOMElement, width);
+
+    [self assert:DOMElement.style.borderWidth equals:"1px"];
+}
+
 @end
